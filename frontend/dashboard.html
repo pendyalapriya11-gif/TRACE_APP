@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRACE - Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+    --charcoal: #2a2a2a;
+    --dark-charcoal: #1a1a1a;
+    --beige: #f5f1e8;
+    --beige-dark: #e8e4db;
+    --teal: #5a9f9f;
+    --teal-light: #7ab5b5;
+    --border: rgba(90, 159, 159, 0.15);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body { background: var(--dark-charcoal); color: var(--beige); }
+
+/* Sidebar */
+.sidebar {
+    position: fixed; left: 0; top: 0; width: 260px; height: 100vh;
+    background: var(--charcoal); border-right: 1px solid var(--border);
+    padding: 25px 15px; display: flex; flex-direction: column;
+}
+
+.logo-section {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 35px;
+    padding: 15px; background: var(--beige); border-radius: 10px;
+}
+
+.logo-small {
+    width: 45px; height: 45px; border-radius: 8px;
+    background: var(--charcoal); color: var(--beige);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 20px;
+}
+
+.logo-text {
+    font-size: 24px; font-weight: 800; color: var(--charcoal);
+}
+
+.nav-menu { flex: 1; }
+
+.nav-item {
+    padding: 14px 16px; margin-bottom: 8px; border-radius: 8px;
+    cursor: pointer; display: flex; align-items: center; gap: 14px;
+    font-size: 14px; font-weight: 500; color: rgba(245, 241, 232, 0.7);
+    text-decoration: none; transition: all 0.2s;
+}
+
+.nav-item:hover {
+    background: rgba(90, 159, 159, 0.1); color: var(--beige);
+}
+
+.nav-item.active {
+    background: var(--beige); color: var(--charcoal); font-weight: 600;
+}
+
+.nav-icon { font-size: 20px; }
+
+.user-section {
+    padding: 15px; background: rgba(245, 241, 232, 0.05);
+    border-radius: 10px; display: flex; align-items: center; gap: 12px;
+    border: 1px solid var(--border);
+}
+
+.user-avatar {
+    width: 42px; height: 42px; border-radius: 8px;
+    background: var(--teal); color: var(--beige);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 18px;
+}
+
+.user-info { flex: 1; }
+.user-name { font-size: 14px; font-weight: 600; color: var(--beige); }
+.user-email { font-size: 11px; color: rgba(245, 241, 232, 0.5); }
+
+.logout-btn {
+    background: rgba(90, 159, 159, 0.15); border: none;
+    color: var(--teal); cursor: pointer; width: 36px; height: 36px;
+    border-radius: 8px; font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s; position: relative; overflow: hidden;
+}
+
+.logout-btn:hover {
+    background: var(--teal); color: var(--beige);
+    transform: scale(1.05);
+}
+
+.logout-btn::before {
+    content: '👋'; position: absolute; font-size: 18px;
+    opacity: 0; transform: translateY(10px);
+    transition: all 0.3s;
+}
+
+.logout-btn:hover::before {
+    opacity: 1; transform: translateY(0);
+}
+
+.logout-btn:hover .logout-icon {
+    opacity: 0; transform: translateY(-10px);
+}
+
+.logout-icon { transition: all 0.3s; }
+
+/* Main */
+.main-content {
+    margin-left: 260px; padding: 30px; min-height: 100vh;
+}
+
+/* Welcome */
+.welcome-section {
+    background: var(--charcoal); padding: 35px; border-radius: 12px;
+    margin-bottom: 30px; border: 1px solid var(--border);
+}
+
+.welcome-title {
+    font-size: 32px; font-weight: 800; margin-bottom: 10px;
+    color: var(--beige);
+}
+
+.welcome-subtitle {
+    font-size: 15px; color: rgba(245, 241, 232, 0.8);
+}
+
+.quote-section {
+    background: rgba(245, 241, 232, 0.08); border-radius: 10px;
+    padding: 20px; margin-top: 20px; cursor: pointer;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+}
+
+.quote-section:hover {
+    background: rgba(245, 241, 232, 0.12);
+    border-color: var(--teal);
+}
+
+.quote-text {
+    font-size: 15px; font-style: italic; margin-bottom: 10px;
+    color: var(--beige);
+}
+
+.quote-author {
+    font-size: 12px; text-align: right;
+    color: rgba(245, 241, 232, 0.7);
+}
+
+.quote-hint {
+    font-size: 11px; text-align: center; margin-top: 10px;
+    color: var(--teal);
+}
+
+/* Stats */
+.stats-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px; margin-bottom: 30px;
+}
+
+.stat-card {
+    background: var(--charcoal); border-radius: 12px; padding: 20px;
+    border: 1px solid var(--border);
+}
+
+.stat-header {
+    display: flex; justify-content: space-between; margin-bottom: 15px;
+}
+
+.stat-icon {
+    width: 50px; height: 50px; border-radius: 10px;
+    background: var(--beige); color: var(--charcoal);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+}
+
+.stat-trend {
+    font-size: 12px; padding: 5px 10px; border-radius: 10px;
+    font-weight: 600;
+}
+
+.stat-trend.up {
+    background: rgba(90, 159, 159, 0.2); color: var(--teal-light);
+}
+
+.stat-trend.down {
+    background: rgba(245, 241, 232, 0.1); color: rgba(245, 241, 232, 0.6);
+}
+
+.stat-trend.neutral {
+    background: rgba(245, 241, 232, 0.05);
+    color: rgba(245, 241, 232, 0.5);
+}
+
+.stat-label {
+    font-size: 12px; color: rgba(245, 241, 232, 0.6);
+    font-weight: 500; text-transform: uppercase;
+    margin-bottom: 8px; letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-size: 32px; font-weight: 800; color: var(--beige);
+    margin-bottom: 5px;
+}
+
+.stat-subtext {
+    font-size: 12px; color: rgba(245, 241, 232, 0.5);
+}
+
+.stat-progress {
+    margin-top: 12px; height: 6px;
+    background: rgba(245, 241, 232, 0.1);
+    border-radius: 10px; overflow: hidden;
+}
+
+.stat-progress-bar {
+    height: 100%; border-radius: 10px;
+    background: var(--teal); transition: width 1s ease;
+}
+
+/* Section */
+.section {
+    background: var(--charcoal); border-radius: 12px; padding: 25px;
+    margin-bottom: 25px; border: 1px solid var(--border);
+}
+
+.section-header {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 20px;
+}
+
+.section-title {
+    font-size: 20px; font-weight: 700; color: var(--beige);
+}
+
+.view-all-btn {
+    background: rgba(90, 159, 159, 0.15);
+    border: 1px solid rgba(90, 159, 159, 0.3);
+    padding: 8px 16px; border-radius: 8px; font-size: 12px;
+    font-weight: 600; cursor: pointer; color: var(--teal);
+    transition: all 0.2s;
+}
+
+.view-all-btn:hover {
+    background: var(--teal); color: var(--beige);
+}
+
+/* Weak Areas */
+.weak-list {
+    display: flex; flex-direction: column; gap: 15px;
+}
+
+.weak-item {
+    display: flex; align-items: center; gap: 15px;
+    padding: 18px; background: rgba(245, 241, 232, 0.04);
+    border-radius: 10px; border: 1px solid var(--border);
+    transition: all 0.2s;
+}
+
+.weak-item:hover {
+    background: rgba(245, 241, 232, 0.07);
+    border-color: var(--teal);
+}
+
+.weak-icon {
+    width: 45px; height: 45px; border-radius: 8px;
+    background: var(--beige); color: var(--charcoal);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+}
+
+.weak-content { flex: 1; }
+
+.weak-topic {
+    font-size: 15px; font-weight: 600; color: var(--beige);
+    margin-bottom: 5px;
+}
+
+.weak-desc {
+    font-size: 13px; color: rgba(245, 241, 232, 0.6);
+    margin-bottom: 8px;
+}
+
+.weak-stats {
+    display: flex; gap: 12px; align-items: center; font-size: 11px;
+    color: rgba(245, 241, 232, 0.5);
+}
+
+.weak-action {
+    background: rgba(90, 159, 159, 0.15);
+    border: 1px solid rgba(90, 159, 159, 0.3);
+    padding: 8px 14px; border-radius: 8px; font-size: 12px;
+    font-weight: 600; color: var(--teal); cursor: pointer;
+    flex-shrink: 0; transition: all 0.2s;
+}
+
+.weak-action:hover {
+    background: var(--teal); color: var(--beige);
+}
+
+.empty-state {
+    text-align: center; padding: 40px;
+    color: rgba(245, 241, 232, 0.5);
+}
+
+/* Activity */
+.activity-list { display: flex; flex-direction: column; gap: 15px; }
+
+.activity-item {
+    display: flex; align-items: flex-start; gap: 15px;
+    padding: 18px; background: rgba(245, 241, 232, 0.04);
+    border-radius: 10px; border: 1px solid var(--border);
+    transition: all 0.2s;
+}
+
+.activity-item:hover {
+    background: rgba(245, 241, 232, 0.07);
+    border-color: var(--teal);
+}
+
+.activity-icon {
+    width: 45px; height: 45px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+}
+
+.activity-icon.learning { background: var(--beige); color: var(--charcoal); }
+.activity-icon.coding { background: var(--teal); color: var(--beige); }
+
+.activity-content { flex: 1; }
+
+.activity-title {
+    font-size: 14px; font-weight: 600; color: var(--beige);
+    margin-bottom: 5px;
+}
+
+.activity-desc {
+    font-size: 13px; color: rgba(245, 241, 232, 0.6);
+    margin-bottom: 8px;
+}
+
+.activity-time {
+    font-size: 11px; color: rgba(245, 241, 232, 0.5);
+}
+
+.activity-badge {
+    font-size: 11px; padding: 4px 10px; border-radius: 8px;
+    background: rgba(90, 159, 159, 0.2); color: var(--teal-light);
+    font-weight: 600; margin-left: 10px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .sidebar { width: 70px; padding: 20px 10px; }
+    .logo-text, .nav-item span, .user-info { display: none; }
+    .main-content { margin-left: 70px; padding: 20px; }
+}
+
+@media (max-width: 768px) {
+    .stats-grid { grid-template-columns: 1fr; }
+}
+
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--dark-charcoal); }
+::-webkit-scrollbar-thumb {
+    background: rgba(90, 159, 159, 0.3); border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(90, 159, 159, 0.5);
+}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="logo-section">
+        <div class="logo">
+        <img src="logo.png" alt="TRACE Logo" class="logo-small">
+        </div>
+        <div class="logo-text">TRACE</div>
+    </div>
+    
+    <nav class="nav-menu">
+        <a href="dashboard.html" class="nav-item active">
+            <span class="nav-icon">📊</span>
+            <span>Dashboard</span>
+        </a>
+        <a href="#" class="nav-item" onclick="showComingSoon(); return false;">
+            <span class="nav-icon">📝</span>
+            <span>Learning Log</span>
+        </a>
+        <a href="#" class="nav-item" onclick="showComingSoon(); return false;">
+            <span class="nav-icon">💻</span>
+            <span>Coding Log</span>
+        </a>
+        <a href="#" class="nav-item" onclick="showComingSoon(); return false;">
+            <span class="nav-icon">🤖</span>
+            <span>AI Recaps</span>
+        </a>
+        <a href="#" class="nav-item" onclick="showComingSoon(); return false;">
+            <span class="nav-icon">📈</span>
+            <span>Analytics</span>
+        </a>
+    </nav>
+    
+    <div class="user-section">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <div class="user-info">
+            <div class="user-name" id="userName">User</div>
+            <div class="user-email" id="userEmail">user@example.com</div>
+        </div>
+        <button class="logout-btn" onclick="handleLogout()" title="Logout">
+            <span class="logout-icon">🚪</span>
+        </button>
+    </div>
+</div>
+
+<!-- Main -->
+<div class="main-content">
+    
+    <!-- Welcome -->
+    <div class="welcome-section">
+        <div class="welcome-title">
+            Welcome back, <span id="welcomeName">Student</span>! 👋
+        </div>
+        <div class="welcome-subtitle">
+            Ready to track your learning journey today?
+        </div>
+        
+        <div class="quote-section" onclick="changeQuote()">
+            <div class="quote-text" id="quoteText">
+                "The only way to do great work is to love what you do."
+            </div>
+            <div class="quote-author" id="quoteAuthor">— Steve Jobs</div>
+            <div class="quote-hint">💡 Click for new inspiration</div>
+        </div>
+    </div>
+    
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon">🔥</div>
+                <div class="stat-trend neutral" id="streakTrend">—</div>
+            </div>
+            <div class="stat-label">Current Streak</div>
+            <div class="stat-value"><span id="streakCount">0</span></div>
+            <div class="stat-subtext">days in a row</div>
+            <div class="stat-progress">
+                <div class="stat-progress-bar" id="pb1" style="width:0%"></div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon">📚</div>
+                <div class="stat-trend neutral" id="topicsTrend">—</div>
+            </div>
+            <div class="stat-label">Topics Mastered</div>
+            <div class="stat-value"><span id="topicsCount">0</span></div>
+            <div class="stat-subtext">concepts learned</div>
+            <div class="stat-progress">
+                <div class="stat-progress-bar" id="pb2" style="width:0%"></div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon">💻</div>
+                <div class="stat-trend neutral" id="problemsTrend">—</div>
+            </div>
+            <div class="stat-label">Problems Solved</div>
+            <div class="stat-value"><span id="problemsCount">0</span></div>
+            <div class="stat-subtext">coding challenges</div>
+            <div class="stat-progress">
+                <div class="stat-progress-bar" id="pb3" style="width:0%"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Weak Areas -->
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">⚠️ Weak Areas</h2>
+            <button class="view-all-btn" onclick="showComingSoon()">View All</button>
+        </div>
+        <div class="weak-list" id="weakList">
+            <div class="empty-state">
+                No weak areas detected yet. Keep logging your learning!
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Activity -->
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">Recent Activity</h2>
+            <button class="view-all-btn" onclick="showComingSoon()">View All</button>
+        </div>
+        <div id="activityList" class="activity-list">
+            <div class="empty-state">No recent activity</div>
+        </div>
+    </div>
+    
+</div>
+
+<script>
+// ========================================
+// UTILITY FUNCTIONS
+// ========================================
+
+function getDateString(daysAgo = 0) {
+    const date = new Date();
+    date.setDate(date.getDate() - daysAgo);
+    return date.toISOString().split('T')[0];
+}
+
+function hasLogOnDate(logs, dateString) {
+    return logs.some(log => log.date === dateString);
+}
+
+// ========================================
+// STREAK CALCULATION
+// ========================================
+
+function calculateStreak(logs) {
+    if (logs.length === 0) return { current: 0, lastWeek: 0 };
+    
+    let currentStreak = 0;
+    let dayOffset = 0;
+    
+    while (true) {
+        const checkDate = getDateString(dayOffset);
+        if (hasLogOnDate(logs, checkDate)) {
+            currentStreak++;
+            dayOffset++;
+        } else {
+            break;
+        }
+    }
+    
+    let lastWeekStreak = 0;
+    dayOffset = 7;
+    
+    while (dayOffset < 14) {
+        const checkDate = getDateString(dayOffset);
+        if (hasLogOnDate(logs, checkDate)) {
+            lastWeekStreak++;
+            dayOffset++;
+        } else {
+            break;
+        }
+    }
+    
+    return { current: currentStreak, lastWeek: lastWeekStreak };
+}
+
+// ========================================
+// TOPICS CALCULATION
+// ========================================
+
+function calculateTopics(logs) {
+    if (logs.length === 0) return { current: 0, lastWeek: 0 };
+    
+    const today = new Date();
+    const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const fourteenDaysAgo = new Date(today.getTime() - 14 * 24 * 60 * 60 * 1000);
+    
+    const thisWeekTopics = new Set();
+    const lastWeekTopics = new Set();
+    
+    logs.forEach(log => {
+        const logDate = new Date(log.date);
+        
+        if (logDate >= sevenDaysAgo) {
+            thisWeekTopics.add(log.topic);
+        } else if (logDate >= fourteenDaysAgo && logDate < sevenDaysAgo) {
+            lastWeekTopics.add(log.topic);
+        }
+    });
+    
+    return {
+        current: thisWeekTopics.size,
+        lastWeek: lastWeekTopics.size
+    };
+}
+
+// ========================================
+// PROBLEMS CALCULATION
+// ========================================
+
+function calculateProblems(logs) {
+    if (logs.length === 0) return { current: 0, lastWeek: 0 };
+    
+    const today = new Date();
+    const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const fourteenDaysAgo = new Date(today.getTime() - 14 * 24 * 60 * 60 * 1000);
+    
+    const thisWeekProblems = logs.filter(log => {
+        const logDate = new Date(log.date);
+        return logDate >= sevenDaysAgo && log.type === 'coding';
+    }).length;
+    
+    const lastWeekProblems = logs.filter(log => {
+        const logDate = new Date(log.date);
+        return logDate >= fourteenDaysAgo && logDate < sevenDaysAgo && log.type === 'coding';
+    }).length;
+    
+    return {
+        current: thisWeekProblems,
+        lastWeek: lastWeekProblems
+    };
+}
+
+// ========================================
+// TREND DISPLAY
+// ========================================
+
+function displayTrend(element, current, previous) {
+    const diff = current - previous;
+    
+    if (diff > 0) {
+        element.textContent = `↗ +${diff}`;
+        element.className = 'stat-trend up';
+    } else if (diff < 0) {
+        element.textContent = `↘ ${diff}`;
+        element.className = 'stat-trend down';
+    } else {
+        element.textContent = '—';
+        element.className = 'stat-trend neutral';
+    }
+}
+
+// ========================================
+// LOAD STATS
+// ========================================
+
+function loadStats() {
+    const logs = JSON.parse(localStorage.getItem('learningLogs') || '[]');
+    
+    const streak = calculateStreak(logs);
+    document.getElementById('streakCount').textContent = streak.current;
+    displayTrend(document.getElementById('streakTrend'), streak.current, streak.lastWeek);
+    
+    const topics = calculateTopics(logs);
+    document.getElementById('topicsCount').textContent = topics.current;
+    displayTrend(document.getElementById('topicsTrend'), topics.current, topics.lastWeek);
+    
+    const problems = calculateProblems(logs);
+    document.getElementById('problemsCount').textContent = problems.current;
+    displayTrend(document.getElementById('problemsTrend'), problems.current, problems.lastWeek);
+    
+    setTimeout(() => {
+        const streakPercent = Math.min((streak.current / 7) * 100, 100);
+        const topicsPercent = Math.min((topics.current / 10) * 100, 100);
+        const problemsPercent = Math.min((problems.current / 15) * 100, 100);
+        
+        document.getElementById('pb1').style.width = streakPercent + '%';
+        document.getElementById('pb2').style.width = topicsPercent + '%';
+        document.getElementById('pb3').style.width = problemsPercent + '%';
+    }, 500);
+}
+
+// ========================================
+// WEAK AREAS
+// ========================================
+
+function loadWeakAreas() {
+    const logs = JSON.parse(localStorage.getItem('learningLogs') || '[]');
+    
+    if (logs.length === 0) {
+        document.getElementById('weakList').innerHTML = '<div class="empty-state">No weak areas detected yet. Keep logging your learning!</div>';
+        return;
+    }
+    
+    const topicCount = {};
+    logs.forEach(log => {
+        const topic = log.topic || 'Unknown Topic';
+        topicCount[topic] = (topicCount[topic] || 0) + 1;
+    });
+    
+    const weakTopics = Object.entries(topicCount)
+        .filter(([topic, count]) => count >= 3)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+    
+    if (weakTopics.length === 0) {
+        document.getElementById('weakList').innerHTML = '<div class="empty-state">Great! No struggling topics detected yet.</div>';
+        return;
+    }
+    
+    document.getElementById('weakList').innerHTML = weakTopics.map(([topic, count]) => `
+        <div class="weak-item">
+            <div class="weak-icon">⚠️</div>
+            <div class="weak-content">
+                <div class="weak-topic">${topic}</div>
+                <div class="weak-desc">Repeated ${count} times in your logs</div>
+                <div class="weak-stats">
+                    <span>❌ ${count} attempts</span>
+                    <span>📊 ${Math.min(count * 20, 100)}% difficulty</span>
+                </div>
+            </div>
+            <button class="weak-action" onclick="practiceWeak('${topic}')">Practice</button>
+        </div>
+    `).join('');
+}
+
+// ========================================
+// ACTIVITY
+// ========================================
+
+function loadActivity() {
+    const logs = JSON.parse(localStorage.getItem('learningLogs') || '[]');
+    
+    if (logs.length === 0) {
+        document.getElementById('activityList').innerHTML = '<div class="empty-state">No recent activity. Start logging your learning!</div>';
+        return;
+    }
+    
+    const recent = logs.slice(-5).reverse();
+    
+    document.getElementById('activityList').innerHTML = recent.map(log => {
+        const iconClass = log.type === 'coding' ? 'coding' : 'learning';
+        const icon = log.type === 'coding' ? '💻' : '📝';
+        
+        return `
+            <div class="activity-item">
+                <div class="activity-icon ${iconClass}">${icon}</div>
+                <div class="activity-content">
+                    <div class="activity-title">${log.topic || 'Learning Activity'}</div>
+                    <div class="activity-desc">${log.notes || 'No description'}</div>
+                    <div class="activity-time">
+                        🕐 ${log.date || 'Recently'}
+                        <span class="activity-badge">${log.type === 'coding' ? 'Coding' : 'Learning'}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// ========================================
+// OTHER FUNCTIONS
+// ========================================
+
+const QUOTES = [
+    {text:"The only way to do great work is to love what you do.",author:"Steve Jobs"},
+    {text:"Success is not final, failure is not fatal: it is the courage to continue that counts.",author:"Winston Churchill"},
+    {text:"Believe you can and you're halfway there.",author:"Theodore Roosevelt"},
+    {text:"It does not matter how slowly you go as long as you do not stop.",author:"Confucius"},
+    {text:"Learning never exhausts the mind.",author:"Leonardo da Vinci"},
+    {text:"The expert in anything was once a beginner.",author:"Helen Hayes"}
+];
+
+let qIdx = 0;
+function changeQuote() {
+    qIdx = (qIdx + 1) % QUOTES.length;
+    document.getElementById('quoteText').textContent = `"${QUOTES[qIdx].text}"`;
+    document.getElementById('quoteAuthor').textContent = `— ${QUOTES[qIdx].author}`;
+}
+
+function loadUserData() {
+    const u = JSON.parse(localStorage.getItem('user') || '{}');
+    if (u.name) {
+        document.getElementById('userName').textContent = u.name;
+        document.getElementById('welcomeName').textContent = u.name.split(' ')[0];
+        document.getElementById('userAvatar').textContent = u.name.charAt(0).toUpperCase();
+    }
+    if (u.email) document.getElementById('userEmail').textContent = u.email;
+}
+
+function practiceWeak(topic) {
+    alert(`Practice session for "${topic}" coming soon!`);
+}
+
+function handleLogout() {
+    const confirmMsg = '👋 Are you sure you want to logout?\n\nYour progress will be saved.';
+    if (confirm(confirmMsg)) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = 'index.html';
+    }
+}
+
+function showComingSoon() {
+    alert('🚀 Feature coming soon!');
+}
+
+function checkAuth() {
+    if (!localStorage.getItem('token')) window.location.href = 'index.html';
+}
+
+// ========================================
+// SAMPLE DATA (FOR TESTING)
+// ========================================
+
+function addSampleLogs() {
+    const samples = [
+        {topic: 'JavaScript', notes: 'Learned ES6 features', date: getDateString(0), type: 'learning'},
+        {topic: 'React', notes: 'Built a todo app', date: getDateString(0), type: 'coding'},
+        {topic: 'JavaScript', notes: 'Async/await practice', date: getDateString(1), type: 'learning'},
+        {topic: 'CSS', notes: 'Flexbox layouts', date: getDateString(2), type: 'learning'},
+        {topic: 'Async JavaScript', notes: 'Struggled with promises', date: getDateString(3), type: 'learning'},
+        {topic: 'Async JavaScript', notes: 'Still confused', date: getDateString(4), type: 'learning'},
+        {topic: 'Async JavaScript', notes: 'Making errors', date: getDateString(5), type: 'learning'},
+        {topic: 'Python', notes: 'Basics', date: getDateString(8), type: 'learning'},
+        {topic: 'Python', notes: 'Functions', date: getDateString(9), type: 'coding'}
+    ];
+    
+    localStorage.setItem('learningLogs', JSON.stringify(samples));
+    alert('✅ Sample data added! Refresh to see stats.');
+    location.reload();
+}
+
+// ========================================
+// INITIALIZE
+// ========================================
+
+window.onload = () => {
+    checkAuth();
+    loadUserData();
+    loadStats();
+    loadWeakAreas();
+    loadActivity();
+};
+
+// FOR TESTING: Uncomment to add sample data
+// setTimeout(() => addSampleLogs(), 1000);
+</script>
+
+</body>
+</html>
