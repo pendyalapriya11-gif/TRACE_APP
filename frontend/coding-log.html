@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRACE - Coding Log</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+    --charcoal: #2a2a2a;
+    --dark-charcoal: #1a1a1a;
+    --beige: #f5f1e8;
+    --teal: #5a9f9f;
+    --border: rgba(90, 159, 159, 0.15);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh; }
+
+/* Sidebar */
+.sidebar {
+    position: fixed; left: 0; top: 0; width: 260px; height: 100vh;
+    background: var(--charcoal); border-right: 1px solid var(--border);
+    padding: 25px 15px; display: flex; flex-direction: column; overflow-y: auto;
+}
+
+.logo-section {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 35px;
+    padding: 15px; background: var(--beige); border-radius: 10px;
+}
+
+.logo-small {
+    width: 45px; height: 45px; border-radius: 8px;
+    background: var(--charcoal); color: var(--beige);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 20px;
+}
+
+.logo-text { font-size: 24px; font-weight: 800; color: var(--charcoal); }
+
+.nav-menu { flex: 1; }
+
+.nav-item {
+    padding: 14px 16px; margin-bottom: 8px; border-radius: 8px;
+    cursor: pointer; display: flex; align-items: center; gap: 14px;
+    font-size: 14px; font-weight: 500; color: rgba(245, 241, 232, 0.7);
+    text-decoration: none; transition: all 0.2s;
+}
+
+.nav-item:hover { background: rgba(245, 241, 232, 0.1); color: var(--beige); }
+.nav-item.active { background: var(--beige); color: var(--charcoal); font-weight: 600; }
+.nav-icon { font-size: 20px; }
+
+.user-section {
+    padding: 15px; background: rgba(245, 241, 232, 0.05);
+    border-radius: 10px; display: flex; align-items: center; gap: 12px;
+    border: 1px solid var(--border);
+}
+
+.user-avatar {
+    width: 42px; height: 42px; border-radius: 8px;
+    background: var(--teal); color: var(--beige);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 18px;
+}
+
+.user-info { flex: 1; }
+.user-name { font-size: 14px; font-weight: 600; color: var(--beige); }
+.user-email { font-size: 11px; color: rgba(245, 241, 232, 0.5); }
+
+.logout-btn {
+    background: rgba(90, 159, 159, 0.15); border: none;
+    color: var(--teal); cursor: pointer; width: 36px; height: 36px;
+    border-radius: 8px; font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s; position: relative; overflow: hidden;
+}
+
+.logout-btn:hover { background: var(--teal); color: var(--beige); transform: scale(1.05); }
+.logout-btn::before {
+    content: '👋'; position: absolute; font-size: 18px;
+    opacity: 0; transform: translateY(10px); transition: all 0.3s;
+}
+.logout-btn:hover::before { opacity: 1; transform: translateY(0); }
+.logout-btn:hover .logout-icon { opacity: 0; transform: translateY(-10px); }
+.logout-icon { transition: all 0.3s; }
+
+/* Main Content */
+.main-content { margin-left: 260px; padding: 30px; }
+
+.page-header {
+    background: var(--charcoal); padding: 30px; border-radius: 12px;
+    margin-bottom: 30px; border: 1px solid var(--border);
+}
+
+.page-title {
+    font-size: 28px; font-weight: 800; color: var(--beige); margin-bottom: 8px;
+}
+
+.page-subtitle { font-size: 14px; color: rgba(245, 241, 232, 0.7); }
+
+/* Form Container */
+.form-container {
+    background: var(--charcoal); padding: 35px; border-radius: 12px;
+    border: 1px solid var(--border); max-width: 1100px;
+}
+
+/* Top Controls */
+.top-controls {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 30px; padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.date-group {
+    flex: 1; max-width: 300px;
+}
+
+.voice-control {
+    display: flex; align-items: center; gap: 10px;
+}
+
+.voice-status {
+    font-size: 12px; color: rgba(245, 241, 232, 0.6);
+}
+
+.global-voice-btn {
+    background: rgba(245, 241, 232, 0.1); border: 1px solid var(--border);
+    color: var(--beige); cursor: pointer; width: 50px; height: 50px;
+    border-radius: 10px; font-size: 22px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+}
+
+.global-voice-btn:hover {
+    background: rgba(245, 241, 232, 0.15);
+    border-color: var(--beige);
+    box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1);
+}
+
+.global-voice-btn.recording {
+    background: #ff4444; color: #fff; border-color: #ff4444;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Topics Section */
+.topics-section {
+    margin-bottom: 35px; padding-bottom: 30px;
+    border-bottom: 1px solid var(--border);
+}
+
+.section-header {
+    font-size: 16px; font-weight: 700; color: var(--beige);
+    margin-bottom: 15px;
+}
+
+.topics-input-group {
+    display: flex; gap: 12px; align-items: flex-start;
+}
+
+.topics-input-wrapper {
+    flex: 1;
+}
+
+.topics-input {
+    width: 100%; padding: 12px 14px; border-radius: 8px;
+    border: 1px solid var(--border); background: rgba(245, 241, 232, 0.05);
+    color: var(--beige); font-size: 14px; font-family: 'Inter', sans-serif;
+    transition: all 0.3s;
+}
+
+.topics-input::placeholder { color: rgba(245, 241, 232, 0.4); }
+
+.topics-input:hover {
+    border-color: var(--beige);
+    box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1);
+}
+
+.topics-input:focus {
+    outline: none; border-color: var(--teal);
+    background: rgba(245, 241, 232, 0.08);
+    box-shadow: 0 0 0 3px rgba(90, 159, 159, 0.15);
+}
+
+.add-topic-btn {
+    padding: 12px 24px; border-radius: 8px; font-size: 14px;
+    font-weight: 600; cursor: pointer; transition: all 0.2s;
+    border: none; background: var(--teal); color: var(--beige);
+    white-space: nowrap;
+}
+
+.add-topic-btn:hover {
+    background: #4a8f8f; transform: translateY(-2px);
+}
+
+.topics-list {
+    margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px;
+}
+
+.topic-tag {
+    background: rgba(245, 241, 232, 0.1); padding: 8px 14px;
+    border-radius: 8px; font-size: 13px; color: var(--beige);
+    border: 1px solid var(--border); display: inline-flex;
+    align-items: center; gap: 8px;
+}
+
+.topic-tag-remove {
+    background: none; border: none; color: var(--teal);
+    cursor: pointer; font-size: 16px; line-height: 1;
+    padding: 0; margin: 0;
+}
+
+.topic-tag-remove:hover { color: #ff4444; }
+
+/* Coding Practice Section */
+.coding-section {
+    margin-bottom: 35px; padding-bottom: 30px;
+    border-bottom: 1px solid var(--border);
+}
+
+.section-header-with-btn {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-title {
+    font-size: 16px; font-weight: 700; color: var(--beige);
+    display: flex; align-items: center; gap: 10px;
+}
+
+.problems-count {
+    font-size: 13px; color: rgba(245, 241, 232, 0.6);
+    font-weight: 500;
+}
+
+.add-problem-btn {
+    padding: 10px 20px; border-radius: 8px; font-size: 13px;
+    font-weight: 600; cursor: pointer; transition: all 0.2s;
+    border: 1px solid var(--teal); background: rgba(90, 159, 159, 0.1);
+    color: var(--teal);
+}
+
+.add-problem-btn:hover {
+    background: var(--teal); color: var(--beige);
+}
+
+.add-problem-btn:disabled {
+    opacity: 0.5; cursor: not-allowed;
+}
+
+.problems-container {
+    display: flex; flex-direction: column; gap: 20px;
+}
+
+.problem-card {
+    background: rgba(245, 241, 232, 0.03); padding: 25px;
+    border-radius: 10px; border: 1px solid var(--border);
+    position: relative;
+}
+
+.problem-card-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px;
+}
+
+.problem-number {
+    font-size: 15px; font-weight: 700; color: var(--teal);
+}
+
+.delete-problem-btn {
+    background: rgba(255, 68, 68, 0.1); border: none;
+    color: #ff4444; cursor: pointer; width: 32px; height: 32px;
+    border-radius: 6px; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+}
+
+.delete-problem-btn:hover {
+    background: #ff4444; color: var(--beige);
+}
+
+.problem-fields {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;
+    margin-bottom: 15px;
+}
+
+.form-group {
+    margin-bottom: 0;
+}
+
+.form-label {
+    display: block; font-size: 12px; font-weight: 600;
+    color: var(--beige); margin-bottom: 6px;
+}
+
+.form-input, .form-select, .form-textarea {
+    width: 100%; padding: 10px 12px; border-radius: 6px;
+    border: 1px solid var(--border); background: rgba(245, 241, 232, 0.05);
+    color: var(--beige); font-size: 13px; font-family: 'Inter', sans-serif;
+    transition: all 0.3s;
+}
+
+.form-input::placeholder, .form-textarea::placeholder {
+    color: rgba(245, 241, 232, 0.4);
+}
+
+/* HOVER EFFECT - BEIGE SHADOW */
+.form-input:hover, .form-select:hover, .form-textarea:hover {
+    border-color: var(--beige);
+    box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1);
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+    outline: none; border-color: var(--teal);
+    background: rgba(245, 241, 232, 0.08);
+    box-shadow: 0 0 0 3px rgba(90, 159, 159, 0.15);
+}
+
+/* VISIBLE DROPDOWN - LIGHT BACKGROUND */
+.form-select {
+    cursor: pointer; appearance: none;
+    background-color: rgba(245, 241, 232, 0.1);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23f5f1e8' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 35px;
+}
+
+.form-select option {
+    background: var(--charcoal);
+    color: var(--beige);
+    padding: 10px;
+}
+
+.form-textarea {
+    min-height: 100px; resize: vertical;
+}
+
+.empty-state {
+    text-align: center; padding: 50px 20px;
+    color: rgba(245, 241, 232, 0.5);
+}
+
+.empty-state-icon {
+    font-size: 48px; margin-bottom: 15px;
+}
+
+.empty-state-text {
+    font-size: 14px; margin-bottom: 10px;
+}
+
+/* Challenges Section */
+.challenges-section {
+    margin-bottom: 35px;
+}
+
+.challenges-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 15px;
+}
+
+.challenges-icon {
+    font-size: 20px;
+}
+
+.challenges-title {
+    font-size: 16px; font-weight: 700; color: var(--beige);
+}
+
+.challenges-subtitle {
+    font-size: 12px; color: rgba(245, 241, 232, 0.6);
+}
+
+.hint-text {
+    font-size: 11px; color: rgba(245, 241, 232, 0.5);
+    margin-top: 8px; padding: 10px 14px;
+    background: rgba(245, 241, 232, 0.03);
+    border-radius: 6px; border-left: 3px solid var(--teal);
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex; gap: 15px; padding-top: 25px;
+    border-top: 1px solid var(--border);
+}
+
+.btn {
+    padding: 13px 30px; border-radius: 8px; font-size: 14px;
+    font-weight: 600; cursor: pointer; transition: all 0.2s;
+    border: none;
+}
+
+.btn-primary {
+    background: var(--teal); color: var(--beige);
+}
+
+.btn-primary:hover {
+    background: #4a8f8f; transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(90, 159, 159, 0.3);
+}
+
+.btn-primary:disabled {
+    opacity: 0.5; cursor: not-allowed; transform: none;
+}
+
+.btn-secondary {
+    background: rgba(245, 241, 232, 0.1);
+    color: var(--beige); border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: rgba(245, 241, 232, 0.15);
+    border-color: var(--beige);
+    box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1);
+}
+
+/* Alert */
+.alert {
+    padding: 13px 18px; border-radius: 8px; margin-bottom: 20px;
+    font-size: 13px; display: none; align-items: center; gap: 10px;
+}
+
+.alert.show { display: flex; }
+.alert-success {
+    background: rgba(90, 159, 159, 0.2); color: var(--teal);
+    border: 1px solid var(--teal);
+}
+.alert-error {
+    background: rgba(255, 68, 68, 0.2); color: #ff4444;
+    border: 1px solid #ff4444;
+}
+
+/* Custom Platform Input */
+.custom-platform-input {
+    display: none; margin-top: 8px;
+}
+
+.custom-platform-input.show {
+    display: block;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .sidebar { width: 70px; padding: 20px 10px; }
+    .logo-text, .nav-item span, .user-info { display: none; }
+    .main-content { margin-left: 70px; padding: 20px; }
+    .problem-fields { grid-template-columns: 1fr; }
+    .topics-input-group { flex-direction: column; }
+    .top-controls { flex-direction: column; align-items: flex-start; gap: 15px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="logo-section">
+        <div class="logo-small">TR</div>
+        <div class="logo-text">TRACE</div>
+    </div>
+    
+    <nav class="nav-menu">
+        <a href="dashboard.html" class="nav-item">
+            <span class="nav-icon">📊</span>
+            <span>Dashboard</span>
+        </a>
+        <a href="learning-log.html" class="nav-item">
+            <span class="nav-icon">📝</span>
+            <span>Learning Log</span>
+        </a>
+        <a href="coding-log.html" class="nav-item active">
+            <span class="nav-icon">💻</span>
+            <span>Coding Log</span>
+        </a>
+        <a href="#" class="nav-item" onclick="showComingSoon(); return false;">
+            <span class="nav-icon">🤖</span>
+            <span>AI Recaps</span>
+        </a>
+        <a href="#" class="nav-item" onclick="showComingSoon(); return false;">
+            <span class="nav-icon">📈</span>
+            <span>Analytics</span>
+        </a>
+    </nav>
+    
+    <div class="user-section">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <div class="user-info">
+            <div class="user-name" id="userName">User</div>
+            <div class="user-email" id="userEmail">user@example.com</div>
+        </div>
+        <button class="logout-btn" onclick="handleLogout()" title="Logout">
+            <span class="logout-icon">🚪</span>
+        </button>
+    </div>
+</div>
+
+<!-- Main -->
+<div class="main-content">
+    
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-title">💻 Coding Log</div>
+        <div class="page-subtitle">Track your coding practice and problem-solving journey</div>
+    </div>
+    
+    <!-- Form -->
+    <div class="form-container">
+        
+        <div id="alert" class="alert"></div>
+        
+        <form id="codingForm" onsubmit="saveCodingLog(event)">
+            
+            <!-- Top Controls: Date + Voice Button -->
+            <div class="top-controls">
+                <div class="date-group">
+                    <label class="form-label">📅 Date</label>
+                    <input type="date" id="log_date" class="form-input" required>
+                </div>
+                <div class="voice-control">
+                    <div class="voice-status" id="voiceStatus">Click to speak</div>
+                    <button type="button" class="global-voice-btn" id="globalVoiceBtn"
+                            onclick="toggleVoiceInput()" title="Voice input (click then select field)">
+                        🎤
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Topics Covered Section -->
+            <div class="topics-section">
+                <div class="section-header">Topics Covered</div>
+                <div class="topics-input-group">
+                    <div class="topics-input-wrapper">
+                        <input type="text" id="topicInput" class="topics-input" 
+                               placeholder="Add a topic... (e.g., Arrays, Dynamic Programming)"
+                               onfocus="setActiveField('topicInput')">
+                    </div>
+                    <button type="button" class="add-topic-btn" onclick="addTopic()">
+                        Add
+                    </button>
+                </div>
+                <div class="topics-list" id="topicsList"></div>
+            </div>
+            
+            <!-- Coding Practice Section -->
+            <div class="coding-section">
+                <div class="section-header-with-btn">
+                    <div>
+                        <div class="section-title">
+                            <span>💻</span>
+                            <span>Coding Practice</span>
+                        </div>
+                        <div class="problems-count" id="problemsCount">Problems solved today</div>
+                    </div>
+                    <button type="button" class="add-problem-btn" id="addProblemBtn" onclick="addProblem()">
+                        + Add Problem
+                    </button>
+                </div>
+                
+                <div class="problems-container" id="problemsContainer">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">💻</div>
+                        <div class="empty-state-text">No problems added yet</div>
+                        <div style="font-size: 12px; margin-top: 5px;">Click "+ Add Problem" to start logging</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Challenges & Mistakes Section -->
+            <div class="challenges-section">
+                <div class="challenges-header">
+                    <span class="challenges-icon">⚠️</span>
+                    <div>
+                        <div class="challenges-title">Challenges & Mistakes</div>
+                        <div class="challenges-subtitle">What difficulties did you face?</div>
+                    </div>
+                </div>
+                <textarea id="challenges" class="form-textarea" 
+                          placeholder="Write about any challenges, mistakes, or areas where you struggled today..."
+                          onfocus="setActiveField('challenges')"></textarea>
+                <div class="hint-text">
+                    💡 <strong>Tip:</strong> Recording mistakes helps identify patterns. The AI will use this to suggest revision points.
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button type="submit" class="btn btn-primary" id="saveBtn">
+                    💾 Save Log
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                    ↺ Clear Form
+                </button>
+            </div>
+            
+        </form>
+        
+    </div>
+    
+</div>
+
+<script>
+const API_URL = 'http://localhost:5000/api';
+
+// State
+let topics = [];
+let problems = [];
+let problemCounter = 0;
+const MAX_PROBLEMS = 10;
+
+// Voice Recognition
+let activeField = null;
+let recognition = null;
+let isRecording = false;
+
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+    
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        if (activeField) {
+            const field = document.getElementById(activeField);
+            if (field) {
+                if (field.tagName === 'INPUT') {
+                    field.value = transcript;
+                } else {
+                    field.value += (field.value ? ' ' : '') + transcript;
+                }
+            }
+        }
+    };
+    
+    recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        showAlert('Voice input error: ' + event.error, 'error');
+        stopVoiceInput();
+    };
+    
+    recognition.onend = () => {
+        stopVoiceInput();
+    };
+}
+
+// Voice Functions
+function setActiveField(fieldId) {
+    activeField = fieldId;
+    updateVoiceStatus();
+}
+
+function toggleVoiceInput() {
+    if (!recognition) {
+        showAlert('Voice input not supported in your browser. Please use Chrome or Edge.', 'error');
+        return;
+    }
+    
+    if (!activeField) {
+        showAlert('Please click on a field first, then click the microphone', 'error');
+        return;
+    }
+    
+    if (isRecording) {
+        stopVoiceInput();
+    } else {
+        startVoiceInput();
+    }
+}
+
+function startVoiceInput() {
+    const btn = document.getElementById('globalVoiceBtn');
+    const status = document.getElementById('voiceStatus');
+    
+    btn.classList.add('recording');
+    status.textContent = 'Listening...';
+    isRecording = true;
+    
+    try {
+        recognition.start();
+    } catch (error) {
+        console.error('Recognition start error:', error);
+        stopVoiceInput();
+    }
+}
+
+function stopVoiceInput() {
+    const btn = document.getElementById('globalVoiceBtn');
+    const status = document.getElementById('voiceStatus');
+    
+    if (recognition) {
+        try {
+            recognition.stop();
+        } catch (error) {}
+    }
+    
+    btn.classList.remove('recording');
+    status.textContent = 'Click to speak';
+    isRecording = false;
+}
+
+function updateVoiceStatus() {
+    const status = document.getElementById('voiceStatus');
+    if (activeField) {
+        status.textContent = `Ready for: ${activeField}`;
+    }
+}
+
+// Topics Functions
+function addTopic() {
+    const input = document.getElementById('topicInput');
+    const topic = input.value.trim();
+    
+    if (!topic) {
+        showAlert('Please enter a topic', 'error');
+        return;
+    }
+    
+    if (topics.includes(topic)) {
+        showAlert('Topic already added', 'error');
+        return;
+    }
+    
+    topics.push(topic);
+    input.value = '';
+    renderTopics();
+}
+
+function removeTopic(topic) {
+    topics = topics.filter(t => t !== topic);
+    renderTopics();
+}
+
+function renderTopics() {
+    const container = document.getElementById('topicsList');
+    
+    if (topics.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    container.innerHTML = topics.map(topic => `
+        <div class="topic-tag">
+            <span>${topic}</span>
+            <button type="button" class="topic-tag-remove" onclick="removeTopic('${topic.replace(/'/g, "\\'")}')">
+                ×
+            </button>
+        </div>
+    `).join('');
+}
+
+// Problem Functions
+function addProblem() {
+    if (problems.length >= MAX_PROBLEMS) {
+        showAlert(`Maximum ${MAX_PROBLEMS} problems allowed per log`, 'error');
+        return;
+    }
+    
+    problemCounter++;
+    const problem = {
+        id: problemCounter,
+        number: problems.length + 1,
+        problem_name: '',
+        platform: 'LeetCode',
+        difficulty: 'Easy',
+        approach_solution: ''
+    };
+    
+    problems.push(problem);
+    renderProblems();
+    updateAddButton();
+}
+
+function deleteProblem(id) {
+    problems = problems.filter(p => p.id !== id);
+    problems.forEach((p, index) => {
+        p.number = index + 1;
+    });
+    renderProblems();
+    updateAddButton();
+}
+
+function updateAddButton() {
+    const btn = document.getElementById('addProblemBtn');
+    btn.disabled = problems.length >= MAX_PROBLEMS;
+    
+    const count = document.getElementById('problemsCount');
+    count.textContent = `${problems.length} problem${problems.length !== 1 ? 's' : ''} added`;
+}
+
+async function loadCustomPlatforms() {
+    const token = localStorage.getItem('token');
+    if (!token) return [];
+    
+    try {
+        const response = await fetch(`${API_URL}/logs/platforms`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        return data.success ? data.platforms : [];
+    } catch (error) {
+        console.error('Load platforms error:', error);
+        return [];
+    }
+}
+
+async function renderProblems() {
+    const container = document.getElementById('problemsContainer');
+    
+    if (problems.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">💻</div>
+                <div class="empty-state-text">No problems added yet</div>
+                <div style="font-size: 12px; margin-top: 5px;">Click "+ Add Problem" to start logging</div>
+            </div>
+        `;
+        return;
+    }
+    
+    const customPlatforms = await loadCustomPlatforms();
+    const allPlatforms = ['LeetCode', 'HackerRank', 'CodeChef', 'Codeforces', 'GFG', ...customPlatforms, 'Custom'];
+    
+    container.innerHTML = problems.map(problem => `
+        <div class="problem-card" data-id="${problem.id}">
+            <div class="problem-card-header">
+                <div class="problem-number">Problem #${problem.number}</div>
+                <button type="button" class="delete-problem-btn" onclick="deleteProblem(${problem.id})">
+                    🗑️
+                </button>
+            </div>
+            
+            <div class="problem-fields">
+                <div class="form-group">
+                    <label class="form-label">Problem Name</label>
+                    <input type="text" class="form-input" 
+                           id="problem_name_${problem.id}"
+                           placeholder="e.g., Two Sum"
+                           value="${problem.problem_name}"
+                           onfocus="setActiveField('problem_name_${problem.id}')"
+                           onchange="updateProblem(${problem.id}, 'problem_name', this.value)">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Platform</label>
+                    <select class="form-select" 
+                            id="platform_${problem.id}"
+                            onchange="handlePlatformChange(${problem.id}, this.value)">
+                        ${allPlatforms.map(p => `
+                            <option value="${p}" ${problem.platform === p ? 'selected' : ''}>${p}</option>
+                        `).join('')}
+                    </select>
+                    <input type="text" class="form-input custom-platform-input" 
+                           id="custom_platform_${problem.id}"
+                           placeholder="Enter platform name"
+                           onfocus="setActiveField('custom_platform_${problem.id}')">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Difficulty</label>
+                    <select class="form-select" 
+                            id="difficulty_${problem.id}"
+                            onchange="updateProblem(${problem.id}, 'difficulty', this.value)">
+                        <option value="Easy" ${problem.difficulty === 'Easy' ? 'selected' : ''}>Easy</option>
+                        <option value="Medium" ${problem.difficulty === 'Medium' ? 'selected' : ''}>Medium</option>
+                        <option value="Hard" ${problem.difficulty === 'Hard' ? 'selected' : ''}>Hard</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Approach / Solution</label>
+                <textarea class="form-textarea" 
+                          id="approach_${problem.id}"
+                          placeholder="Describe your approach or solution..."
+                          onfocus="setActiveField('approach_${problem.id}')"
+                          onchange="updateProblem(${problem.id}, 'approach_solution', this.value)">${problem.approach_solution}</textarea>
+            </div>
+        </div>
+    `).join('');
+}
+
+function handlePlatformChange(id, value) {
+    const customInput = document.getElementById(`custom_platform_${id}`);
+    
+    if (value === 'Custom') {
+        customInput.classList.add('show');
+        customInput.focus();
+        customInput.onchange = () => {
+            updateProblem(id, 'platform', customInput.value);
+        };
+    } else {
+        customInput.classList.remove('show');
+        updateProblem(id, 'platform', value);
+    }
+}
+
+function updateProblem(id, field, value) {
+    const problem = problems.find(p => p.id === id);
+    if (problem) {
+        problem[field] = value;
+    }
+}
+
+// Save Function
+async function saveCodingLog(event) {
+    event.preventDefault();
+    
+    const saveBtn = document.getElementById('saveBtn');
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+        window.location.href = 'index.html';
+        return;
+    }
+    
+    if (topics.length === 0) {
+        showAlert('Please add at least one topic', 'error');
+        return;
+    }
+    
+    const validProblems = [];
+    for (let problem of problems) {
+        const name = document.getElementById(`problem_name_${problem.id}`).value.trim();
+        const platform = document.getElementById(`platform_${problem.id}`).value;
+        const customPlatform = document.getElementById(`custom_platform_${problem.id}`);
+        const difficulty = document.getElementById(`difficulty_${problem.id}`).value;
+        const approach = document.getElementById(`approach_${problem.id}`).value.trim();
+        
+        if (!name) {
+            showAlert(`Problem #${problem.number}: Please enter problem name`, 'error');
+            return;
+        }
+        
+        let finalPlatform = platform;
+        if (platform === 'Custom') {
+            finalPlatform = customPlatform.value.trim();
+            if (!finalPlatform) {
+                showAlert(`Problem #${problem.number}: Please enter custom platform name`, 'error');
+                return;
+            }
+        }
+        
+        validProblems.push({
+            problem_name: name,
+            platform: finalPlatform,
+            difficulty: difficulty,
+            approach_solution: approach
+        });
+    }
+    
+    const data = {
+        topics_covered: topics.join(', '),
+        problems: validProblems,
+        challenges_mistakes: document.getElementById('challenges').value.trim(),
+        log_date: document.getElementById('log_date').value
+    };
+    
+    console.log('Sending coding log:', data);
+    
+    saveBtn.disabled = true;
+    saveBtn.textContent = '💾 Saving...';
+    
+    try {
+        const response = await fetch(`${API_URL}/logs/coding`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        console.log('Save response:', result);
+        
+        if (result.success) {
+            showAlert('✅ Coding log saved successfully!', 'success');
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 1500);
+        } else {
+            showAlert(result.message || 'Failed to save log', 'error');
+        }
+    } catch (error) {
+        console.error('Save error:', error);
+        showAlert('Cannot connect to server. Make sure backend is running.', 'error');
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = '💾 Save Log';
+    }
+}
+
+// Utility Functions
+function showAlert(message, type) {
+    const alert = document.getElementById('alert');
+    alert.textContent = message;
+    alert.className = `alert alert-${type} show`;
+    setTimeout(() => alert.classList.remove('show'), 5000);
+}
+
+function resetForm() {
+    if (confirm('Clear all fields and reset the form?')) {
+        topics = [];
+        problems = [];
+        problemCounter = 0;
+        document.getElementById('codingForm').reset();
+        renderTopics();
+        renderProblems();
+        updateAddButton();
+        setTodayDate();
+        activeField = null;
+        updateVoiceStatus();
+    }
+}
+
+function setTodayDate() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('log_date').value = today;
+}
+
+function loadUserData() {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user.name) {
+        document.getElementById('userName').textContent = user.name;
+        document.getElementById('userAvatar').textContent = user.name.charAt(0).toUpperCase();
+    }
+    if (user.email) {
+        document.getElementById('userEmail').textContent = user.email;
+    }
+}
+
+function handleLogout() {
+    if (confirm('👋 Are you sure you want to logout?')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = 'index.html';
+    }
+}
+
+function showComingSoon() {
+    alert('🚀 Feature coming soon!');
+}
+
+function checkAuth() {
+    if (!localStorage.getItem('token')) {
+        window.location.href = 'index.html';
+    }
+}
+
+// Initialize
+window.onload = () => {
+    checkAuth();
+    loadUserData();
+    setTodayDate();
+    updateAddButton();
+};
+</script>
+
+</body>
+</html>

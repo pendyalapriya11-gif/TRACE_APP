@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRACE - Learning Log</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+    --charcoal: #2a2a2a;
+    --dark-charcoal: #1a1a1a;
+    --beige: #f5f1e8;
+    --teal: #5a9f9f;
+    --border: rgba(90, 159, 159, 0.15);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh; }
+
+/* Sidebar */
+.sidebar {
+    position: fixed; left: 0; top: 0; width: 260px; height: 100vh;
+    background: var(--charcoal); border-right: 1px solid var(--border);
+    padding: 25px 15px; display: flex; flex-direction: column;
+}
+
+.logo-section {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 35px;
+    padding: 15px; background: var(--beige); border-radius: 10px;
+}
+
+.logo-small {
+    width: 45px; height: 45px; border-radius: 8px;
+    background: var(--charcoal); color: var(--beige);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 20px;
+}
+
+.logo-text { font-size: 24px; font-weight: 800; color: var(--charcoal); }
+
+.nav-menu { flex: 1; }
+
+.nav-item {
+    padding: 14px 16px; margin-bottom: 8px; border-radius: 8px;
+    cursor: pointer; display: flex; align-items: center; gap: 14px;
+    font-size: 14px; font-weight: 500; color: rgba(245, 241, 232, 0.7);
+    text-decoration: none; transition: all 0.2s;
+}
+
+.nav-item:hover { background: rgba(245, 241, 232, 0.1); color: var(--beige); }
+.nav-item.active { background: var(--beige); color: var(--charcoal); font-weight: 600; }
+.nav-icon { font-size: 20px; }
+
+.user-section {
+    padding: 15px; background: rgba(245, 241, 232, 0.05);
+    border-radius: 10px; display: flex; align-items: center; gap: 12px;
+    border: 1px solid var(--border);
+}
+
+.user-avatar {
+    width: 42px; height: 42px; border-radius: 8px;
+    background: var(--teal); color: var(--beige);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 18px;
+}
+
+.user-info { flex: 1; }
+.user-name { font-size: 14px; font-weight: 600; color: var(--beige); }
+.user-email { font-size: 11px; color: rgba(245, 241, 232, 0.5); }
+
+.logout-btn {
+    background: rgba(90, 159, 159, 0.15); border: none;
+    color: var(--teal); cursor: pointer; width: 36px; height: 36px;
+    border-radius: 8px; font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s; position: relative; overflow: hidden;
+}
+
+.logout-btn:hover { background: var(--teal); color: var(--beige); transform: scale(1.05); }
+.logout-btn::before {
+    content: '👋'; position: absolute; font-size: 18px;
+    opacity: 0; transform: translateY(10px); transition: all 0.3s;
+}
+.logout-btn:hover::before { opacity: 1; transform: translateY(0); }
+.logout-btn:hover .logout-icon { opacity: 0; transform: translateY(-10px); }
+.logout-icon { transition: all 0.3s; }
+
+/* Main Content */
+.main-content { margin-left: 260px; padding: 30px; }
+
+.page-header {
+    background: var(--charcoal); padding: 30px; border-radius: 12px;
+    margin-bottom: 30px; border: 1px solid var(--border);
+}
+
+.page-title {
+    font-size: 28px; font-weight: 800; color: var(--beige); margin-bottom: 8px;
+}
+
+.page-subtitle { font-size: 14px; color: rgba(245, 241, 232, 0.7); }
+
+/* Form Container */
+.form-container {
+    background: var(--charcoal); padding: 35px; border-radius: 12px;
+    border: 1px solid var(--border); max-width: 900px;
+}
+
+/* Top Controls: Date + Voice Button */
+.top-controls {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 30px; padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.date-group {
+    flex: 1; max-width: 300px;
+}
+
+.voice-control {
+    display: flex; align-items: center; gap: 10px;
+}
+
+.voice-status {
+    font-size: 12px; color: rgba(245, 241, 232, 0.6);
+}
+
+.global-voice-btn {
+    background: rgba(245, 241, 232, 0.1); border: 1px solid var(--border);
+    color: var(--beige); cursor: pointer; width: 50px; height: 50px;
+    border-radius: 10px; font-size: 22px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+}
+
+.global-voice-btn:hover {
+    background: rgba(245, 241, 232, 0.15);
+    border-color: var(--beige);
+    box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1);
+}
+
+.global-voice-btn.recording {
+    background: #ff4444; color: #fff; border-color: #ff4444;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-label {
+    display: block; font-size: 13px; font-weight: 600;
+    color: var(--beige); margin-bottom: 8px;
+}
+
+.form-input, .form-textarea {
+    width: 100%; padding: 14px 16px; border-radius: 8px;
+    border: 1px solid var(--border);
+    background: rgba(245, 241, 232, 0.05);
+    color: var(--beige); font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.3s;
+}
+
+.form-input::placeholder, .form-textarea::placeholder {
+    color: rgba(245, 241, 232, 0.4);
+}
+
+/* HOVER EFFECT - BEIGE SHADOW */
+.form-input:hover, .form-textarea:hover {
+    border-color: var(--beige);
+    box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1);
+}
+
+.form-input:focus, .form-textarea:focus {
+    outline: none;
+    border-color: var(--teal);
+    background: rgba(245, 241, 232, 0.08);
+    box-shadow: 0 0 0 3px rgba(90, 159, 159, 0.15);
+}
+
+.form-textarea {
+    min-height: 140px; resize: vertical;
+}
+
+.hint-text {
+    font-size: 11px; color: rgba(245, 241, 232, 0.5);
+    margin-top: 6px; display: flex; align-items: center; gap: 5px;
+}
+
+.action-buttons {
+    display: flex; gap: 15px; margin-top: 35px;
+    padding-top: 25px; border-top: 1px solid var(--border);
+}
+
+.btn {
+    padding: 13px 30px; border-radius: 8px; font-size: 14px;
+    font-weight: 600; cursor: pointer; transition: all 0.2s;
+    border: none;
+}
+
+.btn-primary {
+    background: var(--teal); color: var(--beige);
+}
+
+.btn-primary:hover {
+    background: #4a8f8f; transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(90, 159, 159, 0.3);
+}
+
+.btn-primary:disabled {
+    opacity: 0.5; cursor: not-allowed; transform: none;
+}
+
+.btn-secondary {
+    background: rgba(245, 241, 232, 0.1);
+    color: var(--beige); border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: rgba(245, 241, 232, 0.15);
+    border-color: var(--beige);
+    box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1);
+}
+
+.alert {
+    padding: 13px 18px; border-radius: 8px; margin-bottom: 20px;
+    font-size: 13px; display: none; align-items: center; gap: 10px;
+}
+
+.alert.show { display: flex; }
+.alert-success {
+    background: rgba(90, 159, 159, 0.2); color: var(--teal);
+    border: 1px solid var(--teal);
+}
+.alert-error {
+    background: rgba(255, 68, 68, 0.2); color: #ff4444;
+    border: 1px solid #ff4444;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .sidebar { width: 70px; padding: 20px 10px; }
+    .logo-text, .nav-item span, .user-info { display: none; }
+    .main-content { margin-left: 70px; padding: 20px; }
+    .top-controls { flex-direction: column; align-items: flex-start; gap: 15px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="logo-section">
+        <div class="logo-small">TR</div>
+        <div class="logo-text">TRACE</div>
+    </div>
+    
+    <nav class="nav-menu">
+        <a href="dashboard.html" class="nav-item">
+            <span class="nav-icon">📊</span>
+            <span>Dashboard</span>
+        </a>
+        <a href="learning-log.html" class="nav-item active">
+            <span class="nav-icon">📝</span>
+            <span>Learning Log</span>
+        </a>
+        <a href="coding-log.html" class="nav-item">
+            <span class="nav-icon">💻</span>
+            <span>Coding Log</span>
+        </a>
+        <a href="#" class="nav-item" onclick="showComingSoon(); return false;">
+            <span class="nav-icon">🤖</span>
+            <span>AI Recaps</span>
+        </a>
+        <a href="#" class="nav-item" onclick="showComingSoon(); return false;">
+            <span class="nav-icon">📈</span>
+            <span>Analytics</span>
+        </a>
+    </nav>
+    
+    <div class="user-section">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <div class="user-info">
+            <div class="user-name" id="userName">User</div>
+            <div class="user-email" id="userEmail">user@example.com</div>
+        </div>
+        <button class="logout-btn" onclick="handleLogout()" title="Logout">
+            <span class="logout-icon">🚪</span>
+        </button>
+    </div>
+</div>
+
+<!-- Main -->
+<div class="main-content">
+    
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-title">📝 Learning Log</div>
+        <div class="page-subtitle">Track what you learned today and challenges you faced</div>
+    </div>
+    
+    <!-- Form -->
+    <div class="form-container">
+        
+        <div id="alert" class="alert"></div>
+        
+        <form id="learningForm" onsubmit="saveLearningLog(event)">
+            
+            <!-- Top Controls: Date + Voice Button -->
+            <div class="top-controls">
+                <div class="date-group">
+                    <label class="form-label">📅 Date</label>
+                    <input type="date" id="log_date" class="form-input" required>
+                </div>
+                <div class="voice-control">
+                    <div class="voice-status" id="voiceStatus">Click to speak</div>
+                    <button type="button" class="global-voice-btn" id="globalVoiceBtn"
+                            onclick="toggleVoiceInput()" title="Voice input (click then select field)">
+                        🎤
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Topic -->
+            <div class="form-group">
+                <label class="form-label">Topic Name</label>
+                <input type="text" id="topic" class="form-input" 
+                       placeholder="e.g., JavaScript Arrays" 
+                       onfocus="setActiveField('topic')" required>
+                <div class="hint-text">💡 What subject or technology did you study?</div>
+            </div>
+            
+            <!-- What You Learned -->
+            <div class="form-group">
+                <label class="form-label">What You Learned</label>
+                <textarea id="content" class="form-textarea" 
+                          placeholder="Describe what you learned today..."
+                          onfocus="setActiveField('content')" required></textarea>
+                <div class="hint-text">💡 Key concepts, techniques, or insights you gained</div>
+            </div>
+            
+            <!-- Challenges & Mistakes -->
+            <div class="form-group">
+                <label class="form-label">Challenges & Mistakes (Optional)</label>
+                <textarea id="challenges" class="form-textarea" 
+                          placeholder="What difficulties did you face? What mistakes did you make?"
+                          onfocus="setActiveField('challenges')"></textarea>
+                <div class="hint-text">💡 Recording mistakes helps identify patterns</div>
+            </div>
+            
+            <!-- Buttons -->
+            <div class="action-buttons">
+                <button type="submit" class="btn btn-primary" id="saveBtn">
+                    💾 Save Log
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                    ↺ Clear Form
+                </button>
+            </div>
+            
+        </form>
+        
+    </div>
+    
+</div>
+
+<script>
+const API_URL = 'http://localhost:5000/api';
+let activeField = null;
+let recognition = null;
+let isRecording = false;
+
+// Voice Recognition Setup
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+    
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        if (activeField) {
+            const field = document.getElementById(activeField);
+            if (field) {
+                if (field.tagName === 'INPUT') {
+                    field.value = transcript;
+                } else {
+                    field.value += (field.value ? ' ' : '') + transcript;
+                }
+            }
+        }
+    };
+    
+    recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        showAlert('Voice input error: ' + event.error, 'error');
+        stopVoiceInput();
+    };
+    
+    recognition.onend = () => {
+        stopVoiceInput();
+    };
+}
+
+function setActiveField(fieldId) {
+    activeField = fieldId;
+    updateVoiceStatus();
+}
+
+function toggleVoiceInput() {
+    if (!recognition) {
+        showAlert('Voice input not supported in your browser. Please use Chrome or Edge.', 'error');
+        return;
+    }
+    
+    if (!activeField) {
+        showAlert('Please click on a field first, then click the microphone', 'error');
+        return;
+    }
+    
+    if (isRecording) {
+        stopVoiceInput();
+    } else {
+        startVoiceInput();
+    }
+}
+
+function startVoiceInput() {
+    const btn = document.getElementById('globalVoiceBtn');
+    const status = document.getElementById('voiceStatus');
+    
+    btn.classList.add('recording');
+    status.textContent = 'Listening...';
+    isRecording = true;
+    
+    try {
+        recognition.start();
+    } catch (error) {
+        console.error('Recognition start error:', error);
+        stopVoiceInput();
+    }
+}
+
+function stopVoiceInput() {
+    const btn = document.getElementById('globalVoiceBtn');
+    const status = document.getElementById('voiceStatus');
+    
+    if (recognition) {
+        try {
+            recognition.stop();
+        } catch (error) {}
+    }
+    
+    btn.classList.remove('recording');
+    status.textContent = 'Click to speak';
+    isRecording = false;
+}
+
+function updateVoiceStatus() {
+    const status = document.getElementById('voiceStatus');
+    if (activeField) {
+        const fieldNames = {
+            'topic': 'Topic',
+            'content': 'What You Learned',
+            'challenges': 'Challenges'
+        };
+        status.textContent = `Ready for: ${fieldNames[activeField] || activeField}`;
+    }
+}
+
+function showAlert(message, type) {
+    const alert = document.getElementById('alert');
+    alert.textContent = message;
+    alert.className = `alert alert-${type} show`;
+    setTimeout(() => alert.classList.remove('show'), 5000);
+}
+
+async function saveLearningLog(event) {
+    event.preventDefault();
+    
+    const saveBtn = document.getElementById('saveBtn');
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+        window.location.href = 'index.html';
+        return;
+    }
+    
+    const data = {
+        topic: document.getElementById('topic').value.trim(),
+        content: document.getElementById('content').value.trim(),
+        challenges: document.getElementById('challenges').value.trim(),
+        log_date: document.getElementById('log_date').value
+    };
+    
+    console.log('Sending learning log:', data);
+    
+    saveBtn.disabled = true;
+    saveBtn.textContent = '💾 Saving...';
+    
+    try {
+        const response = await fetch(`${API_URL}/logs/learning`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        console.log('Save response:', result);
+        
+        if (result.success) {
+            showAlert('✅ Learning log saved successfully!', 'success');
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 1500);
+        } else {
+            showAlert(result.message || 'Failed to save log', 'error');
+        }
+    } catch (error) {
+        console.error('Save error:', error);
+        showAlert('Cannot connect to server. Make sure backend is running.', 'error');
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = '💾 Save Log';
+    }
+}
+
+function resetForm() {
+    if (confirm('Clear all fields?')) {
+        document.getElementById('learningForm').reset();
+        setTodayDate();
+        activeField = null;
+        updateVoiceStatus();
+    }
+}
+
+function setTodayDate() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('log_date').value = today;
+}
+
+function loadUserData() {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user.name) {
+        document.getElementById('userName').textContent = user.name;
+        document.getElementById('userAvatar').textContent = user.name.charAt(0).toUpperCase();
+    }
+    if (user.email) {
+        document.getElementById('userEmail').textContent = user.email;
+    }
+}
+
+function handleLogout() {
+    if (confirm('👋 Are you sure you want to logout?')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = 'index.html';
+    }
+}
+
+function showComingSoon() {
+    alert('🚀 Feature coming soon!');
+}
+
+function checkAuth() {
+    if (!localStorage.getItem('token')) {
+        window.location.href = 'index.html';
+    }
+}
+
+window.onload = () => {
+    checkAuth();
+    loadUserData();
+    setTodayDate();
+};
+</script>
+
+</body>
+</html>
