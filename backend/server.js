@@ -7,7 +7,7 @@ const cors = require('cors');
 
 
 const authRoutes = require('./routes/auth');
-
+const logRoutes = require('./routes/logs');
 const app = express();
 
 // Middleware
@@ -19,7 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/auth', authRoutes);
-
+app.use('/api/logs', logRoutes);
 // Health check
 app.get('/api/health', (req, res) => {
     res.status(200).json({ status: 'OK', message: 'TRACE API is running' });

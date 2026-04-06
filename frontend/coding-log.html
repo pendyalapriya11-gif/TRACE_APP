@@ -621,21 +621,24 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognition = new SpeechRecognition();
     recognition.continuous = false;
-    recognition.interimResults = false;
+    recognition.interimResults = true;
     recognition.lang = 'en-US';
     
     recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        if (activeField) {
-            const field = document.getElementById(activeField);
-            if (field) {
-                if (field.tagName === 'INPUT') {
-                    field.value = transcript;
-                } else {
-                    field.value += (field.value ? ' ' : '') + transcript;
-                }
-            }
-        }
+    const result = event.results[event.resultIndex];
+
+    // ❗ Only process FINAL result
+    if (!result.isFinal) return;
+
+    const transcript = result[0].transcript.trim();
+
+    const fieldId = activeField || document.activeElement?.id;
+    if (!fieldId) return;
+
+    const field = document.getElementById(fieldId);
+    if (!field) return;
+
+    field.value += (field.value ? ' ' : '') + transcript;
     };
     
     recognition.onerror = (event) => {
@@ -645,7 +648,13 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     };
     
     recognition.onend = () => {
+    if (isRecording) {
+        try {
+            recognition.start();
+        } catch (e) {}
+    } else {
         stopVoiceInput();
+    }
     };
 }
 
@@ -674,6 +683,11 @@ function toggleVoiceInput() {
 }
 
 function startVoiceInput() {
+    activeField = document.activeElement?.id;
+    if (!activeField) {
+        showAlert('Click inside a field first', 'error');
+        return;
+    }
     const btn = document.getElementById('globalVoiceBtn');
     const status = document.getElementById('voiceStatus');
     
@@ -915,15 +929,17 @@ async function saveCodingLog(event) {
     const token = localStorage.getItem('token');
     
     if (!token) {
+        alert('Please login first');
         window.location.href = 'index.html';
         return;
     }
     
     if (topics.length === 0) {
-        showAlert('Please add at least one topic', 'error');
+        alert('Please add at least one topic');
         return;
     }
     
+    // Collect problems
     const validProblems = [];
     for (let problem of problems) {
         const name = document.getElementById(`problem_name_${problem.id}`).value.trim();
@@ -933,7 +949,7 @@ async function saveCodingLog(event) {
         const approach = document.getElementById(`approach_${problem.id}`).value.trim();
         
         if (!name) {
-            showAlert(`Problem #${problem.number}: Please enter problem name`, 'error');
+            alert(`Problem #${problem.number}: Please enter problem name`);
             return;
         }
         
@@ -941,7 +957,7 @@ async function saveCodingLog(event) {
         if (platform === 'Custom') {
             finalPlatform = customPlatform.value.trim();
             if (!finalPlatform) {
-                showAlert(`Problem #${problem.number}: Please enter custom platform name`, 'error');
+                alert(`Problem #${problem.number}: Please enter platform name`);
                 return;
             }
         }
@@ -961,41 +977,35 @@ async function saveCodingLog(event) {
         log_date: document.getElementById('log_date').value
     };
     
-    console.log('Sending coding log:', data);
-    
     saveBtn.disabled = true;
     saveBtn.textContent = '💾 Saving...';
     
     try {
-        const response = await fetch(`${API_URL}/logs/coding`, {
+        const response = await fetch('http://localhost:5000/api/logs/coding', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Authorization': 'Bearer ' + token
             },
             body: JSON.stringify(data)
         });
         
         const result = await response.json();
-        console.log('Save response:', result);
         
         if (result.success) {
-            showAlert('✅ Coding log saved successfully!', 'success');
-            setTimeout(() => {
-                window.location.href = 'dashboard.html';
-            }, 1500);
+            alert('✅ Coding log saved!');
+            window.location.href = 'dashboard.html';
         } else {
-            showAlert(result.message || 'Failed to save log', 'error');
+            alert('❌ ' + result.message);
         }
     } catch (error) {
-        console.error('Save error:', error);
-        showAlert('Cannot connect to server. Make sure backend is running.', 'error');
+        console.error('Error:', error);
+        alert('❌ Cannot connect to server');
     } finally {
         saveBtn.disabled = false;
         saveBtn.textContent = '💾 Save Log';
     }
 }
-
 // Utility Functions
 function showAlert(message, type) {
     const alert = document.getElementById('alert');
