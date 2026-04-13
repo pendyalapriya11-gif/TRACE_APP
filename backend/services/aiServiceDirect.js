@@ -2,8 +2,8 @@ async function callGeminiAPI(prompt) {
     const API_KEY = process.env.GEMINI_API_KEY;
 
     const models = [
-        "gemini-2.5-flash",   // try best first
-        "gemini-2.0-flash",   // fallback
+        // "gemini-2.5-flash",   // try best first
+        // "gemini-2.0-flash",   // fallback
         "gemini-flash-latest" // backup
     ];
 
@@ -35,7 +35,7 @@ async function callGeminiAPI(prompt) {
 }
 
 // Generate Topic-Wise Summary
-async function generateTopicWiseSummary(groupedLogs) {
+async function generateTopicWiseSummary(groupedLogs, weakTopics = []) {
     try {
         console.log("📊 AI Summary - Starting...");
         
@@ -53,20 +53,29 @@ async function generateTopicWiseSummary(groupedLogs) {
             return `Topic: ${topic}\n${logDetails}`;
         }).join('\n\n');
 
-        const prompt = `Analyze these student learning logs grouped by topic:
+        const prompt = `
+            You are an expert coding mentor.
 
-${topicSummaries}
+            Analyze the student's learning activity:
 
-For EACH topic, provide:
+            ${topicSummaries}
 
-**[TOPIC NAME]**
-📝 What You Learned: (summary)
-⚠️ Challenges: (difficulties)
-💡 Suggestions: (what to improve)
+            Weak areas:
+            ${JSON.stringify(weakTopics)}
 
----
+            Focus strongly on mistakes. Give specific problem patterns to practice.
+            Avoid generic advice.
 
-Be specific and actionable.`;
+            For EACH topic provide:
+
+            **[TOPIC NAME]**
+            📊 Progress Level: (Beginner / Intermediate / Strong)
+            ⚠️ Key Weakness: (based on mistakes)
+            💡 What to Improve: (specific actionable advice)
+            🚀 Next Step: (what to practice next)
+
+            Be precise. Avoid generic advice.
+            `;
 
         console.log("🤖 Calling Gemini API...");
         

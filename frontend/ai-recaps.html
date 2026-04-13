@@ -469,7 +469,10 @@ async function generateRecap() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ groupedLogs })
+            body: JSON.stringify({
+            groupedLogs: logsData.groupedLogs,
+            weakTopics: logsData.weakTopics
+        })
         });
         if (!summaryResponse.ok) {
             throw new Error("Logs API failed");

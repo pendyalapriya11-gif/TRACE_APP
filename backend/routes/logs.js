@@ -190,163 +190,94 @@ router.post('/question/solve', auth, async (req, res) => {
 // ========================================
 
 // Get Dashboard Stats
-router.get('/dashboard/stats', auth, async (req, res) => {
+router.get('/dashboard/stats', async (req, res) => {
     try {
-        const userId = req.user.userId; // FIXED
-        const today = new Date();
-        const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-        const fourteenDaysAgo = new Date(today.getTime() - 14 * 24 * 60 * 60 * 1000);
+        const userId = 1;
 
-        // Calculate current streak
-        let currentStreak = 0;
-        let dayOffset = 0;
-        
-        while (true) {
-            const checkDate = new Date(today.getTime() - dayOffset * 24 * 60 * 60 * 1000);
-            const dateStr = checkDate.toISOString().split('T')[0];
-            
-            const [logs] = await db.query(
-                'SELECT id FROM learning_logs WHERE user_id = ? AND log_date = ? UNION SELECT id FROM coding_logs WHERE user_id = ? AND log_date = ?',
-                [userId, dateStr, userId, dateStr]
-            );
-            
-            if (logs.length > 0) {
-                currentStreak++;
-                dayOffset++;
-            } else {
-                break;
-            }
-        }
+        // Problems solved
+        const [problems] = await db.query(`
+            SELECT COUNT(*) as total FROM user_solved_questions WHERE user_id = ?
+        `, [userId]);
 
-        // Calculate last week streak
-        let lastWeekStreak = 0;
-        dayOffset = 7;
-        
-        while (dayOffset < 14) {
-            const checkDate = new Date(today.getTime() - dayOffset * 24 * 60 * 60 * 1000);
-            const dateStr = checkDate.toISOString().split('T')[0];
-            
-            const [logs] = await db.query(
-                'SELECT id FROM learning_logs WHERE user_id = ? AND log_date = ? UNION SELECT id FROM coding_logs WHERE user_id = ? AND log_date = ?',
-                [userId, dateStr, userId, dateStr]
-            );
-            
-            if (logs.length > 0) {
-                lastWeekStreak++;
-                dayOffset++;
-            } else {
-                break;
-            }
-        }
-
-        // Get unique topics this week
-        const [thisWeekTopics] = await db.query(
-            'SELECT DISTINCT topic FROM learning_logs WHERE user_id = ? AND log_date >= ? UNION SELECT DISTINCT topics_covered FROM coding_logs WHERE user_id = ? AND log_date >= ?',
-            [userId, sevenDaysAgo.toISOString().split('T')[0], userId, sevenDaysAgo.toISOString().split('T')[0]]
-        );
-
-        // Get unique topics last week
-        const [lastWeekTopics] = await db.query(
-            'SELECT DISTINCT topic FROM learning_logs WHERE user_id = ? AND log_date >= ? AND log_date < ? UNION SELECT DISTINCT topics_covered FROM coding_logs WHERE user_id = ? AND log_date >= ? AND log_date < ?',
-            [userId, fourteenDaysAgo.toISOString().split('T')[0], sevenDaysAgo.toISOString().split('T')[0], userId, fourteenDaysAgo.toISOString().split('T')[0], sevenDaysAgo.toISOString().split('T')[0]]
-        );
-
-        // Count coding problems this week
-        const [thisWeekProblems] = await db.query(
-            'SELECT COUNT(*) as count FROM coding_problems cp JOIN coding_logs cl ON cp.coding_log_id = cl.id WHERE cl.user_id = ? AND cl.log_date >= ?',
-            [userId, sevenDaysAgo.toISOString().split('T')[0]]
-        );
-
-        // Count coding problems last week
-        const [lastWeekProblems] = await db.query(
-            'SELECT COUNT(*) as count FROM coding_problems cp JOIN coding_logs cl ON cp.coding_log_id = cl.id WHERE cl.user_id = ? AND cl.log_date >= ? AND cl.log_date < ?',
-            [userId, fourteenDaysAgo.toISOString().split('T')[0], sevenDaysAgo.toISOString().split('T')[0]]
-        );
+        // Topics
+        const [topics] = await db.query(`
+            SELECT COUNT(DISTINCT topic) as total FROM user_solved_questions WHERE user_id = ?
+        `, [userId]);
 
         res.json({
             success: true,
             stats: {
-                streak: {
-                    current: currentStreak,
-                    lastWeek: lastWeekStreak
-                },
-                topics: {
-                    current: thisWeekTopics.length,
-                    lastWeek: lastWeekTopics.length
-                },
-                problems: {
-                    current: thisWeekProblems[0].count,
-                    lastWeek: lastWeekProblems[0].count
-                }
+                streak: { current: 3, lastWeek: 2 }, // keep simple for now
+                topics: { current: topics[0].total, lastWeek: 0 },
+                problems: { current: problems[0].total, lastWeek: 0 }
             }
         });
-    } catch (error) {
-        console.error('Dashboard stats error:', error);
-        res.status(500).json({
-            success: false,
-            stats: {
-                streak: { current: 0, lastWeek: 0 },
-                topics: { current: 0, lastWeek: 0 },
-                problems: { current: 0, lastWeek: 0 }
-            }
-        });
+
+    } catch (err) {
+        console.error("Stats error:", err);
+        res.status(500).json({ success: false });
     }
 });
 
 // Get Recent Activity
-router.get('/dashboard/activity', auth, async (req, res) => {
+router.get('/dashboard/activity', async (req, res) => {
     try {
-        const userId = req.user.userId; 
+        const userId = 1;
 
-        // Get recent learning logs
-        const [learningLogs] = await db.query(
-            'SELECT topic, content as notes, log_date as date, "learning" as type FROM learning_logs WHERE user_id = ? ORDER BY created_at DESC LIMIT 3',
-            [userId]
-        );
+        const [rows] = await db.query(`
+            SELECT topic, solved_date, mistakes_faced
+            FROM user_solved_questions
+            WHERE user_id = ?
+            ORDER BY solved_date DESC
+            LIMIT 10
+        `, [userId]);
 
-        // Get recent coding logs
-        const [codingLogs] = await db.query(
-            'SELECT topics_covered as topic, challenges_mistakes as notes, log_date as date, "coding" as type FROM coding_logs WHERE user_id = ? ORDER BY created_at DESC LIMIT 3',
-            [userId]
-        );
+        const activity = rows.map(r => ({
+            type: 'coding',
+            topic: r.topic,
+            notes: r.mistakes_faced,
+            date: r.solved_date
+        }));
 
-        // Combine and sort
-        const allLogs = [...learningLogs, ...codingLogs]
-            .sort((a, b) => new Date(b.date) - new Date(a.date))
-            .slice(0, 5);
+        res.json({ success: true, activity });
 
-        res.json({
-            success: true,
-            activity: allLogs
-        });
-    } catch (error) {
-        console.error('Activity error:', error);
-        res.json({ success: true, activity: [] });
+    } catch (err) {
+        console.error("Activity error:", err);
+        res.status(500).json({ success: false });
     }
 });
 
 // Get Weak Areas
-router.get('/dashboard/weak-areas', auth, async (req, res) => {
+router.get('/dashboard/weak-areas', async (req, res) => {
     try {
-        const userId = req.user.userId; 
+        const userId = 1; // or req.user.id if auth
 
-        // Get topics from learning logs
-        const [topics] = await db.query(
-            'SELECT topic, COUNT(*) as count FROM learning_logs WHERE user_id = ? AND challenges IS NOT NULL AND challenges != "" GROUP BY topic HAVING count >= 3 ORDER BY count DESC LIMIT 5',
-            [userId]
-        );
-
+        const [rows] = await db.query(`
+            SELECT topic,
+                COUNT(*) as count,
+                GROUP_CONCAT(mistakes_faced SEPARATOR ' | ') as mistakes
+            FROM user_solved_questions
+            WHERE user_id = ? 
+            AND mistakes_faced IS NOT NULL 
+            AND mistakes_faced != ''
+            GROUP BY topic
+            ORDER BY count DESC
+            LIMIT 5
+        `, [userId]);
+        console.log("ROWS FROM DB:", rows);
         res.json({
             success: true,
-            weakAreas: topics.map(t => ({
-                topic: t.topic,
-                count: t.count,
-                difficulty: Math.min(t.count * 20, 100)
+            weakAreas: rows.map(r => ({
+                topic: r.topic,
+                count: r.count,
+                mistakes: r.mistakes || '',
+                difficulty: Math.min(100, r.count * 10)
             }))
         });
-    } catch (error) {
-        console.error('Weak areas error:', error);
-        res.json({ success: true, weakAreas: [] });
+
+    } catch (err) {
+        console.error("Weak areas error:", err);
+        res.status(500).json({ success: false });
     }
 });
 
@@ -392,7 +323,27 @@ router.post('/ai-recap/logs', async (req, res) => {
 
         const allLogs = [...learningLogs, ...codingLogs];
 
+        // 🔥 Weak topic detection
+        const weakTopicsMap = {};
+
+        (codingLogs || []).forEach(log => {
+            if (log.challenges && log.challenges.trim() !== '') {
+                if (!weakTopicsMap[log.topic]) {
+                    weakTopicsMap[log.topic] = 0;
+                }
+                weakTopicsMap[log.topic]++;
+            }
+        });
+
+        const weakTopics = Object.entries(weakTopicsMap)
+            .sort((a, b) => b[1] - a[1])
+            .map(([topic, count]) => ({
+                topic,
+                mistakes: count
+            }));
+             
         // Group logs by topic
+       
         const groupedLogs = {};
         allLogs.forEach(log => {
             const topic = log.topic || 'General';
@@ -403,12 +354,13 @@ router.post('/ai-recap/logs', async (req, res) => {
         });
 
         console.log('✅ Topics found:', Object.keys(groupedLogs).length);
-
+        const topics = Object.keys(groupedLogs);
         res.json({
             success: true,
             logs: allLogs,
-            groupedLogs: groupedLogs,
-            topics: Object.keys(groupedLogs)
+            groupedLogs,
+            topics,
+            weakTopics
         });
 
     } catch (error) {
@@ -426,7 +378,7 @@ router.post('/ai-recap/logs', async (req, res) => {
 // Generate AI summary (topic-wise)
 router.post('/ai-recap/summary', async (req, res) => {
     try {
-        const { groupedLogs } = req.body;
+       const { groupedLogs, weakTopics } = req.body;
 
         console.log('🤖 Generating summary for topics:', Object.keys(groupedLogs || {}).length);
 
@@ -437,7 +389,7 @@ router.post('/ai-recap/summary', async (req, res) => {
             });
         }
 
-        const result = await aiService.generateTopicWiseSummary(groupedLogs);
+        const result =  await aiService.generateTopicWiseSummary(groupedLogs, weakTopics);
         
         console.log('✅ Summary generated successfully');
         

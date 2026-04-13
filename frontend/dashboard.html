@@ -591,26 +591,35 @@ async function loadWeakAreas() {
         const data = await response.json();
         
         if (data.success && data.weakAreas.length > 0) {
-            document.getElementById('weakList').innerHTML = data.weakAreas.map(area => `
-                <div class="weak-item">
-                    <div class="weak-icon">⚠️</div>
-                    <div class="weak-content">
-                        <div class="weak-topic">${area.topic}</div>
-                        <div class="weak-desc">Repeated ${area.count} times in your logs</div>
-                        <div class="weak-stats">
-                            <span>❌ ${area.count} attempts</span>
-                            <span>📊 ${area.difficulty}% difficulty</span>
-                        </div>
-                    </div>
-                    <button class="weak-action" onclick="practiceWeak('${area.topic}')">Practice</button>
+            document.getElementById('weakList').innerHTML = data.weakAreas.map(area => {
+    const shortMistakes = area.mistakes 
+        ? area.mistakes.split(' | ').slice(0,2).join(', ')
+        : '';
+                console.log("weak areas: ",data);
+    return `
+        <div class="weak-item">
+            <div class="weak-icon">⚠️</div>
+            <div class="weak-content">
+                <div class="weak-topic">${area.topic}</div>
+                <div class="weak-desc">
+                    ${shortMistakes || `Repeated ${area.count} times`}
                 </div>
-            `).join('');
+                <div class="weak-stats">
+                    <span>❌ ${area.count} attempts</span>
+                    <span>📊 ${area.difficulty}% difficulty</span>
+                </div>
+            </div>
+            <button class="weak-action" onclick="practiceWeak('${area.topic}')">Practice</button>
+        </div>
+    `;
+}).join('');
         } else {
             document.getElementById('weakList').innerHTML = '<div class="empty-state">Great! No struggling topics detected yet.</div>';
         }
     } catch (error) {
         console.error('Load weak areas error:', error);
     }
+    
 }
 
 // ========================================
