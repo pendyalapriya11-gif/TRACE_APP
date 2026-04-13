@@ -4,6 +4,18 @@ const auth = require('../middleware/auth');
 const db = require('../db');
 const aiService = require('../services/aiServiceDirect');
 
+
+const topicGraph = {
+  "Array": ["Two Pointers", "Sliding Window", "Prefix Sum"],
+  "String": ["Sliding Window", "Hash Table"],
+  "Dynamic Programming": ["Memoization", "Recursion"],
+  "Tree": ["Binary Tree", "Binary Search Tree"],
+  "Graph Theory": ["Depth-First Search", "Breadth-First Search"],
+  "Stack": ["Monotonic Stack"],
+  "Queue": ["Breadth-First Search"],
+};
+
+
 // ========================================
 // LEARNING LOG ROUTES
 // ========================================
@@ -37,69 +49,139 @@ router.post('/learning', auth, async (req, res) => {
 // ========================================
 
 // Create Coding Log
-router.post('/coding', auth, async (req, res) => {
+// Topic normalization
+function normalizeTopic(topic) {
+    return topic.trim().toLowerCase();
+}
+
+// Get or create normalized topic
+router.post('/topic/normalize', auth, async (req, res) => {
     try {
-        const { topics_covered, problems, challenges_mistakes, log_date } = req.body;
-        const userId = req.user.userId; 
-
-        // Insert main coding log
-        const [logResult] = await db.query(
-            'INSERT INTO coding_logs (user_id, topics_covered, challenges_mistakes, log_date) VALUES (?, ?, ?, ?)',
-            [userId, topics_covered, challenges_mistakes || '', log_date]
+        const { topicName } = req.body;
+        const userId = req.user.userId;
+        const normalized = normalizeTopic(topicName);
+        
+        const [existing] = await db.query(
+            'SELECT * FROM user_topics WHERE user_id = ? AND normalized_topic = ?',
+            [userId, normalized]
         );
-
-        const codingLogId = logResult.insertId;
-
-        // Insert problems
-        if (problems && problems.length > 0) {
-            for (let i = 0; i < problems.length; i++) {
-                const p = problems[i];
-                await db.query(
-                    'INSERT INTO coding_problems (coding_log_id, problem_number, problem_name, platform, difficulty, approach_solution) VALUES (?, ?, ?, ?, ?, ?)',
-                    [codingLogId, i + 1, p.problem_name, p.platform, p.difficulty, p.approach_solution || '']
-                );
-
-                // Save custom platform
-                const defaults = ['LeetCode', 'HackerRank', 'CodeChef', 'Codeforces', 'GFG'];
-                if (!defaults.includes(p.platform)) {
-                    await db.query(
-                        'INSERT IGNORE INTO custom_platforms (user_id, platform_name) VALUES (?, ?)',
-                        [userId, p.platform]
-                    );
-                }
-            }
+        
+        if (existing.length > 0) {
+            return res.json({
+                success: true,
+                exists: true,
+                existingTopic: existing[0].display_name,
+                normalized
+            });
         }
-
-        res.status(201).json({
-            success: true,
-            message: 'Coding log saved successfully'
-        });
+        
+        res.json({ success: true, exists: false, normalized });
     } catch (error) {
-        console.error('Save coding log error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to save log'
-        });
+        console.error('Normalize topic error:', error);
+        res.status(500).json({ success: false });
     }
 });
 
-// Get custom platforms
-router.get('/platforms', auth, async (req, res) => {
+// Save topic
+router.post('/topic/save', auth, async (req, res) => {
     try {
-        const userId = req.user.userId; 
+        const { topicName, normalized } = req.body;
+        const userId = req.user.userId;
         
-        const [platforms] = await db.query(
-            'SELECT platform_name FROM custom_platforms WHERE user_id = ?',
-            [userId]
+        await db.query(
+            'INSERT INTO user_topics (user_id, normalized_topic, display_name) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE display_name = ?',
+            [userId, normalized, topicName, topicName]
+        );
+        
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Save topic error:', error);
+        res.status(500).json({ success: false });
+    }
+});
+
+// Get questions by topic
+router.get('/questions/:topic', auth,async (req, res) => {
+    try {
+        const topic = req.params.topic;
+
+        // normalize
+        const normalized = normalizeTopic(topic);
+
+        // convert back to display format (first letter caps)
+        const mainTopic = topic
+            .toLowerCase()
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+
+        // get related topics
+        const related = topicGraph[mainTopic] || [];
+
+        const allTopics = [mainTopic, ...related];
+
+        // fetch questions
+        const [questions] = await db.query(
+            `SELECT * FROM question_bank 
+             WHERE LOWER(topic) IN (?) 
+             ORDER BY FIELD(difficulty, 'Easy', 'Medium', 'Hard'), question_name`,
+            [allTopics.map(t => t.toLowerCase())]
         );
 
         res.json({
             success: true,
-            platforms: platforms.map(p => p.platform_name)
+            mainTopic,
+            relatedTopics: related,
+            total: questions.length,
+            questions
         });
+
     } catch (error) {
-        console.error('Get platforms error:', error);
-        res.status(500).json({ success: false, platforms: [] });
+        console.error('Get questions error:', error);
+        res.status(500).json({ success: false, questions: [] });
+    }
+});
+
+// Save solved question
+router.post('/question/solve', auth, async (req, res) => {
+    try {
+        const { question_id, topic, approach_solution, mistakes_faced, solved_date } = req.body;
+        const userId = req.user.userId;
+
+        if (!mistakes_faced || mistakes_faced.trim() === '') {
+            return res.status(400).json({ success: false, message: 'Mistakes field is required' });
+        }
+
+        // ✅ Normalize topic
+        const normalized = normalizeTopic(topic);
+
+        // ✅ Check if topic exists
+        const [existing] = await db.query(
+            'SELECT * FROM user_topics WHERE user_id = ? AND normalized_topic = ?',
+            [userId, normalized]
+        );
+
+        // ✅ Insert if not exists
+        if (existing.length === 0) {
+            await db.query(
+                'INSERT INTO user_topics (user_id, normalized_topic, display_name) VALUES (?, ?, ?)',
+                [userId, normalized, topic]
+            );
+        }
+
+        // ✅ Save solved question
+        await db.query(
+            `INSERT INTO user_solved_questions 
+            (user_id, question_id, topic, approach_solution, mistakes_faced, solved_date) 
+            VALUES (?, ?, ?, ?, ?, ?)`,
+            [userId, question_id, topic, approach_solution || '', mistakes_faced, solved_date]
+        );
+
+        res.json({ success: true });
+
+    } catch (error) {
+        console.error('Save question error:', error);
+        res.status(500).json({ success: false, message: 'Failed to save' });
     }
 });
 
@@ -214,7 +296,7 @@ router.get('/dashboard/stats', auth, async (req, res) => {
 // Get Recent Activity
 router.get('/dashboard/activity', auth, async (req, res) => {
     try {
-        const userId = req.user.userId; // FIXED
+        const userId = req.user.userId; 
 
         // Get recent learning logs
         const [learningLogs] = await db.query(
@@ -246,7 +328,7 @@ router.get('/dashboard/activity', auth, async (req, res) => {
 // Get Weak Areas
 router.get('/dashboard/weak-areas', auth, async (req, res) => {
     try {
-        const userId = req.user.userId; // FIXED
+        const userId = req.user.userId; 
 
         // Get topics from learning logs
         const [topics] = await db.query(
@@ -273,10 +355,10 @@ router.get('/dashboard/weak-areas', auth, async (req, res) => {
 // ========================================
 
 // Get logs for AI recap (grouped by topic)
-router.post('/ai-recap/logs', auth, async (req, res) => {
+router.post('/ai-recap/logs', async (req, res) => {
     try {
         const { startDate, endDate } = req.body;
-        const userId = req.user.userId; // FIXED
+        const userId = 1;
 
         console.log('📊 AI Recap request:', { userId, startDate, endDate });
 
@@ -290,8 +372,20 @@ router.post('/ai-recap/logs', auth, async (req, res) => {
 
         // Get coding logs
         const [codingLogs] = await db.query(
-            'SELECT cl.topics_covered as topic, cl.challenges_mistakes, cl.log_date, "coding" as type, COUNT(cp.id) as problem_count FROM coding_logs cl LEFT JOIN coding_problems cp ON cl.id = cp.coding_log_id WHERE cl.user_id = ? AND cl.log_date BETWEEN ? AND ? GROUP BY cl.id ORDER BY cl.topics_covered, cl.log_date ASC',
-            [userId, startDate, endDate]
+        `SELECT 
+            usq.topic,
+            usq.mistakes_faced as challenges,
+            usq.solved_date as log_date,
+            "coding" as type,
+            qb.question_name,
+            qb.difficulty,
+            qb.platform
+        FROM user_solved_questions usq
+        JOIN question_bank qb ON usq.question_id = qb.id
+        WHERE usq.user_id = ? 
+        AND usq.solved_date BETWEEN ? AND ?
+        ORDER BY usq.topic, usq.solved_date ASC`,
+        [userId, startDate, endDate]
         );
 
         console.log('💻 Coding logs found:', codingLogs.length);
@@ -330,7 +424,7 @@ router.post('/ai-recap/logs', auth, async (req, res) => {
 });
 
 // Generate AI summary (topic-wise)
-router.post('/ai-recap/summary', auth, async (req, res) => {
+router.post('/ai-recap/summary', async (req, res) => {
     try {
         const { groupedLogs } = req.body;
 
@@ -359,7 +453,7 @@ router.post('/ai-recap/summary', auth, async (req, res) => {
 });
 
 // Generate comprehensive checklist
-router.post('/ai-recap/checklist', auth, async (req, res) => {
+router.post('/ai-recap/checklist', async (req, res) => {
     try {
         const { topics } = req.body;
 
@@ -389,7 +483,7 @@ router.post('/ai-recap/checklist', auth, async (req, res) => {
 });
 
 // Generate topic overview
-router.post('/ai-recap/overview', auth, async (req, res) => {
+router.post('/ai-recap/overview', async (req, res) => {
     try {
         const { topics } = req.body;
 
@@ -424,7 +518,7 @@ router.post('/ai-recap/overview', auth, async (req, res) => {
 // Get all data for analytics
 router.get('/analytics/data', auth, async (req, res) => {
     try {
-        const userId = req.user.userId; // FIXED
+        const userId = 1; // FIXED
 
         console.log('📊 Analytics data request for user:', userId);
 

@@ -1,34 +1,37 @@
 async function callGeminiAPI(prompt) {
     const API_KEY = process.env.GEMINI_API_KEY;
-    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${API_KEY}`;
-    
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{
-                        text: prompt
-                    }]
-                }]
-            })
-        });
-        
-        if (!response.ok) {
-            const error = await response.text();
-            throw new Error(`API Error: ${error}`);
+
+    const models = [
+        "gemini-2.5-flash",   // try best first
+        "gemini-2.0-flash",   // fallback
+        "gemini-flash-latest" // backup
+    ];
+
+    for (let model of models) {
+        try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${API_KEY}`;
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }]
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(await response.text());
+            }
+
+            const data = await response.json();
+            return data.candidates[0].content.parts[0].text;
+
+        } catch (error) {
+            console.log(`⚠️ Model ${model} failed, trying next...`);
         }
-        
-        const data = await response.json();
-        return data.candidates[0].content.parts[0].text;
-        
-    } catch (error) {
-        console.error("Gemini API Error:", error);
-        throw error;
     }
+
+    throw new Error("All Gemini models failed");
 }
 
 // Generate Topic-Wise Summary
@@ -41,7 +44,9 @@ async function generateTopicWiseSummary(groupedLogs) {
                 if (log.type === 'learning') {
                     return `  • ${log.log_date}: ${log.content}`;
                 } else {
-                    return `  • ${log.log_date}: Coding (${log.problem_count || 0} problems)`;
+                    return `  • ${log.log_date}: Solved problem (${log.question_name || ''}) [${log.platform || ''}, ${log.difficulty || ''}]. ${
+                        log.challenges ? `Mistakes: ${log.challenges}` : ''
+                    }`;
                 }
             }).join('\n');
             

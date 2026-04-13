@@ -437,12 +437,14 @@ async function generateRecap() {
         const logsResponse = await fetch(`${API_URL}/logs/ai-recap/logs`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({ startDate, endDate })
         });
         
+        if (!logsResponse.ok) {
+            throw new Error("Logs API failed");
+        }
         const logsData = await logsResponse.json();
         console.log("📊 Logs received:", logsData);
         
@@ -465,12 +467,13 @@ async function generateRecap() {
         const summaryResponse = await fetch(`${API_URL}/logs/ai-recap/summary`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({ groupedLogs })
         });
-        
+        if (!summaryResponse.ok) {
+            throw new Error("Logs API failed");
+        }
         const summaryData = await summaryResponse.json();
         console.log("✅ Summary received:", summaryData.success);
         
@@ -511,12 +514,14 @@ async function generateChecklistFromAPI(topics) {
         const response = await fetch(`${API_URL}/logs/ai-recap/checklist`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({ topics })
         });
         
+        if (!response.ok) {
+            throw new Error("Logs API failed");
+        }
         const data = await response.json();
         console.log("✅ Checklist received:", data);
         
@@ -600,12 +605,13 @@ async function generateOverview() {
         const response = await fetch(`${API_URL}/logs/ai-recap/overview`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({ topics: uncheckedTopics })
         });
-        
+        if (!response.ok) {
+            throw new Error("Logs API failed");
+        }
         const data = await response.json();
         console.log("✅ Overview received");
         

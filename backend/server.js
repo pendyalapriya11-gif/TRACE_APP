@@ -17,7 +17,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.use('/api/auth', authRoutes);
+//app.use('/api/auth', authRoutes);
 app.use('/api/logs', logRoutes);
 // Health check
 app.get('/api/health', (req, res) => {
@@ -42,7 +42,7 @@ app.listen(PORT, () => {
 
 console.log("DB_USER:", process.env.DB_USER);
 console.log("NODE_ENV:", process.env.NODE_ENV);
-
+console.log("GEMINI:", process.env.GEMINI_API_KEY);
 const path = require('path');
 
 app.use(express.static(path.join(__dirname, '../frontend')));
