@@ -396,11 +396,11 @@ body { background: var(--dark-charcoal); color: var(--beige); }
             <span class="nav-icon">💻</span>
             <span>Coding Log</span>
         </a>
-        <a href="#" class="nav-item" onclick="showComingSoon(); return false;">
+        <a href="ai-recaps.html" class="nav-item">
             <span class="nav-icon">🤖</span>
             <span>AI Recaps</span>
         </a>
-        <a href="#" class="nav-item" onclick="showComingSoon(); return false;">
+        <a href="analytics.html" class="nav-item">
             <span class="nav-icon">📈</span>
             <span>Analytics</span>
         </a>
@@ -508,115 +508,56 @@ body { background: var(--dark-charcoal); color: var(--beige); }
 </div>
 
 <script>
-// ========================================
-// UTILITY FUNCTIONS
-// ========================================
-
-function getDateString(daysAgo = 0) {
-    const date = new Date();
-    date.setDate(date.getDate() - daysAgo);
-    return date.toISOString().split('T')[0];
-}
-
-function hasLogOnDate(logs, dateString) {
-    return logs.some(log => log.date === dateString);
-}
+const API_URL = 'http://localhost:5000/api';
 
 // ========================================
-// STREAK CALCULATION
+// FETCH STATS FROM DATABASE
 // ========================================
 
-function calculateStreak(logs) {
-    if (logs.length === 0) return { current: 0, lastWeek: 0 };
-    
-    let currentStreak = 0;
-    let dayOffset = 0;
-    
-    while (true) {
-        const checkDate = getDateString(dayOffset);
-        if (hasLogOnDate(logs, checkDate)) {
-            currentStreak++;
-            dayOffset++;
-        } else {
-            break;
-        }
-    }
-    
-    let lastWeekStreak = 0;
-    dayOffset = 7;
-    
-    while (dayOffset < 14) {
-        const checkDate = getDateString(dayOffset);
-        if (hasLogOnDate(logs, checkDate)) {
-            lastWeekStreak++;
-            dayOffset++;
-        } else {
-            break;
-        }
-    }
-    
-    return { current: currentStreak, lastWeek: lastWeekStreak };
-}
+async function loadStats() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
 
-// ========================================
-// TOPICS CALCULATION
-// ========================================
-
-function calculateTopics(logs) {
-    if (logs.length === 0) return { current: 0, lastWeek: 0 };
-    
-    const today = new Date();
-    const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const fourteenDaysAgo = new Date(today.getTime() - 14 * 24 * 60 * 60 * 1000);
-    
-    const thisWeekTopics = new Set();
-    const lastWeekTopics = new Set();
-    
-    logs.forEach(log => {
-        const logDate = new Date(log.date);
+    try {
+        const response = await fetch(`${API_URL}/logs/dashboard/stats`, {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
         
-        if (logDate >= sevenDaysAgo) {
-            thisWeekTopics.add(log.topic);
-        } else if (logDate >= fourteenDaysAgo && logDate < sevenDaysAgo) {
-            lastWeekTopics.add(log.topic);
+        const data = await response.json();
+        
+        if (data.success) {
+            const { streak, topics, problems } = data.stats;
+            
+            // Update streak
+            document.getElementById('streakCount').textContent = streak.current;
+            displayTrend(document.getElementById('streakTrend'), streak.current, streak.lastWeek);
+            
+            // Update topics
+            document.getElementById('topicsCount').textContent = topics.current;
+            displayTrend(document.getElementById('topicsTrend'), topics.current, topics.lastWeek);
+            
+            // Update problems
+            document.getElementById('problemsCount').textContent = problems.current;
+            displayTrend(document.getElementById('problemsTrend'), problems.current, problems.lastWeek);
+            
+            // Animate progress bars
+            setTimeout(() => {
+                const streakPercent = Math.min((streak.current / 7) * 100, 100);
+                const topicsPercent = Math.min((topics.current / 10) * 100, 100);
+                const problemsPercent = Math.min((problems.current / 15) * 100, 100);
+                
+                document.getElementById('pb1').style.width = streakPercent + '%';
+                document.getElementById('pb2').style.width = topicsPercent + '%';
+                document.getElementById('pb3').style.width = problemsPercent + '%';
+            }, 500);
         }
-    });
-    
-    return {
-        current: thisWeekTopics.size,
-        lastWeek: lastWeekTopics.size
-    };
+    } catch (error) {
+        console.error('Load stats error:', error);
+    }
 }
 
 // ========================================
-// PROBLEMS CALCULATION
-// ========================================
-
-function calculateProblems(logs) {
-    if (logs.length === 0) return { current: 0, lastWeek: 0 };
-    
-    const today = new Date();
-    const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const fourteenDaysAgo = new Date(today.getTime() - 14 * 24 * 60 * 60 * 1000);
-    
-    const thisWeekProblems = logs.filter(log => {
-        const logDate = new Date(log.date);
-        return logDate >= sevenDaysAgo && log.type === 'coding';
-    }).length;
-    
-    const lastWeekProblems = logs.filter(log => {
-        const logDate = new Date(log.date);
-        return logDate >= fourteenDaysAgo && logDate < sevenDaysAgo && log.type === 'coding';
-    }).length;
-    
-    return {
-        current: thisWeekProblems,
-        lastWeek: lastWeekProblems
-    };
-}
-
-// ========================================
-// TREND DISPLAY
+// DISPLAY TREND INDICATOR
 // ========================================
 
 function displayTrend(element, current, previous) {
@@ -635,111 +576,83 @@ function displayTrend(element, current, previous) {
 }
 
 // ========================================
-// LOAD STATS
+// LOAD WEAK AREAS FROM DATABASE
 // ========================================
 
-function loadStats() {
-    const logs = JSON.parse(localStorage.getItem('learningLogs') || '[]');
-    
-    const streak = calculateStreak(logs);
-    document.getElementById('streakCount').textContent = streak.current;
-    displayTrend(document.getElementById('streakTrend'), streak.current, streak.lastWeek);
-    
-    const topics = calculateTopics(logs);
-    document.getElementById('topicsCount').textContent = topics.current;
-    displayTrend(document.getElementById('topicsTrend'), topics.current, topics.lastWeek);
-    
-    const problems = calculateProblems(logs);
-    document.getElementById('problemsCount').textContent = problems.current;
-    displayTrend(document.getElementById('problemsTrend'), problems.current, problems.lastWeek);
-    
-    setTimeout(() => {
-        const streakPercent = Math.min((streak.current / 7) * 100, 100);
-        const topicsPercent = Math.min((topics.current / 10) * 100, 100);
-        const problemsPercent = Math.min((problems.current / 15) * 100, 100);
+async function loadWeakAreas() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+        const response = await fetch(`${API_URL}/logs/dashboard/weak-areas`, {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
         
-        document.getElementById('pb1').style.width = streakPercent + '%';
-        document.getElementById('pb2').style.width = topicsPercent + '%';
-        document.getElementById('pb3').style.width = problemsPercent + '%';
-    }, 500);
-}
-
-// ========================================
-// WEAK AREAS
-// ========================================
-
-function loadWeakAreas() {
-    const logs = JSON.parse(localStorage.getItem('learningLogs') || '[]');
-    
-    if (logs.length === 0) {
-        document.getElementById('weakList').innerHTML = '<div class="empty-state">No weak areas detected yet. Keep logging your learning!</div>';
-        return;
-    }
-    
-    const topicCount = {};
-    logs.forEach(log => {
-        const topic = log.topic || 'Unknown Topic';
-        topicCount[topic] = (topicCount[topic] || 0) + 1;
-    });
-    
-    const weakTopics = Object.entries(topicCount)
-        .filter(([topic, count]) => count >= 3)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5);
-    
-    if (weakTopics.length === 0) {
-        document.getElementById('weakList').innerHTML = '<div class="empty-state">Great! No struggling topics detected yet.</div>';
-        return;
-    }
-    
-    document.getElementById('weakList').innerHTML = weakTopics.map(([topic, count]) => `
-        <div class="weak-item">
-            <div class="weak-icon">⚠️</div>
-            <div class="weak-content">
-                <div class="weak-topic">${topic}</div>
-                <div class="weak-desc">Repeated ${count} times in your logs</div>
-                <div class="weak-stats">
-                    <span>❌ ${count} attempts</span>
-                    <span>📊 ${Math.min(count * 20, 100)}% difficulty</span>
-                </div>
-            </div>
-            <button class="weak-action" onclick="practiceWeak('${topic}')">Practice</button>
-        </div>
-    `).join('');
-}
-
-// ========================================
-// ACTIVITY
-// ========================================
-
-function loadActivity() {
-    const logs = JSON.parse(localStorage.getItem('learningLogs') || '[]');
-    
-    if (logs.length === 0) {
-        document.getElementById('activityList').innerHTML = '<div class="empty-state">No recent activity. Start logging your learning!</div>';
-        return;
-    }
-    
-    const recent = logs.slice(-5).reverse();
-    
-    document.getElementById('activityList').innerHTML = recent.map(log => {
-        const iconClass = log.type === 'coding' ? 'coding' : 'learning';
-        const icon = log.type === 'coding' ? '💻' : '📝';
+        const data = await response.json();
         
-        return `
-            <div class="activity-item">
-                <div class="activity-icon ${iconClass}">${icon}</div>
-                <div class="activity-content">
-                    <div class="activity-title">${log.topic || 'Learning Activity'}</div>
-                    <div class="activity-desc">${log.notes || 'No description'}</div>
-                    <div class="activity-time">
-                        🕐 ${log.date || 'Recently'}
-                        <span class="activity-badge">${log.type === 'coding' ? 'Coding' : 'Learning'}</span>
+        if (data.success && data.weakAreas.length > 0) {
+            document.getElementById('weakList').innerHTML = data.weakAreas.map(area => `
+                <div class="weak-item">
+                    <div class="weak-icon">⚠️</div>
+                    <div class="weak-content">
+                        <div class="weak-topic">${area.topic}</div>
+                        <div class="weak-desc">Repeated ${area.count} times in your logs</div>
+                        <div class="weak-stats">
+                            <span>❌ ${area.count} attempts</span>
+                            <span>📊 ${area.difficulty}% difficulty</span>
+                        </div>
                     </div>
+                    <button class="weak-action" onclick="practiceWeak('${area.topic}')">Practice</button>
                 </div>
-            </div>
-        `;
-    }).join('');
+            `).join('');
+        } else {
+            document.getElementById('weakList').innerHTML = '<div class="empty-state">Great! No struggling topics detected yet.</div>';
+        }
+    } catch (error) {
+        console.error('Load weak areas error:', error);
+    }
+}
+
+// ========================================
+// LOAD ACTIVITY FROM DATABASE
+// ========================================
+
+async function loadActivity() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+        const response = await fetch(`${API_URL}/logs/dashboard/activity`, {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.activity.length > 0) {
+            document.getElementById('activityList').innerHTML = data.activity.map(log => {
+                const iconClass = log.type === 'coding' ? 'coding' : 'learning';
+                const icon = log.type === 'coding' ? '💻' : '📝';
+                
+                return `
+                    <div class="activity-item">
+                        <div class="activity-icon ${iconClass}">${icon}</div>
+                        <div class="activity-content">
+                            <div class="activity-title">${log.topic || 'Learning Activity'}</div>
+                            <div class="activity-desc">${(log.notes || 'No description').substring(0, 100)}...</div>
+                            <div class="activity-time">
+                                🕐 ${log.date || 'Recently'}
+                                <span class="activity-badge">${log.type === 'coding' ? 'Coding' : 'Learning'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            document.getElementById('activityList').innerHTML = '<div class="empty-state">No recent activity. Start logging your learning!</div>';
+        }
+    } catch (error) {
+        console.error('Load activity error:', error);
+    }
 }
 
 // ========================================
@@ -794,41 +707,16 @@ function checkAuth() {
 }
 
 // ========================================
-// SAMPLE DATA (FOR TESTING)
-// ========================================
-
-function addSampleLogs() {
-    const samples = [
-        {topic: 'JavaScript', notes: 'Learned ES6 features', date: getDateString(0), type: 'learning'},
-        {topic: 'React', notes: 'Built a todo app', date: getDateString(0), type: 'coding'},
-        {topic: 'JavaScript', notes: 'Async/await practice', date: getDateString(1), type: 'learning'},
-        {topic: 'CSS', notes: 'Flexbox layouts', date: getDateString(2), type: 'learning'},
-        {topic: 'Async JavaScript', notes: 'Struggled with promises', date: getDateString(3), type: 'learning'},
-        {topic: 'Async JavaScript', notes: 'Still confused', date: getDateString(4), type: 'learning'},
-        {topic: 'Async JavaScript', notes: 'Making errors', date: getDateString(5), type: 'learning'},
-        {topic: 'Python', notes: 'Basics', date: getDateString(8), type: 'learning'},
-        {topic: 'Python', notes: 'Functions', date: getDateString(9), type: 'coding'}
-    ];
-    
-    localStorage.setItem('learningLogs', JSON.stringify(samples));
-    alert('✅ Sample data added! Refresh to see stats.');
-    location.reload();
-}
-
-// ========================================
-// INITIALIZE
+// INITIALIZE - LOAD DATA FROM DATABASE
 // ========================================
 
 window.onload = () => {
     checkAuth();
     loadUserData();
-    loadStats();
-    loadWeakAreas();
-    loadActivity();
+    loadStats();        // ← Fetch from database
+    loadWeakAreas();    // ← Fetch from database
+    loadActivity();     // ← Fetch from database
 };
-
-// FOR TESTING: Uncomment to add sample data
-// setTimeout(() => addSampleLogs(), 1000);
 </script>
 
 </body>

@@ -1,5 +1,4 @@
-
-require('dotenv').config({ path: __dirname + '/.env' });
+require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 console.log("ENV CHECK:", process.env.DB_USER, process.env.NODE_ENV);
 
 const express = require('express');

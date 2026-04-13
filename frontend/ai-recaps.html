@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRACE - AI Recaps</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+    --charcoal: #2a2a2a;
+    --dark-charcoal: #1a1a1a;
+    --beige: #f5f1e8;
+    --teal: #5a9f9f;
+    --border: rgba(90, 159, 159, 0.15);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh; }
+
+/* Sidebar */
+.sidebar {
+    position: fixed; left: 0; top: 0; width: 260px; height: 100vh;
+    background: var(--charcoal); border-right: 1px solid var(--border);
+    padding: 25px 15px; display: flex; flex-direction: column;
+}
+
+.logo-section {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 35px;
+    padding: 15px; background: var(--beige); border-radius: 10px;
+}
+
+.logo-small {
+    width: 45px; height: 45px; border-radius: 8px;
+    background: var(--charcoal); color: var(--beige);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 20px;
+}
+
+.logo-text { font-size: 24px; font-weight: 800; color: var(--charcoal); }
+
+.nav-menu { flex: 1; }
+
+.nav-item {
+    padding: 14px 16px; margin-bottom: 8px; border-radius: 8px;
+    cursor: pointer; display: flex; align-items: center; gap: 14px;
+    font-size: 14px; font-weight: 500; color: rgba(245, 241, 232, 0.7);
+    text-decoration: none; transition: all 0.2s;
+}
+
+.nav-item:hover { background: rgba(245, 241, 232, 0.1); color: var(--beige); }
+.nav-item.active { background: var(--beige); color: var(--charcoal); font-weight: 600; }
+.nav-icon { font-size: 20px; }
+
+.user-section {
+    padding: 15px; background: rgba(245, 241, 232, 0.05);
+    border-radius: 10px; display: flex; align-items: center; gap: 12px;
+    border: 1px solid var(--border);
+}
+
+.user-avatar {
+    width: 42px; height: 42px; border-radius: 8px;
+    background: var(--teal); color: var(--beige);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 18px;
+}
+
+.user-info { flex: 1; }
+.user-name { font-size: 14px; font-weight: 600; color: var(--beige); }
+.user-email { font-size: 11px; color: rgba(245, 241, 232, 0.5); }
+
+.logout-btn {
+    background: rgba(90, 159, 159, 0.15); border: none;
+    color: var(--teal); cursor: pointer; width: 36px; height: 36px;
+    border-radius: 8px; font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s; position: relative; overflow: hidden;
+}
+
+.logout-btn:hover { background: var(--teal); color: var(--beige); }
+
+/* Main Content */
+.main-content { margin-left: 260px; padding: 30px; }
+
+.page-header {
+    background: var(--charcoal); padding: 30px; border-radius: 12px;
+    margin-bottom: 30px; border: 1px solid var(--border);
+}
+
+.page-title {
+    font-size: 28px; font-weight: 800; color: var(--beige); margin-bottom: 8px;
+}
+
+.page-subtitle { font-size: 14px; color: rgba(245, 241, 232, 0.7); }
+
+/* Date Selector */
+.date-selector {
+    background: var(--charcoal); padding: 30px; border-radius: 12px;
+    margin-bottom: 30px; border: 1px solid var(--border);
+}
+
+.date-inputs {
+    display: flex; gap: 20px; align-items: flex-end; margin-bottom: 20px;
+}
+
+.date-group {
+    flex: 1;
+}
+
+.date-label {
+    display: block; font-size: 13px; font-weight: 600;
+    color: var(--beige); margin-bottom: 8px;
+}
+
+.date-input {
+    width: 100%; padding: 12px 14px; border-radius: 8px;
+    border: 1px solid var(--border); background: rgba(245, 241, 232, 0.05);
+    color: var(--beige); font-size: 14px; transition: all 0.3s;
+}
+
+.date-input:hover {
+    border-color: var(--beige);
+    box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1);
+}
+
+.date-input:focus {
+    outline: none; border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(90, 159, 159, 0.15);
+}
+
+.generate-btn {
+    padding: 12px 30px; border-radius: 8px; font-size: 14px;
+    font-weight: 600; cursor: pointer; background: var(--teal);
+    color: var(--beige); border: none; transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.generate-btn:hover {
+    background: #4a8f8f; transform: translateY(-2px);
+}
+
+.generate-btn:disabled {
+    opacity: 0.5; cursor: not-allowed; transform: none;
+}
+
+/* Results */
+.results-container {
+    display: none;
+}
+
+.results-container.show {
+    display: block;
+}
+
+.result-section {
+    background: var(--charcoal); padding: 30px; border-radius: 12px;
+    margin-bottom: 25px; border: 1px solid var(--border);
+}
+
+.section-title {
+    font-size: 20px; font-weight: 700; color: var(--beige);
+    margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+}
+
+.summary-text {
+    line-height: 1.8; color: rgba(245, 241, 232, 0.9);
+    font-size: 14px;
+}
+
+.summary-text strong {
+    color: var(--beige); font-weight: 700;
+}
+
+/* Checklist */
+.checklist-container {
+    display: flex; flex-direction: column; gap: 25px;
+}
+
+.topic-group {
+    background: rgba(245, 241, 232, 0.03); padding: 20px;
+    border-radius: 10px; border: 1px solid var(--border);
+}
+
+.topic-name {
+    font-size: 16px; font-weight: 700; color: var(--teal);
+    margin-bottom: 15px;
+}
+
+.subtopics-list {
+    display: flex; flex-direction: column; gap: 12px;
+}
+
+.subtopic-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px; border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.subtopic-item:hover {
+    background: rgba(245, 241, 232, 0.05);
+}
+
+.subtopic-checkbox {
+    width: 20px; height: 20px; cursor: pointer;
+    accent-color: var(--teal);
+}
+
+.subtopic-label {
+    font-size: 14px; color: var(--beige); cursor: pointer;
+}
+
+.subtopic-item.checked .subtopic-label {
+    text-decoration: line-through;
+    color: rgba(245, 241, 232, 0.5);
+}
+
+.generate-overview-btn {
+    margin-top: 25px; padding: 12px 30px; border-radius: 8px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    background: rgba(90, 159, 159, 0.15); color: var(--teal);
+    border: 1px solid var(--teal); transition: all 0.2s;
+}
+
+.generate-overview-btn:hover {
+    background: var(--teal); color: var(--beige);
+}
+
+.generate-overview-btn:disabled {
+    opacity: 0.5; cursor: not-allowed;
+}
+
+/* Overview */
+.overview-content {
+    line-height: 1.8; color: rgba(245, 241, 232, 0.9);
+    font-size: 14px;
+}
+
+.overview-content strong {
+    color: var(--teal); font-weight: 700;
+}
+
+/* Loading */
+.loading {
+    text-align: center; padding: 40px; color: rgba(245, 241, 232, 0.7);
+}
+
+.loading-spinner {
+    font-size: 32px; margin-bottom: 15px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Alert */
+.alert {
+    padding: 13px 18px; border-radius: 8px; margin-bottom: 20px;
+    font-size: 13px; display: none;
+}
+
+.alert.show { display: block; }
+.alert-error {
+    background: rgba(255, 68, 68, 0.2); color: #ff4444;
+    border: 1px solid #ff4444;
+}
+.alert-success {
+    background: rgba(90, 159, 159, 0.2); color: var(--teal);
+    border: 1px solid var(--teal);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .sidebar { width: 70px; padding: 20px 10px; }
+    .logo-text, .nav-item span, .user-info { display: none; }
+    .main-content { margin-left: 70px; padding: 20px; }
+    .date-inputs { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="logo-section">
+        <div class="logo">
+        <img src="logo.png" alt="TRACE Logo" class="logo-small">
+        </div>
+        <div class="logo-text">TRACE</div>
+    </div>
+    
+    <nav class="nav-menu">
+        <a href="dashboard.html" class="nav-item">
+            <span class="nav-icon">📊</span>
+            <span>Dashboard</span>
+        </a>
+        <a href="learning-log.html" class="nav-item">
+            <span class="nav-icon">📝</span>
+            <span>Learning Log</span>
+        </a>
+        <a href="coding-log.html" class="nav-item">
+            <span class="nav-icon">💻</span>
+            <span>Coding Log</span>
+        </a>
+        <a href="ai-recaps.html" class="nav-item active">
+            <span class="nav-icon">🤖</span>
+            <span>AI Recaps</span>
+        </a>
+        <a href="analytics.html" class="nav-item" >
+            <span class="nav-icon">📈</span>
+            <span>Analytics</span>
+        </a>
+    </nav>
+    
+    <div class="user-section">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <div class="user-info">
+            <div class="user-name" id="userName">User</div>
+            <div class="user-email" id="userEmail">user@example.com</div>
+        </div>
+        <button class="logout-btn" onclick="handleLogout()" title="Logout">🚪</button>
+    </div>
+</div>
+
+<!-- Main -->
+<div class="main-content">
+    
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-title">🤖 AI Recaps</div>
+        <div class="page-subtitle">Get AI-powered insights from your learning logs</div>
+    </div>
+    
+    <!-- Date Selector -->
+    <div class="date-selector">
+        <div id="alert" class="alert"></div>
+        
+        <div class="date-inputs">
+            <div class="date-group">
+                <label class="date-label">📅 Start Date</label>
+                <input type="date" id="startDate" class="date-input">
+            </div>
+            <div class="date-group">
+                <label class="date-label">📅 End Date</label>
+                <input type="date" id="endDate" class="date-input">
+            </div>
+            <button class="generate-btn" id="generateBtn" onclick="generateRecap()">
+                ✨ Generate AI Recap
+            </button>
+        </div>
+    </div>
+    
+    <!-- Results -->
+    <div class="results-container" id="resultsContainer">
+        
+        <!-- Summary -->
+        <div class="result-section" id="summarySection" style="display:none;">
+            <div class="section-title">
+                <span>📋</span>
+                <span>Learning Summary</span>
+            </div>
+            <div class="summary-text" id="summaryText"></div>
+        </div>
+        
+        <!-- Checklist -->
+        <div class="result-section" id="checklistSection" style="display:none;">
+            <div class="section-title">
+                <span>✅</span>
+                <span>Topic Checklist</span>
+            </div>
+            <div class="checklist-container" id="checklistContainer"></div>
+            <button class="generate-overview-btn" id="overviewBtn" onclick="generateOverview()">
+                📚 Generate Overview for Unchecked Topics
+            </button>
+        </div>
+        
+        <!-- Overview -->
+        <div class="result-section" id="overviewSection" style="display:none;">
+            <div class="section-title">
+                <span>📖</span>
+                <span>Topics to Learn</span>
+            </div>
+            <div class="overview-content" id="overviewContent"></div>
+        </div>
+        
+    </div>
+    
+</div>
+
+<script>
+const API_URL = 'http://localhost:5000/api';
+let allLogs = [];
+let groupedLogs = {};
+let checklist = [];
+
+function showAlert(message, type) {
+    const alert = document.getElementById('alert');
+    alert.textContent = message;
+    alert.className = `alert alert-${type} show`;
+    setTimeout(() => alert.classList.remove('show'), 5000);
+}
+
+function setDefaultDates() {
+    const today = new Date();
+    const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    
+    document.getElementById('endDate').value = today.toISOString().split('T')[0];
+    document.getElementById('startDate').value = sevenDaysAgo.toISOString().split('T')[0];
+}
+
+async function generateRecap() {
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const generateBtn = document.getElementById('generateBtn');
+    const token = localStorage.getItem('token');
+    
+    if (!startDate || !endDate) {
+        showAlert('Please select both start and end dates', 'error');
+        return;
+    }
+    
+    if (new Date(startDate) > new Date(endDate)) {
+        showAlert('Start date must be before end date', 'error');
+        return;
+    }
+    
+    generateBtn.disabled = true;
+    generateBtn.textContent = '⏳ Generating...';
+    
+    document.getElementById('resultsContainer').classList.add('show');
+    document.getElementById('summarySection').style.display = 'block';
+    document.getElementById('summaryText').innerHTML = '<div class="loading"><div class="loading-spinner">🤖</div><div>AI is analyzing your logs...</div></div>';
+    
+    try {
+        // Fetch logs (grouped by topic)
+        console.log("📡 Fetching logs...");
+        const logsResponse = await fetch(`${API_URL}/logs/ai-recap/logs`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ startDate, endDate })
+        });
+        
+        const logsData = await logsResponse.json();
+        console.log("📊 Logs received:", logsData);
+        
+        if (!logsData.success || logsData.logs.length === 0) {
+            showAlert('No logs found for this period', 'error');
+            document.getElementById('summaryText').textContent = 'No learning logs found for the selected period. Start logging your learning!';
+            generateBtn.disabled = false;
+            generateBtn.textContent = '✨ Generate AI Recap';
+            return;
+        }
+        
+        allLogs = logsData.logs;
+        groupedLogs = logsData.groupedLogs;
+        const topics = logsData.topics;
+        
+        console.log("📚 Topics found:", topics);
+        
+        // Generate topic-wise summary
+        console.log("🤖 Generating summary...");
+        const summaryResponse = await fetch(`${API_URL}/logs/ai-recap/summary`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ groupedLogs })
+        });
+        
+        const summaryData = await summaryResponse.json();
+        console.log("✅ Summary received:", summaryData.success);
+        
+        if (summaryData.success) {
+            document.getElementById('summaryText').innerHTML = 
+                summaryData.summary
+                    .replace(/\n/g, '<br>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        } else {
+            document.getElementById('summaryText').textContent = 
+                summaryData.summary || "Failed to generate summary";
+        }
+        
+        // Generate comprehensive checklist
+        if (topics.length > 0) {
+            await generateChecklistFromAPI(topics);
+        }
+        
+    } catch (error) {
+        console.error('❌ Generate recap error:', error);
+        showAlert('Failed to generate recap. Check console for details.', 'error');
+    } finally {
+        generateBtn.disabled = false;
+        generateBtn.textContent = '✨ Generate AI Recap';
+    }
+}
+
+async function generateChecklistFromAPI(topics) {
+    const token = localStorage.getItem('token');
+    
+    document.getElementById('checklistSection').style.display = 'block';
+    document.getElementById('checklistContainer').innerHTML = 
+        '<div class="loading"><div class="loading-spinner">🤖</div><div>Generating comprehensive checklist...</div></div>';
+    
+    try {
+        console.log("🤖 Generating checklist for topics:", topics);
+        
+        const response = await fetch(`${API_URL}/logs/ai-recap/checklist`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ topics })
+        });
+        
+        const data = await response.json();
+        console.log("✅ Checklist received:", data);
+        
+        if (data.success && data.checklist.length > 0) {
+            checklist = data.checklist;
+            renderChecklist();
+        } else {
+            document.getElementById('checklistContainer').textContent = 'Could not generate checklist.';
+        }
+        
+    } catch (error) {
+        console.error('❌ Checklist error:', error);
+        document.getElementById('checklistContainer').textContent = 'Failed to generate checklist.';
+    }
+}
+
+function renderChecklist() {
+    const container = document.getElementById('checklistContainer');
+    
+    container.innerHTML = checklist.map((topic, topicIdx) => `
+        <div class="topic-group">
+            <div class="topic-name">${topic.mainTopic}</div>
+            <div class="subtopics-list">
+                ${topic.subtopics.map((subtopic, subIdx) => `
+                    <div class="subtopic-item" id="subtopic_${topicIdx}_${subIdx}">
+                        <input type="checkbox" class="subtopic-checkbox" 
+                               id="check_${topicIdx}_${subIdx}"
+                               onchange="toggleSubtopic(${topicIdx}, ${subIdx})">
+                        <label class="subtopic-label" for="check_${topicIdx}_${subIdx}">
+                            ${subtopic}
+                        </label>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `).join('');
+}
+
+function toggleSubtopic(topicIdx, subIdx) {
+    const item = document.getElementById(`subtopic_${topicIdx}_${subIdx}`);
+    const checkbox = document.getElementById(`check_${topicIdx}_${subIdx}`);
+    
+    if (checkbox.checked) {
+        item.classList.add('checked');
+    } else {
+        item.classList.remove('checked');
+    }
+}
+
+async function generateOverview() {
+    const token = localStorage.getItem('token');
+    const overviewBtn = document.getElementById('overviewBtn');
+    
+    // Get unchecked topics
+    const uncheckedTopics = [];
+    
+    checklist.forEach((topic, topicIdx) => {
+        topic.subtopics.forEach((subtopic, subIdx) => {
+            const checkbox = document.getElementById(`check_${topicIdx}_${subIdx}`);
+            if (!checkbox.checked) {
+                uncheckedTopics.push(subtopic);
+            }
+        });
+    });
+    
+    if (uncheckedTopics.length === 0) {
+        showAlert('✅ All topics completed! Great job!', 'success');
+        return;
+    }
+    
+    overviewBtn.disabled = true;
+    overviewBtn.textContent = '⏳ Generating overview...';
+    
+    document.getElementById('overviewSection').style.display = 'block';
+    document.getElementById('overviewContent').innerHTML = 
+        '<div class="loading"><div class="loading-spinner">🤖</div><div>AI is creating topic overviews...</div></div>';
+    
+    try {
+        console.log("🤖 Generating overview for unchecked topics:", uncheckedTopics.length);
+        
+        const response = await fetch(`${API_URL}/logs/ai-recap/overview`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ topics: uncheckedTopics })
+        });
+        
+        const data = await response.json();
+        console.log("✅ Overview received");
+        
+        if (data.success) {
+            document.getElementById('overviewContent').innerHTML = 
+                data.overview
+                    .replace(/\n/g, '<br>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        } else {
+            document.getElementById('overviewContent').textContent = 
+                data.overview || 'Failed to generate overview.';
+        }
+        
+    } catch (error) {
+        console.error('❌ Overview error:', error);
+        document.getElementById('overviewContent').textContent = 'Failed to generate overview.';
+    } finally {
+        overviewBtn.disabled = false;
+        overviewBtn.textContent = '📚 Generate Overview for Unchecked Topics';
+    }
+}
+
+function loadUserData() {
+    const u = JSON.parse(localStorage.getItem('user') || '{}');
+    if (u.name) {
+        document.getElementById('userName').textContent = u.name;
+        document.getElementById('userAvatar').textContent = u.name.charAt(0).toUpperCase();
+    }
+    if (u.email) document.getElementById('userEmail').textContent = u.email;
+}
+
+function handleLogout() {
+    if (confirm('👋 Logout?')) {
+        localStorage.clear();
+        window.location.href = 'index.html';
+    }
+}
+
+function showComingSoon() {
+    alert('🚀 Coming soon!');
+}
+
+function checkAuth() {
+    if (!localStorage.getItem('token')) {
+        window.location.href = 'index.html';
+    }
+}
+
+window.onload = () => {
+    checkAuth();
+    loadUserData();
+    setDefaultDates();
+    console.log("✅ AI Recaps page loaded");
+};
+</script>
+
+</body>
+</html>
