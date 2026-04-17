@@ -17,7 +17,6 @@
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh; }
 
-/* Sidebar */
 .sidebar {
     position: fixed; left: 0; top: 0; width: 260px; height: 100vh;
     background: var(--charcoal); border-right: 1px solid var(--border);
@@ -37,7 +36,6 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
 }
 
 .logo-text { font-size: 24px; font-weight: 800; color: var(--charcoal); }
-
 .nav-menu { flex: 1; }
 
 .nav-item {
@@ -73,19 +71,11 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
     color: var(--teal); cursor: pointer; width: 36px; height: 36px;
     border-radius: 8px; font-size: 18px;
     display: flex; align-items: center; justify-content: center;
-    transition: all 0.3s; position: relative; overflow: hidden;
+    transition: all 0.3s;
 }
 
-.logout-btn:hover { background: var(--teal); color: var(--beige); transform: scale(1.05); }
-.logout-btn::before {
-    content: '👋'; position: absolute; font-size: 18px;
-    opacity: 0; transform: translateY(10px); transition: all 0.3s;
-}
-.logout-btn:hover::before { opacity: 1; transform: translateY(0); }
-.logout-btn:hover .logout-icon { opacity: 0; transform: translateY(-10px); }
-.logout-icon { transition: all 0.3s; }
+.logout-btn:hover { background: var(--teal); color: var(--beige); }
 
-/* Main Content */
 .main-content { margin-left: 260px; padding: 30px; }
 
 .page-header {
@@ -99,57 +89,38 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
 
 .page-subtitle { font-size: 14px; color: rgba(245, 241, 232, 0.7); }
 
-/* Form Container */
 .form-container {
     background: var(--charcoal); padding: 35px; border-radius: 12px;
     border: 1px solid var(--border); max-width: 1100px;
 }
 
-/* Top Controls */
-.top-controls {
-    display: flex; justify-content: space-between; align-items: center;
+.date-section {
     margin-bottom: 30px; padding-bottom: 20px;
     border-bottom: 1px solid var(--border);
 }
 
-.date-group {
-    flex: 1; max-width: 300px;
+.form-label {
+    display: block; font-size: 12px; font-weight: 600;
+    color: var(--beige); margin-bottom: 6px;
 }
 
-.voice-control {
-    display: flex; align-items: center; gap: 10px;
+.form-input {
+    width: 100%; max-width: 300px; padding: 12px 14px; border-radius: 8px;
+    border: 1px solid var(--border); background: rgba(245, 241, 232, 0.05);
+    color: var(--beige); font-size: 14px; transition: all 0.3s;
 }
 
-.voice-status {
-    font-size: 12px; color: rgba(245, 241, 232, 0.6);
-}
-
-.global-voice-btn {
-    background: rgba(245, 241, 232, 0.1); border: 1px solid var(--border);
-    color: var(--beige); cursor: pointer; width: 50px; height: 50px;
-    border-radius: 10px; font-size: 22px;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s;
-}
-
-.global-voice-btn:hover {
-    background: rgba(245, 241, 232, 0.15);
+.form-input:hover {
     border-color: var(--beige);
     box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1);
 }
 
-.global-voice-btn.recording {
-    background: #ff4444; color: #fff; border-color: #ff4444;
-    animation: pulse 1s infinite;
+.form-input:focus {
+    outline: none; border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(90, 159, 159, 0.15);
 }
 
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-}
-
-/* Topics Section */
-.topics-section {
+.topic-section {
     margin-bottom: 35px; padding-bottom: 30px;
     border-bottom: 1px solid var(--border);
 }
@@ -159,87 +130,72 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
     margin-bottom: 15px;
 }
 
-.topics-input-group {
-    display: flex; gap: 12px; align-items: flex-start;
+.topic-input-group {
+    display: flex; gap: 12px; align-items: flex-end;
 }
 
-.topics-input-wrapper {
-    flex: 1;
-}
+.topic-input-wrapper { flex: 1; max-width: 400px; }
 
-.topics-input {
+.topic-input {
     width: 100%; padding: 12px 14px; border-radius: 8px;
     border: 1px solid var(--border); background: rgba(245, 241, 232, 0.05);
-    color: var(--beige); font-size: 14px; font-family: 'Inter', sans-serif;
-    transition: all 0.3s;
+    color: var(--beige); font-size: 14px; transition: all 0.3s;
 }
 
-.topics-input::placeholder { color: rgba(245, 241, 232, 0.4); }
-
-.topics-input:hover {
+.topic-input:hover {
     border-color: var(--beige);
     box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1);
 }
 
-.topics-input:focus {
+.topic-input:focus {
     outline: none; border-color: var(--teal);
-    background: rgba(245, 241, 232, 0.08);
     box-shadow: 0 0 0 3px rgba(90, 159, 159, 0.15);
 }
 
-.add-topic-btn {
+.select-topic-btn {
     padding: 12px 24px; border-radius: 8px; font-size: 14px;
     font-weight: 600; cursor: pointer; transition: all 0.2s;
     border: none; background: var(--teal); color: var(--beige);
-    white-space: nowrap;
 }
 
-.add-topic-btn:hover {
+.select-topic-btn:hover {
     background: #4a8f8f; transform: translateY(-2px);
 }
 
-.topics-list {
-    margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px;
+.selected-topic-display {
+    margin-top: 20px; padding: 15px; background: rgba(90, 159, 159, 0.15);
+    border-radius: 8px; border: 1px solid var(--teal); display: none;
 }
 
-.topic-tag {
-    background: rgba(245, 241, 232, 0.1); padding: 8px 14px;
-    border-radius: 8px; font-size: 13px; color: var(--beige);
-    border: 1px solid var(--border); display: inline-flex;
-    align-items: center; gap: 8px;
-}
+.selected-topic-display.show { display: block; }
 
-.topic-tag-remove {
-    background: none; border: none; color: var(--teal);
-    cursor: pointer; font-size: 16px; line-height: 1;
-    padding: 0; margin: 0;
-}
-
-.topic-tag-remove:hover { color: #ff4444; }
-
-/* Coding Practice Section */
-.coding-section {
-    margin-bottom: 35px; padding-bottom: 30px;
-    border-bottom: 1px solid var(--border);
-}
-
-.section-header-with-btn {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 20px;
-}
-
-.section-title {
-    font-size: 16px; font-weight: 700; color: var(--beige);
+.selected-topic-name {
+    font-size: 16px; font-weight: 700; color: var(--teal);
     display: flex; align-items: center; gap: 10px;
 }
 
-.problems-count {
-    font-size: 13px; color: rgba(245, 241, 232, 0.6);
-    font-weight: 500;
+.change-topic-btn {
+    background: rgba(245, 241, 232, 0.1); border: 1px solid var(--border);
+    color: var(--beige); cursor: pointer; padding: 6px 14px;
+    border-radius: 6px; font-size: 12px; font-weight: 600;
+    transition: all 0.2s; margin-left: auto;
+}
+
+.change-topic-btn:hover {
+    background: rgba(245, 241, 232, 0.15);
+    border-color: var(--beige);
+}
+
+.problems-section {
+    margin-bottom: 35px;
+}
+
+.add-problem-btn-container {
+    text-align: center; margin-bottom: 25px;
 }
 
 .add-problem-btn {
-    padding: 10px 20px; border-radius: 8px; font-size: 13px;
+    padding: 12px 30px; border-radius: 8px; font-size: 14px;
     font-weight: 600; cursor: pointer; transition: all 0.2s;
     border: 1px solid var(--teal); background: rgba(90, 159, 159, 0.1);
     color: var(--teal);
@@ -249,12 +205,8 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
     background: var(--teal); color: var(--beige);
 }
 
-.add-problem-btn:disabled {
-    opacity: 0.5; cursor: not-allowed;
-}
-
 .problems-container {
-    display: flex; flex-direction: column; gap: 20px;
+    display: flex; flex-direction: column; gap: 30px;
 }
 
 .problem-card {
@@ -265,7 +217,8 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
 
 .problem-card-header {
     display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 20px; padding-bottom: 15px;
+    border-bottom: 1px solid var(--border);
 }
 
 .problem-number {
@@ -284,97 +237,88 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
     background: #ff4444; color: var(--beige);
 }
 
-.problem-fields {
-    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;
-    margin-bottom: 15px;
-}
+.form-group { margin-bottom: 20px; }
 
-.form-group {
-    margin-bottom: 0;
-}
-
-.form-label {
-    display: block; font-size: 12px; font-weight: 600;
-    color: var(--beige); margin-bottom: 6px;
-}
-
-.form-input, .form-select, .form-textarea {
-    width: 100%; padding: 10px 12px; border-radius: 6px;
+.form-input-full, .form-select, .form-textarea {
+    width: 100%; padding: 12px 14px; border-radius: 8px;
     border: 1px solid var(--border); background: rgba(245, 241, 232, 0.05);
-    color: var(--beige); font-size: 13px; font-family: 'Inter', sans-serif;
-    transition: all 0.3s;
+    color: var(--beige); font-size: 14px; transition: all 0.3s;
 }
 
-.form-input::placeholder, .form-textarea::placeholder {
-    color: rgba(245, 241, 232, 0.4);
-}
-
-/* HOVER EFFECT - BEIGE SHADOW */
-.form-input:hover, .form-select:hover, .form-textarea:hover {
+.form-input-full:hover, .form-select:hover, .form-textarea:hover {
     border-color: var(--beige);
     box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1);
 }
 
-.form-input:focus, .form-select:focus, .form-textarea:focus {
+.form-input-full:focus, .form-select:focus, .form-textarea:focus {
     outline: none; border-color: var(--teal);
-    background: rgba(245, 241, 232, 0.08);
     box-shadow: 0 0 0 3px rgba(90, 159, 159, 0.15);
 }
 
-/* VISIBLE DROPDOWN - LIGHT BACKGROUND */
-.form-select {
-    cursor: pointer; appearance: none;
-    background-color: rgba(245, 241, 232, 0.1);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23f5f1e8' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    padding-right: 35px;
+.form-input-full:disabled {
+    opacity: 0.6; cursor: not-allowed;
+    background: rgba(245, 241, 232, 0.02);
 }
 
-.form-select option {
-    background: var(--charcoal);
-    color: var(--beige);
-    padding: 10px;
+.form-select {
+    cursor: pointer; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23f5f1e8' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 40px;
+    background-color: #2a2a2a;
+    color: #f5f1e8;
 }
 
 .form-textarea {
     min-height: 100px; resize: vertical;
 }
 
-.empty-state {
-    text-align: center; padding: 50px 20px;
-    color: rgba(245, 241, 232, 0.5);
+.suggestions-section {
+    margin-top: 25px; padding-top: 25px;
+    border-top: 1px solid var(--border);
 }
 
-.empty-state-icon {
-    font-size: 48px; margin-bottom: 15px;
+.suggestions-header {
+    font-size: 14px; font-weight: 600; color: var(--teal);
+    margin-bottom: 15px; display: flex; align-items: center; gap: 8px;
 }
 
-.empty-state-text {
-    font-size: 14px; margin-bottom: 10px;
+.suggestions-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
 }
 
-/* Challenges Section */
-.challenges-section {
-    margin-bottom: 35px;
+.suggestion-card {
+    background: rgba(90, 159, 159, 0.05); padding: 12px;
+    border-radius: 8px; border: 1px solid rgba(90, 159, 159, 0.2);
+    cursor: pointer; transition: all 0.2s;
 }
 
-.challenges-header {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 15px;
+.suggestion-card:hover {
+    background: rgba(90, 159, 159, 0.15);
+    border-color: var(--teal);
+    transform: translateY(-2px);
 }
 
-.challenges-icon {
-    font-size: 20px;
+.suggestion-name {
+    font-size: 13px; font-weight: 600; color: var(--beige);
+    margin-bottom: 6px;
 }
 
-.challenges-title {
-    font-size: 16px; font-weight: 700; color: var(--beige);
+.suggestion-meta {
+    display: flex; gap: 8px; flex-wrap: wrap;
 }
 
-.challenges-subtitle {
-    font-size: 12px; color: rgba(245, 241, 232, 0.6);
+.suggestion-badge {
+    padding: 3px 8px; border-radius: 4px; font-size: 10px;
+    font-weight: 600;
 }
+
+.badge-easy { background: rgba(78, 201, 148, 0.2); color: #4ec994; }
+.badge-medium { background: rgba(240, 168, 50, 0.2); color: #f0a832; }
+.badge-hard { background: rgba(224, 92, 92, 0.2); color: #e05c5c; }
+.badge-platform { background: rgba(245, 241, 232, 0.1); color: rgba(245, 241, 232, 0.7); }
 
 .hint-text {
     font-size: 11px; color: rgba(245, 241, 232, 0.5);
@@ -383,7 +327,6 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
     border-radius: 6px; border-left: 3px solid var(--teal);
 }
 
-/* Action Buttons */
 .action-buttons {
     display: flex; gap: 15px; padding-top: 25px;
     border-top: 1px solid var(--border);
@@ -391,8 +334,7 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
 
 .btn {
     padding: 13px 30px; border-radius: 8px; font-size: 14px;
-    font-weight: 600; cursor: pointer; transition: all 0.2s;
-    border: none;
+    font-weight: 600; cursor: pointer; transition: all 0.2s; border: none;
 }
 
 .btn-primary {
@@ -401,7 +343,6 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
 
 .btn-primary:hover {
     background: #4a8f8f; transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(90, 159, 159, 0.3);
 }
 
 .btn-primary:disabled {
@@ -416,53 +357,56 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
 .btn-secondary:hover {
     background: rgba(245, 241, 232, 0.15);
     border-color: var(--beige);
-    box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1);
 }
 
-/* Alert */
 .alert {
     padding: 13px 18px; border-radius: 8px; margin-bottom: 20px;
     font-size: 13px; display: none; align-items: center; gap: 10px;
 }
 
 .alert.show { display: flex; }
-.alert-success {
-    background: rgba(90, 159, 159, 0.2); color: var(--teal);
-    border: 1px solid var(--teal);
-}
-.alert-error {
-    background: rgba(255, 68, 68, 0.2); color: #ff4444;
-    border: 1px solid #ff4444;
+.alert-success { background: rgba(90, 159, 159, 0.2); color: var(--teal); border: 1px solid var(--teal); }
+.alert-error { background: rgba(255, 68, 68, 0.2); color: #ff4444; border: 1px solid #ff4444; }
+
+.modal-overlay {
+    position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8);
+    display: none; align-items: center; justify-content: center; z-index: 1000;
 }
 
-/* Custom Platform Input */
-.custom-platform-input {
-    display: none; margin-top: 8px;
+.modal-overlay.show { display: flex; }
+
+.modal {
+    background: var(--charcoal); border: 1px solid var(--border);
+    border-radius: 12px; padding: 30px; max-width: 500px; width: 90%;
 }
 
-.custom-platform-input.show {
-    display: block;
+.modal-title {
+    font-size: 18px; font-weight: 700; color: var(--beige);
+    margin-bottom: 15px;
 }
 
-/* Responsive */
+.modal-text {
+    font-size: 14px; color: rgba(245, 241, 232, 0.8);
+    margin-bottom: 20px;
+}
+
+.modal-actions {
+    display: flex; gap: 12px; justify-content: flex-end;
+}
+
 @media (max-width: 1024px) {
     .sidebar { width: 70px; padding: 20px 10px; }
     .logo-text, .nav-item span, .user-info { display: none; }
     .main-content { margin-left: 70px; padding: 20px; }
-    .problem-fields { grid-template-columns: 1fr; }
-    .topics-input-group { flex-direction: column; }
-    .top-controls { flex-direction: column; align-items: flex-start; gap: 15px; }
+    .suggestions-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 <body>
 
-<!-- Sidebar -->
 <div class="sidebar">
     <div class="logo-section">
-        <div class="logo">
-        <img src="logo.png" alt="TRACE Logo" class="logo-small">
-        </div>
+        <div class="logo-small">TR</div>
         <div class="logo-text">TRACE</div>
     </div>
     
@@ -479,13 +423,17 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
             <span class="nav-icon">💻</span>
             <span>Coding Log</span>
         </a>
-        <a href="ai-recaps.html" class="nav-item active">
+        <a href="ai-recaps.html" class="nav-item">
             <span class="nav-icon">🤖</span>
             <span>AI Recaps</span>
         </a>
-        <a href="analytics.html" class="nav-item active">
+        <a href="analytics.html" class="nav-item">
             <span class="nav-icon">📈</span>
             <span>Analytics</span>
+        </a>
+        <a href="manage-logs.html" class="nav-item">
+            <span class="nav-icon">🔍</span>
+            <span>Manage Logs</span>
         </a>
     </nav>
     
@@ -495,107 +443,65 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
             <div class="user-name" id="userName">User</div>
             <div class="user-email" id="userEmail">user@example.com</div>
         </div>
-        <button class="logout-btn" onclick="handleLogout()" title="Logout">
-            <span class="logout-icon">🚪</span>
-        </button>
+        <button class="logout-btn" onclick="handleLogout()" title="Logout">🚪</button>
     </div>
 </div>
 
-<!-- Main -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <div class="modal-title" id="modalTitle">Confirm</div>
+        <div class="modal-text" id="modalText">Message</div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary" id="modalConfirmBtn">Confirm</button>
+        </div>
+    </div>
+</div>
+
 <div class="main-content">
     
-    <!-- Page Header -->
     <div class="page-header">
         <div class="page-title">💻 Coding Log</div>
-        <div class="page-subtitle">Track your coding practice and problem-solving journey</div>
+        <div class="page-subtitle">Log your coding problems and get relevant suggestions</div>
     </div>
     
-    <!-- Form -->
     <div class="form-container">
         
         <div id="alert" class="alert"></div>
-        
+        <div style="display:flex; justify-content:flex-end; margin-bottom:15px; align-items:center; gap:10px;">
+            <span id="voiceStatus" style="font-size:12px; color:rgba(245,241,232,0.6);">
+                Click a field and speak
+            </span>
+            <button type="button" id="globalVoiceBtn" class="btn btn-secondary">
+                🎤
+            </button>
+        </div>
         <form id="codingForm" onsubmit="saveCodingLog(event)">
             
-            <!-- Top Controls: Date + Voice Button -->
-            <div class="top-controls">
-                <div class="date-group">
-                    <label class="form-label">📅 Date</label>
-                    <input type="date" id="log_date" class="form-input" required>
-                </div>
-                <div class="voice-control">
-                    <div class="voice-status" id="voiceStatus">Click to speak</div>
-                    <button type="button" class="global-voice-btn" id="globalVoiceBtn"
-                            onclick="toggleVoiceInput()" title="Voice input (click then select field)">
-                        🎤
-                    </button>
-                </div>
+            <div class="date-section">
+                <label class="form-label">📅 Date</label>
+                <input type="date" id="log_date" class="form-input" required>
             </div>
             
-            <!-- Topics Covered Section -->
-            <div class="topics-section">
-                <div class="section-header">Topics Covered</div>
-                <div class="topics-input-group">
-                    <div class="topics-input-wrapper">
-                        <input type="text" id="topicInput" class="topics-input" 
-                               placeholder="Add a topic... (e.g., Arrays, Dynamic Programming)"
-                               onfocus="setActiveField('topicInput')">
-                    </div>
-                    <button type="button" class="add-topic-btn" onclick="addTopic()">
-                        Add
-                    </button>
-                </div>
-                <div class="topics-list" id="topicsList"></div>
-            </div>
             
-            <!-- Coding Practice Section -->
-            <div class="coding-section">
-                <div class="section-header-with-btn">
-                    <div>
-                        <div class="section-title">
-                            <span>💻</span>
-                            <span>Coding Practice</span>
-                        </div>
-                        <div class="problems-count" id="problemsCount">Problems solved today</div>
-                    </div>
-                    <button type="button" class="add-problem-btn" id="addProblemBtn" onclick="addProblem()">
+            <div class="problems-section" id="problemsSection">
+                <div class="section-header">💻 Step 1: Add Problems</div>
+                
+                <div class="add-problem-btn-container">
+                    <button type="button" class="add-problem-btn" onclick="addProblem()">
                         + Add Problem
                     </button>
                 </div>
                 
-                <div class="problems-container" id="problemsContainer">
-                    <div class="empty-state">
-                        <div class="empty-state-icon">💻</div>
-                        <div class="empty-state-text">No problems added yet</div>
-                        <div style="font-size: 12px; margin-top: 5px;">Click "+ Add Problem" to start logging</div>
-                    </div>
-                </div>
+                <div class="problems-container" id="problemsContainer"></div>
             </div>
             
-            <!-- Challenges & Mistakes Section -->
-            <div class="challenges-section">
-                <div class="challenges-header">
-                    <span class="challenges-icon">⚠️</span>
-                    <div>
-                        <div class="challenges-title">Challenges & Mistakes</div>
-                        <div class="challenges-subtitle">What difficulties did you face?</div>
-                    </div>
-                </div>
-                <textarea id="challenges" class="form-textarea" 
-                          placeholder="Write about any challenges, mistakes, or areas where you struggled today..."
-                          onfocus="setActiveField('challenges')"></textarea>
-                <div class="hint-text">
-                    💡 <strong>Tip:</strong> Recording mistakes helps identify patterns. The AI will use this to suggest revision points.
-                </div>
-            </div>
-            
-            <!-- Action Buttons -->
-            <div class="action-buttons">
+            <div class="action-buttons" id="actionButtons" style="display:none;">
                 <button type="submit" class="btn btn-primary" id="saveBtn">
                     💾 Save Log
                 </button>
                 <button type="button" class="btn btn-secondary" onclick="resetForm()">
-                    ↺ Clear Form
+                    ↺ Reset
                 </button>
             </div>
             
@@ -607,190 +513,134 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
 
 <script>
 const API_URL = 'http://localhost:5000/api';
+const token = localStorage.getItem('token');
 
-// State
-let topics = [];
+
+let suggestions = [];
 let problems = [];
 let problemCounter = 0;
-const MAX_PROBLEMS = 10;
 
-// Voice Recognition
-let activeField = null;
-let recognition = null;
-let isRecording = false;
-
-if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = true;
-    recognition.lang = 'en-US';
-    
-    recognition.onresult = (event) => {
-    const result = event.results[event.resultIndex];
-
-    // ❗ Only process FINAL result
-    if (!result.isFinal) return;
-
-    const transcript = result[0].transcript.trim();
-
-    const fieldId = activeField || document.activeElement?.id;
-    if (!fieldId) return;
-
-    const field = document.getElementById(fieldId);
-    if (!field) return;
-
-    field.value += (field.value ? ' ' : '') + transcript;
-    };
-    
-    recognition.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
-        showAlert('Voice input error: ' + event.error, 'error');
-        stopVoiceInput();
-    };
-    
-    recognition.onend = () => {
-    if (isRecording) {
-        try {
-            recognition.start();
-        } catch (e) {}
-    } else {
-        stopVoiceInput();
-    }
-    };
+async function init() {
+    checkAuth();
+    loadUserData();
+    setTodayDate();
 }
 
-// Voice Functions
-function setActiveField(fieldId) {
-    activeField = fieldId;
-    updateVoiceStatus();
+function normalizeTopic(topic) {
+    if (!topic) return '';
+
+    // Step 1: lowercase + trim
+    let t = topic.toLowerCase().trim();
+
+    // Step 2: replace symbols with space
+    t = t.replace(/[^a-z0-9]/g, ' ');
+
+    // Step 3: remove extra spaces
+    t = t.replace(/\s+/g, ' ').trim();
+
+    // Step 4: split into words
+    const words = t.split(' ');
+
+    // Step 5: normalize each word
+    const keywordMap = {
+        'dp': 'dynamic programming',
+        'dynamic': 'dynamic programming',
+        'programming': 'dynamic programming',
+
+        'array': 'array',
+        'arrays': 'array',
+
+        'hash': 'hashing',
+        'hashing': 'hashing',
+
+        'graph': 'graph',
+        'graphs': 'graph',
+        'bfs': 'graph',
+        'dfs': 'graph',
+
+        'tree': 'tree',
+        'trees': 'tree',
+        'binary': 'tree',
+
+        'linked': 'linked list',
+        'list': 'linked list',
+
+        'two': 'two pointers',
+        'pointer': 'two pointers',
+        'pointers': 'two pointers',
+
+        'sliding': 'sliding window',
+        'window': 'sliding window',
+
+        'recursion': 'recursion',
+        'backtracking': 'backtracking',
+        'greedy': 'greedy',
+
+        'heap': 'heap',
+        'priority': 'heap',
+        'queue': 'queue',
+        'stack': 'stack',
+
+        'search': 'binary search'
+    };
+
+    let resultSet = new Set();
+
+    for (let word of words) {
+        if (keywordMap[word]) {
+            resultSet.add(keywordMap[word]);
+        }
+    }
+
+    // Step 6: return best match
+    if (resultSet.size > 0) {
+        return Array.from(resultSet)[0];
+    }
+
+    // fallback
+    return t;
 }
 
-function toggleVoiceInput() {
-    if (!recognition) {
-        showAlert('Voice input not supported in your browser. Please use Chrome or Edge.', 'error');
-        return;
-    }
-    
-    if (!activeField) {
-        showAlert('Please click on a field first, then click the microphone', 'error');
-        return;
-    }
-    
-    if (isRecording) {
-        stopVoiceInput();
-    } else {
-        startVoiceInput();
-    }
-}
 
-function startVoiceInput() {
-    activeField = document.activeElement?.id;
-    if (!activeField) {
-        showAlert('Click inside a field first', 'error');
-        return;
-    }
-    const btn = document.getElementById('globalVoiceBtn');
-    const status = document.getElementById('voiceStatus');
-    
-    btn.classList.add('recording');
-    status.textContent = 'Listening...';
-    isRecording = true;
-    
+async function loadSuggestions(normalized) {
     try {
-        recognition.start();
+        const response = await fetch(`${API_URL}/logs/questions/${encodeURIComponent(normalized)}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            suggestions = data.questions;
+        }
     } catch (error) {
-        console.error('Recognition start error:', error);
-        stopVoiceInput();
+        console.error('Load suggestions error:', error);
     }
 }
 
-function stopVoiceInput() {
-    const btn = document.getElementById('globalVoiceBtn');
-    const status = document.getElementById('voiceStatus');
-    
-    if (recognition) {
-        try {
-            recognition.stop();
-        } catch (error) {}
-    }
-    
-    btn.classList.remove('recording');
-    status.textContent = 'Click to speak';
-    isRecording = false;
-}
-
-function updateVoiceStatus() {
-    const status = document.getElementById('voiceStatus');
-    if (activeField) {
-        status.textContent = `Ready for: ${activeField}`;
-    }
-}
-
-// Topics Functions
-function addTopic() {
-    const input = document.getElementById('topicInput');
-    const topic = input.value.trim();
-    
-    if (!topic) {
-        showAlert('Please enter a topic', 'error');
-        return;
-    }
-    
-    if (topics.includes(topic)) {
-        showAlert('Topic already added', 'error');
-        return;
-    }
-    
-    topics.push(topic);
-    input.value = '';
-    renderTopics();
-}
-
-function removeTopic(topic) {
-    topics = topics.filter(t => t !== topic);
-    renderTopics();
-}
-
-function renderTopics() {
-    const container = document.getElementById('topicsList');
-    
-    if (topics.length === 0) {
-        container.innerHTML = '';
-        return;
-    }
-    
-    container.innerHTML = topics.map(topic => `
-        <div class="topic-tag">
-            <span>${topic}</span>
-            <button type="button" class="topic-tag-remove" onclick="removeTopic('${topic.replace(/'/g, "\\'")}')">
-                ×
-            </button>
-        </div>
-    `).join('');
-}
-
-// Problem Functions
-function addProblem() {
-    if (problems.length >= MAX_PROBLEMS) {
-        showAlert(`Maximum ${MAX_PROBLEMS} problems allowed per log`, 'error');
-        return;
-    }
-    
+    function addProblem() {
     problemCounter++;
+
     const problem = {
         id: problemCounter,
+        question_id: null,
         number: problems.length + 1,
+        topic: '', // now user enters
         problem_name: '',
         platform: 'LeetCode',
         difficulty: 'Easy',
-        approach_solution: ''
+        approach_solution: '',
+        logic_steps: '',
+        mistakes_faced: '',
+        suggestions: [] // per problem
     };
-    
+
     problems.push(problem);
     renderProblems();
-    updateAddButton();
+
+    document.getElementById('actionButtons').style.display = 'flex';
 }
+
 
 function deleteProblem(id) {
     problems = problems.filter(p => p.id !== id);
@@ -798,122 +648,164 @@ function deleteProblem(id) {
         p.number = index + 1;
     });
     renderProblems();
-    updateAddButton();
-}
-
-function updateAddButton() {
-    const btn = document.getElementById('addProblemBtn');
-    btn.disabled = problems.length >= MAX_PROBLEMS;
-    
-    const count = document.getElementById('problemsCount');
-    count.textContent = `${problems.length} problem${problems.length !== 1 ? 's' : ''} added`;
-}
-
-async function loadCustomPlatforms() {
-    const token = localStorage.getItem('token');
-    if (!token) return [];
-    
-    try {
-        const response = await fetch(`${API_URL}/logs/platforms`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await response.json();
-        return data.success ? data.platforms : [];
-    } catch (error) {
-        console.error('Load platforms error:', error);
-        return [];
-    }
-}
-
-async function renderProblems() {
-    const container = document.getElementById('problemsContainer');
     
     if (problems.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">💻</div>
-                <div class="empty-state-text">No problems added yet</div>
-                <div style="font-size: 12px; margin-top: 5px;">Click "+ Add Problem" to start logging</div>
-            </div>
-        `;
+        document.getElementById('actionButtons').style.display = 'none';
+    }
+}
+
+function renderProblems() {
+    const container = document.getElementById('problemsContainer');
+
+    if (problems.length === 0) {
+        container.innerHTML = '';
         return;
     }
-    
-    const customPlatforms = await loadCustomPlatforms();
-    const allPlatforms = ['LeetCode', 'HackerRank', 'CodeChef', 'Codeforces', 'GFG', ...customPlatforms, 'Custom'];
-    
+
     container.innerHTML = problems.map(problem => `
         <div class="problem-card" data-id="${problem.id}">
+            
             <div class="problem-card-header">
                 <div class="problem-number">Problem #${problem.number}</div>
                 <button type="button" class="delete-problem-btn" onclick="deleteProblem(${problem.id})">
                     🗑️
                 </button>
             </div>
-            
-            <div class="problem-fields">
-                <div class="form-group">
-                    <label class="form-label">Problem Name</label>
-                    <input type="text" class="form-input" 
-                           id="problem_name_${problem.id}"
-                           placeholder="e.g., Two Sum"
-                           value="${problem.problem_name}"
-                           onfocus="setActiveField('problem_name_${problem.id}')"
-                           onchange="updateProblem(${problem.id}, 'problem_name', this.value)">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Platform</label>
-                    <select class="form-select" 
-                            id="platform_${problem.id}"
-                            onchange="handlePlatformChange(${problem.id}, this.value)">
-                        ${allPlatforms.map(p => `
-                            <option value="${p}" ${problem.platform === p ? 'selected' : ''}>${p}</option>
-                        `).join('')}
-                    </select>
-                    <input type="text" class="form-input custom-platform-input" 
-                           id="custom_platform_${problem.id}"
-                           placeholder="Enter platform name"
-                           onfocus="setActiveField('custom_platform_${problem.id}')">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Difficulty</label>
-                    <select class="form-select" 
-                            id="difficulty_${problem.id}"
-                            onchange="updateProblem(${problem.id}, 'difficulty', this.value)">
-                        <option value="Easy" ${problem.difficulty === 'Easy' ? 'selected' : ''}>Easy</option>
-                        <option value="Medium" ${problem.difficulty === 'Medium' ? 'selected' : ''}>Medium</option>
-                        <option value="Hard" ${problem.difficulty === 'Hard' ? 'selected' : ''}>Hard</option>
-                    </select>
-                </div>
-            </div>
-            
+
             <div class="form-group">
-                <label class="form-label">Approach / Solution</label>
-                <textarea class="form-textarea" 
-                          id="approach_${problem.id}"
-                          placeholder="Describe your approach or solution..."
-                          onfocus="setActiveField('approach_${problem.id}')"
-                          onchange="updateProblem(${problem.id}, 'approach_solution', this.value)">${problem.approach_solution}</textarea>
+                <label class="form-label">Topic Name *</label>
+                <input type="text" class="form-input-full" 
+                       id="topic_${problem.id}"
+                       placeholder="Enter topic (e.g., Arrays, DP...)"
+                       value="${problem.topic}"
+                       onchange="updateTopic(${problem.id}, this.value)">
             </div>
+
+            <div class="form-group">
+                <label class="form-label">Problem Name *</label>
+                <input type="text" class="form-input-full"
+                       id="name_${problem.id}"
+                       value="${problem.problem_name}"
+                       onchange="updateProblem(${problem.id}, 'problem_name', this.value)">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Platform</label>
+                <select class="form-select"
+                    onchange="updateProblem(${problem.id}, 'platform', this.value)">
+                <option value="LeetCode" ${problem.platform === 'LeetCode' ? 'selected' : ''}>LeetCode</option>
+                <option value="HackerRank" ${problem.platform === 'HackerRank' ? 'selected' : ''}>HackerRank</option>
+                <option value="CodeChef" ${problem.platform === 'CodeChef' ? 'selected' : ''}>CodeChef</option>
+                <option value="Codeforces" ${problem.platform === 'Codeforces' ? 'selected' : ''}>Codeforces</option>
+                <option value="GFG" ${problem.platform === 'GFG' ? 'selected' : ''}>GFG</option>
+            </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Difficulty</label>
+                <select class="form-select"
+                    onchange="updateProblem(${problem.id}, 'difficulty', this.value)">
+                <option value="Easy" ${problem.difficulty === 'Easy' ? 'selected' : ''}>Easy</option>
+                <option value="Medium" ${problem.difficulty === 'Medium' ? 'selected' : ''}>Medium</option>
+                <option value="Hard" ${problem.difficulty === 'Hard' ? 'selected' : ''}>Hard</option>
+            </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Approach (Idea) *</label>
+                <textarea class="form-textarea"
+                        placeholder="What strategy did you use? (e.g., hashmap, sliding window...)"
+                        oninput="updateProblem(${problem.id}, 'approach_solution', this.value)">${problem.approach_solution || ''}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Logic (Steps) *</label>
+                <textarea class="form-textarea"
+                        placeholder="Write step-by-step logic (not full code)..."
+                        oninput="updateProblem(${problem.id}, 'logic_steps', this.value)">${problem.logic_steps || ''}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Mistakes *</label>
+                <textarea class="form-textarea"
+          oninput="updateProblem(${problem.id}, 'mistakes_faced', this.value)">${problem.mistakes_faced || ''}</textarea>
+            </div>
+
+            ${renderSuggestions(problem)}
+
         </div>
     `).join('');
 }
 
-function handlePlatformChange(id, value) {
-    const customInput = document.getElementById(`custom_platform_${id}`);
-    
-    if (value === 'Custom') {
-        customInput.classList.add('show');
-        customInput.focus();
-        customInput.onchange = () => {
-            updateProblem(id, 'platform', customInput.value);
-        };
-    } else {
-        customInput.classList.remove('show');
-        updateProblem(id, 'platform', value);
+function renderSuggestions(problem) {
+    if (!problem.suggestions || problem.suggestions.length === 0) {
+        return `<div class="suggestions-section">
+            <div style="text-align:center;color:rgba(245,241,232,0.5);">
+                Enter topic to get suggestions
+            </div>
+        </div>`;
     }
+
+    return `
+        <div class="suggestions-section">
+            <div class="suggestions-header">
+                💡 Suggested Problems
+            </div>
+            <div class="suggestions-grid">
+                ${problem.suggestions.map(q => `
+                    <div class="suggestion-card" onclick="handleSuggestionClick(${q.id}, '${problem.topic}', \`${q.question_url}\`, ${problem.id})">
+                        <div class="suggestion-name">${q.question_name}</div>
+                        <div class="suggestion-meta">
+                            <span class="suggestion-badge badge-${q.difficulty.toLowerCase()}">${q.difficulty}</span>
+                            <span class="suggestion-badge badge-platform">${q.platform}</span>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
+async function handleSuggestionClick(questionId, topic, url, problemId) {
+    const problem = problems.find(p => p.id === problemId);
+    if (problem) {
+        problem.question_id = questionId;
+    }
+
+    try {
+        await fetch(`${API_URL}/logs/suggestion/click`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                question_id: questionId,
+                topic: topic
+            })
+        });
+    } catch (err) {
+        console.error('Tracking failed:', err);
+    }
+
+    if (url && url !== 'null') {
+        window.open(url, '_blank');
+    }
+}
+
+function applySuggestion(problemId, questionId, name, platform, difficulty) {
+    const problem = problems.find(p => p.id === problemId);
+    if (!problem) return;
+    
+    problem.problem_name = name;
+    problem.platform = platform;
+    problem.difficulty = difficulty;
+    problem.question_id = questionId;
+    
+    document.getElementById(`name_${problemId}`).value = name;
+    document.getElementById(`platform_${problemId}`).value = platform;
+    document.getElementById(`difficulty_${problemId}`).value = difficulty;
+    
+    showAlert('✅ Suggestion applied! You can edit if needed', 'success');
 }
 
 function updateProblem(id, field, value) {
@@ -923,92 +815,84 @@ function updateProblem(id, field, value) {
     }
 }
 
-// Save Function
 async function saveCodingLog(event) {
     event.preventDefault();
     
-    const saveBtn = document.getElementById('saveBtn');
-    const token = localStorage.getItem('token');
-    
-    if (!token) {
-        alert('Please login first');
-        window.location.href = 'index.html';
+    if (problems.length === 0) {
+        showAlert('Please add at least one problem', 'error');
         return;
     }
     
-    if (topics.length === 0) {
-        alert('Please add at least one topic');
-        return;
-    }
-    
-    // Collect problems
-    const validProblems = [];
-    for (let problem of problems) {
-        const name = document.getElementById(`problem_name_${problem.id}`).value.trim();
-        const platform = document.getElementById(`platform_${problem.id}`).value;
-        const customPlatform = document.getElementById(`custom_platform_${problem.id}`);
-        const difficulty = document.getElementById(`difficulty_${problem.id}`).value;
-        const approach = document.getElementById(`approach_${problem.id}`).value.trim();
-        
-        if (!name) {
-            alert(`Problem #${problem.number}: Please enter problem name`);
+    // Validate all problems
+    for (const problem of problems) {
+        if (!problem.problem_name || problem.problem_name.trim() === '') {
+            showAlert(`Problem #${problem.number}: Problem name is required`, 'error');
             return;
         }
-        
-        let finalPlatform = platform;
-        if (platform === 'Custom') {
-            finalPlatform = customPlatform.value.trim();
-            if (!finalPlatform) {
-                alert(`Problem #${problem.number}: Please enter platform name`);
-                return;
-            }
+        if (!problem.topic || problem.topic.trim() === '') {
+            showAlert(`Problem #${problem.number}: Topic is required`, 'error');
+            return;
         }
-        
-        validProblems.push({
-            problem_name: name,
-            platform: finalPlatform,
-            difficulty: difficulty,
-            approach_solution: approach
-        });
+        if (!problem.mistakes_faced || problem.mistakes_faced.trim() === '') {
+            showAlert(`Problem #${problem.number}: Mistakes field is required`, 'error');
+            return;
+        }
+        if (!problem.logic_steps || problem.logic_steps.trim() === '') {
+            showAlert(`Problem #${problem.number}: Logic field is required`, 'error');
+            return;
+        }
     }
     
-    const data = {
-        topics_covered: topics.join(', '),
-        problems: validProblems,
-        challenges_mistakes: document.getElementById('challenges').value.trim(),
-        log_date: document.getElementById('log_date').value
-    };
-    
-    saveBtn.disabled = true;
-    saveBtn.textContent = '💾 Saving...';
-    
+    const saveBtn = document.getElementById('saveBtn');
+    saveBtn.disabled = false;
+    saveBtn.textContent = '💾 Save Log';
     try {
-        const response = await fetch('http://localhost:5000/api/logs/coding', {
+    for (const problem of problems) {
+        const response = await fetch(`${API_URL}/logs/question/solve`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
+                'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify({
+                question_id: problem.question_id || null,
+
+                problem_name: problem.problem_name,
+                difficulty: problem.difficulty,
+                platform: problem.platform,
+                topic_name: problem.topic,
+
+                approach_solution: problem.approach_solution,
+                logic_steps: problem.logic_steps,
+                mistakes_faced: problem.mistakes_faced,
+
+                solved_date: document.getElementById('log_date').value
+            })
         });
-        
+
         const result = await response.json();
-        
-        if (result.success) {
-            alert('✅ Coding log saved!');
-            window.location.href = 'dashboard.html';
-        } else {
-            alert('❌ ' + result.message);
+
+        if (!result.success) {
+            console.error("Backend error:", result);
+            throw new Error(result.message || JSON.stringify(result));
         }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('❌ Cannot connect to server');
-    } finally {
-        saveBtn.disabled = false;
-        saveBtn.textContent = '💾 Save Log';
     }
+
+    // ✅ If all saved
+    showAlert('✅ All problems saved successfully!', 'success');
+    setTimeout(() => {
+        window.location.href = 'dashboard.html';
+    }, 1500);
+
+} catch (error) {
+    console.error('Save error:', error);
+    showAlert('❌ Cannot connect to server', 'error');
+    saveBtn.disabled = false;
+    saveBtn.textContent = '💾 Save Log';
 }
-// Utility Functions
+    
+}
+
 function showAlert(message, type) {
     const alert = document.getElementById('alert');
     alert.textContent = message;
@@ -1016,18 +900,23 @@ function showAlert(message, type) {
     setTimeout(() => alert.classList.remove('show'), 5000);
 }
 
+function showModal(title, text, onConfirm) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalText').textContent = text;
+    document.getElementById('modalConfirmBtn').onclick = () => {
+        closeModal();
+        onConfirm();
+    };
+    document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('show');
+}
+
 function resetForm() {
-    if (confirm('Clear all fields and reset the form?')) {
-        topics = [];
-        problems = [];
-        problemCounter = 0;
-        document.getElementById('codingForm').reset();
-        renderTopics();
-        renderProblems();
-        updateAddButton();
-        setTodayDate();
-        activeField = null;
-        updateVoiceStatus();
+    if (confirm('Reset the entire form?')) {
+        window.location.reload();
     }
 }
 
@@ -1048,15 +937,10 @@ function loadUserData() {
 }
 
 function handleLogout() {
-    if (confirm('👋 Are you sure you want to logout?')) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+    if (confirm('👋 Logout?')) {
+        localStorage.clear();
         window.location.href = 'index.html';
     }
-}
-
-function showComingSoon() {
-    alert('🚀 Feature coming soon!');
 }
 
 function checkAuth() {
@@ -1065,13 +949,149 @@ function checkAuth() {
     }
 }
 
-// Initialize
-window.onload = () => {
-    checkAuth();
-    loadUserData();
-    setTodayDate();
-    updateAddButton();
+async function updateTopic(problemId, topic) {
+    const problem = problems.find(p => p.id === problemId);
+    if (!problem) return;
+
+    problem.topic = topic;
+
+    if (!topic.trim()) {
+        problem.suggestions = [];
+        renderProblems();
+        return;
+    }
+
+    try {
+        const normalized = normalizeTopic(topic);
+        console.log("INPUT:", topic);
+        console.log("NORMALIZED:", normalized);
+
+        const response = await fetch(`${API_URL}/logs/questions/${encodeURIComponent(normalized)}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            const easy = data.questions.filter(q => q.difficulty === "Easy");
+            const medium = data.questions.filter(q => q.difficulty === "Medium");
+            const hard = data.questions.filter(q => q.difficulty === "Hard");
+
+            // shuffle helper
+            function shuffle(arr) {
+                return arr.sort(() => Math.random() - 0.5);
+            }
+
+            problem.suggestions = [
+                ...shuffle(easy).slice(0, 3),
+                ...shuffle(medium).slice(0, 4),
+                ...shuffle(hard).slice(0, 3)
+            ];
+        } else {
+            problem.suggestions = [];
+        }
+
+    } catch (error) {
+        console.error(error);
+        problem.suggestions = [];
+    }
+
+    renderProblems();
+}
+
+let recognition;
+let isRecording = false;
+
+function initVoice() {
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+        console.warn("Voice not supported");
+        return;
+    }
+    let lastFocusedField = null;
+    document.addEventListener('focusin', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            lastFocusedField = e.target;
+        }
+    });
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-IN';
+
+    recognition.onstart = () => {
+        isRecording = true;
+        document.getElementById('voiceStatus').textContent = 'Listening...';
+        document.getElementById('globalVoiceBtn').classList.add('recording');
+    };
+
+    recognition.onend = () => {
+        isRecording = false;
+        document.getElementById('voiceStatus').textContent = 'Click a field and speak';
+        document.getElementById('globalVoiceBtn').classList.remove('recording');
+    };
+
+recognition.onresult = (event) => {
+    const result = event.results[event.resultIndex];
+
+    if (!result.isFinal) return;
+
+    const transcript = result[0].transcript.trim();
+
+    const field = lastFocusedField;
+
+    if (!field) return;
+
+    // ❗ Avoid duplicate same text
+    if (field.value.endsWith(transcript)) return;
+
+    field.value = field.value
+        ? field.value + ' ' + transcript
+        : transcript;
+
+    field.dispatchEvent(new Event('input'));
 };
+
+    recognition.onerror = (event) => {
+        if (event.error === 'no-speech') return;
+
+        console.error('Speech error:', event.error);
+        showAlert('Voice error: ' + event.error, 'error');
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('globalVoiceBtn');
+
+    if (!btn) return;
+
+    btn.addEventListener('click', () => {
+        const field = lastFocusedField;
+
+        if (!field) {
+            showAlert('Click inside a field first', 'error');
+            return;
+        }
+
+
+        if (!recognition) {
+            showAlert('Voice not supported', 'error');
+            return;
+        }
+
+        if (!isRecording) {
+            try {
+                recognition.start();
+            } catch (e) {}
+        } else {
+            recognition.stop();
+        }
+    });
+});
+}
+
+init();
+initVoice();
 </script>
 
 </body>

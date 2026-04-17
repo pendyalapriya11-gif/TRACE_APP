@@ -51,6 +51,7 @@ router.post('/learning', auth, async (req, res) => {
 // Create Coding Log
 // Topic normalization
 function normalizeTopic(topic) {
+    if (!topic) return '';
     return topic.trim().toLowerCase();
 }
 
@@ -144,16 +145,34 @@ router.get('/questions/:topic', auth,async (req, res) => {
 
 // Save solved question
 router.post('/question/solve', auth, async (req, res) => {
+    console.log("🚀 Incoming body:", req.body);
     try {
-        const { question_id, topic, approach_solution, mistakes_faced, solved_date } = req.body;
+        const {
+            problem_name,
+            difficulty,
+            platform,
+            topic_name,
+            approach_solution,
+            logic_steps,
+            mistakes_faced,
+            solved_date
+        } = req.body;
+        console.log("BODY:", req.body);
+        if (!problem_name || !difficulty || !platform || !topic_name) {
+            console.log("❌ Missing fields:", req.body);
+            return res.status(400).json({
+                success: false,
+                message: "Required fields missing"
+            });
+        }
         const userId = req.user.userId;
 
-        if (!mistakes_faced || mistakes_faced.trim() === '') {
+        if (!mistakes_faced || String(mistakes_faced).trim() === '') {
             return res.status(400).json({ success: false, message: 'Mistakes field is required' });
         }
 
         // ✅ Normalize topic
-        const normalized = normalizeTopic(topic);
+        const normalized = normalizeTopic(topic_name);
 
         // ✅ Check if topic exists
         const [existing] = await db.query(
@@ -165,17 +184,38 @@ router.post('/question/solve', auth, async (req, res) => {
         if (existing.length === 0) {
             await db.query(
                 'INSERT INTO user_topics (user_id, normalized_topic, display_name) VALUES (?, ?, ?)',
-                [userId, normalized, topic]
+                [userId, normalized, topic_name]
             );
         }
 
         // ✅ Save solved question
-        await db.query(
-            `INSERT INTO user_solved_questions 
-            (user_id, question_id, topic, approach_solution, mistakes_faced, solved_date) 
-            VALUES (?, ?, ?, ?, ?, ?)`,
-            [userId, question_id, topic, approach_solution || '', mistakes_faced, solved_date]
-        );
+        await db.query(`
+            INSERT INTO user_solved_questions 
+            (
+                user_id,
+                question_id,
+                problem_name,
+                difficulty,
+                platform,
+                topic_name,
+                approach_solution,
+                logic_steps,
+                mistakes_faced,
+                solved_date
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [
+            userId,
+            req.body.question_id || null,
+            problem_name,
+            difficulty,
+            platform,
+            topic_name,
+            approach_solution || '',
+            logic_steps || '',
+            mistakes_faced,
+            solved_date
+        ]);
 
         res.json({ success: true });
 
@@ -185,14 +225,33 @@ router.post('/question/solve', auth, async (req, res) => {
     }
 });
 
+router.post('/suggestion/click', auth, async (req, res) => {
+    try {
+        const { question_id, topic } = req.body;
+        const userId = req.user.userId;
+
+        await db.query(
+            `INSERT INTO suggestion_clicks (user_id, question_id, topic) 
+             VALUES (?, ?, ?)`,
+            [userId, question_id, topic]
+        );
+
+        res.json({ success: true });
+
+    } catch (error) {
+        console.error('Suggestion click error:', error);
+        res.status(500).json({ success: false });
+    }
+});
+
 // ========================================
 // DASHBOARD ROUTES
 // ========================================
 
 // Get Dashboard Stats
-router.get('/dashboard/stats', async (req, res) => {
+router.get('/dashboard/stats', auth,async (req, res) => {
     try {
-        const userId = 1;
+        const userId = req.user.userId;
 
         // Problems solved
         const [problems] = await db.query(`
@@ -201,13 +260,41 @@ router.get('/dashboard/stats', async (req, res) => {
 
         // Topics
         const [topics] = await db.query(`
-            SELECT COUNT(DISTINCT topic) as total FROM user_solved_questions WHERE user_id = ?
+            SELECT COUNT(DISTINCT topic_name) as total FROM user_solved_questions WHERE user_id = ?
         `, [userId]);
 
+        const [datesRows] = await db.query(`
+            SELECT DISTINCT DATE(solved_date) as date
+            FROM user_solved_questions
+            WHERE user_id = ?
+        `, [userId]);
+
+        const solvedDates = new Set(
+            datesRows.map(r => r.date.toISOString().slice(0, 10))
+        );
+
+        function formatDate(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        let currentStreak = 0;
+        let today = new Date();
+
+        // STRICT streak (no skipping today)
+        if (solvedDates.has(formatDate(today))) {
+            for (let i = 0; i < 365; i++) {
+                const temp = new Date(today);
+                temp.setDate(today.getDate() - i);
+
+                if (solvedDates.has(formatDate(temp))) {
+                    currentStreak++;
+                } else break;
+            }
+        }
         res.json({
             success: true,
             stats: {
-                streak: { current: 3, lastWeek: 2 }, // keep simple for now
+                streak: { current: currentStreak, lastWeek: 0 }, // keep simple for now
                 topics: { current: topics[0].total, lastWeek: 0 },
                 problems: { current: problems[0].total, lastWeek: 0 }
             }
@@ -220,12 +307,12 @@ router.get('/dashboard/stats', async (req, res) => {
 });
 
 // Get Recent Activity
-router.get('/dashboard/activity', async (req, res) => {
+router.get('/dashboard/activity', auth,async (req, res) => {
     try {
-        const userId = 1;
+        const userId = req.user.userId;
 
         const [rows] = await db.query(`
-            SELECT topic, solved_date, mistakes_faced
+            SELECT topic_name, solved_date, mistakes_faced
             FROM user_solved_questions
             WHERE user_id = ?
             ORDER BY solved_date DESC
@@ -234,7 +321,7 @@ router.get('/dashboard/activity', async (req, res) => {
 
         const activity = rows.map(r => ({
             type: 'coding',
-            topic: r.topic,
+            topic: r.topic_name,
             notes: r.mistakes_faced,
             date: r.solved_date
         }));
@@ -248,19 +335,19 @@ router.get('/dashboard/activity', async (req, res) => {
 });
 
 // Get Weak Areas
-router.get('/dashboard/weak-areas', async (req, res) => {
+router.get('/dashboard/weak-areas', auth, async (req, res) => {
     try {
-        const userId = 1; // or req.user.id if auth
+        const userId = req.user.userId; // or req.user.id if auth
 
         const [rows] = await db.query(`
-            SELECT topic,
+            SELECT topic_name as topic,
                 COUNT(*) as count,
                 GROUP_CONCAT(mistakes_faced SEPARATOR ' | ') as mistakes
             FROM user_solved_questions
             WHERE user_id = ? 
             AND mistakes_faced IS NOT NULL 
             AND mistakes_faced != ''
-            GROUP BY topic
+            GROUP BY topic_name
             ORDER BY count DESC
             LIMIT 5
         `, [userId]);
@@ -286,10 +373,10 @@ router.get('/dashboard/weak-areas', async (req, res) => {
 // ========================================
 
 // Get logs for AI recap (grouped by topic)
-router.post('/ai-recap/logs', async (req, res) => {
+router.post('/ai-recap/logs', auth,async (req, res) => {
     try {
         const { startDate, endDate } = req.body;
-        const userId = 1;
+        const userId = req.user.userId;
 
         console.log('📊 AI Recap request:', { userId, startDate, endDate });
 
@@ -304,18 +391,19 @@ router.post('/ai-recap/logs', async (req, res) => {
         // Get coding logs
         const [codingLogs] = await db.query(
         `SELECT 
-            usq.topic,
+            usq.topic_name as topic,
             usq.mistakes_faced as challenges,
+            usq.approach_solution,
+            usq.logic_steps,
             usq.solved_date as log_date,
             "coding" as type,
-            qb.question_name,
-            qb.difficulty,
-            qb.platform
+            usq.problem_name,
+            usq.difficulty,
+            usq.platform
         FROM user_solved_questions usq
-        JOIN question_bank qb ON usq.question_id = qb.id
         WHERE usq.user_id = ? 
         AND usq.solved_date BETWEEN ? AND ?
-        ORDER BY usq.topic, usq.solved_date ASC`,
+        ORDER BY usq.topic_name, usq.solved_date ASC`,
         [userId, startDate, endDate]
         );
 
@@ -346,7 +434,7 @@ router.post('/ai-recap/logs', async (req, res) => {
        
         const groupedLogs = {};
         allLogs.forEach(log => {
-            const topic = log.topic || 'General';
+            const topic = log.topic?.trim() || 'General';
             if (!groupedLogs[topic]) {
                 groupedLogs[topic] = [];
             }
@@ -470,93 +558,211 @@ router.post('/ai-recap/overview', async (req, res) => {
 // Get all data for analytics
 router.get('/analytics/data', auth, async (req, res) => {
     try {
-        const userId = 1; // FIXED
+        const userId = req.user.userId;
 
-        console.log('📊 Analytics data request for user:', userId);
+        console.log('📊 Optimized analytics for user:', userId);
 
-        // Get all learning logs
-        const [learningLogs] = await db.query(
-            'SELECT * FROM learning_logs WHERE user_id = ? ORDER BY log_date DESC',
-            [userId]
-        );
+        // =========================
+        // 1. TOTAL PROBLEMS
+        // =========================
+        const [[{ totalSolved }]] = await db.query(`
+            SELECT COUNT(*) as totalSolved
+            FROM user_solved_questions
+            WHERE user_id = ?
+        `, [userId]);
 
-        console.log('📝 Learning logs found:', learningLogs.length);
+        // =========================
+        // 2. DIFFICULTY BREAKDOWN
+        // =========================
+        const [difficultyRows] = await db.query(`
+            SELECT difficulty, COUNT(*) as count
+            FROM user_solved_questions
+            WHERE user_id = ?
+            GROUP BY difficulty
+        `, [userId]);
 
-        // Get all coding logs
-        const [codingLogs] = await db.query(
-            'SELECT cl.* FROM coding_logs cl WHERE cl.user_id = ? ORDER BY cl.log_date DESC',
-            [userId]
-        );
-
-        console.log('💻 Coding logs found:', codingLogs.length);
-
-        // Get all coding problems with details
-        const [codingProblems] = await db.query(
-            'SELECT cp.*, cl.log_date FROM coding_problems cp JOIN coding_logs cl ON cp.coding_log_id = cl.id WHERE cl.user_id = ? ORDER BY cl.log_date DESC',
-            [userId]
-        );
-
-        console.log('🎯 Coding problems found:', codingProblems.length);
-
-        res.json({
-            success: true,
-            learningLogs,
-            codingLogs,
-            codingProblems
+        const difficulty = { Easy: 0, Medium: 0, Hard: 0 };
+        difficultyRows.forEach(d => {
+            difficulty[d.difficulty] = d.count;
         });
 
-    } catch (error) {
-        console.error('❌ Analytics data error:', error);
-        res.status(500).json({
-            success: false,
-            learningLogs: [],
-            codingLogs: [],
-            codingProblems: []
+        // =========================
+        // 3. TOP TOPICS
+        // =========================
+        const [topTopics] = await db.query(`
+            SELECT topic, COUNT(*) as count
+            FROM learning_logs
+            WHERE user_id = ?
+            GROUP BY topic
+            ORDER BY count DESC
+            LIMIT 5
+        `, [userId]);
+
+        // =========================
+        // 4. STREAK CALCULATION 🔥
+        // =========================
+       
+        const [datesRows] = await db.query(`
+            SELECT DISTINCT solved_date
+            FROM user_solved_questions
+            WHERE user_id = ?
+        `, [userId]);
+
+       const solvedDates = new Set(
+            datesRows.map(r => r.solved_date.toISOString().slice(0, 10))
+        );
+
+        function formatDate(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        let currentStreak = 0;
+        let today = new Date();
+
+        if(solvedDates.has(formatDate(today))) {
+        // calculate current streak
+            for (let i = 0; i < 365; i++) {
+            const tempDate = new Date(today);
+            tempDate.setDate(today.getDate() - i);
+
+            const dateStr = formatDate(tempDate);
+
+            if (solvedDates.has(dateStr)) {
+                currentStreak++;
+            } else {
+                break;
+            }
+        }
+}
+
+        // =========================
+        // MAX STREAK
+        // =========================
+        const sortedDates = Array.from(solvedDates).sort();
+
+        let maxStreak = 0;
+        let tempStreak = 0;
+
+        for (let i = 0; i < sortedDates.length; i++) {
+            if (i === 0) {
+                tempStreak = 1;
+            } else {
+                const prev = new Date(sortedDates[i - 1]);
+                const curr = new Date(sortedDates[i]);
+
+                const diff = (curr - prev) / (1000 * 60 * 60 * 24);
+
+                if (diff === 1) tempStreak++;
+                else tempStreak = 1;
+            }
+
+            maxStreak = Math.max(maxStreak, tempStreak);
+        }
+
+        const activeDays = solvedDates.size;
+
+                // =========================
+                // 6. LEARNING LOG STATS
+                // =========================
+                const [[{ totalLogs }]] = await db.query(`
+                    SELECT COUNT(*) as totalLogs
+                    FROM learning_logs
+                    WHERE user_id = ?
+                `, [userId]);
+
+                const [[{ uniqueTopics }]] = await db.query(`
+                    SELECT COUNT(DISTINCT topic) as uniqueTopics
+                    FROM learning_logs
+                    WHERE user_id = ?
+                `, [userId]);
+                const [platformRows] = await db.query(`
+                    SELECT platform, COUNT(*) as count
+                    FROM user_solved_questions
+                    WHERE user_id = ?
+                    AND platform IS NOT NULL
+                    AND platform != ''
+                    GROUP BY platform
+                `, [userId]);
+                
+                // =========================
+                // FINAL RESPONSE (UI SAFE)
+                // =========================
+                res.json({
+                    success: true,
+
+                    // existing UI fields
+                    totalSolved,
+                    currentStreak,
+                    maxStreak,
+                    activeDays,
+
+                    // charts
+                    difficulty,
+                    topTopics,
+
+                    // learning stats
+                    totalLogs,
+                    uniqueTopics,
+
+                    platforms : platformRows
+                });
+
+            } catch (error) {
+                console.error('❌ Optimized analytics error:', error);
+                res.status(500).json({ success: false });
+            }
         });
-    }
-});
 
 // Get comparison data for specific date ranges
 router.post('/analytics/compare', auth, async (req, res) => {
     try {
-        const userId = req.user.userId; // FIXED
+        const userId = req.user.userId;
         const { periodA, periodB } = req.body;
 
         console.log('⟷ Comparison request:', { userId, periodA, periodB });
 
-        // Period A data
+        // ======================
+        // PERIOD A
+        // ======================
         const [learningA] = await db.query(
             'SELECT * FROM learning_logs WHERE user_id = ? AND log_date BETWEEN ? AND ?',
             [userId, periodA.start, periodA.end]
         );
 
-        const [codingA] = await db.query(
-            'SELECT cl.* FROM coding_logs cl WHERE cl.user_id = ? AND cl.log_date BETWEEN ? AND ?',
-            [userId, periodA.start, periodA.end]
-        );
+        const [codingA] = await db.query(`
+            SELECT * FROM user_solved_questions 
+            WHERE user_id = ? AND solved_date BETWEEN ? AND ?
+        `, [userId, periodA.start, periodA.end]);
 
-        const [problemsA] = await db.query(
-            'SELECT cp.* FROM coding_problems cp JOIN coding_logs cl ON cp.coding_log_id = cl.id WHERE cl.user_id = ? AND cl.log_date BETWEEN ? AND ?',
-            [userId, periodA.start, periodA.end]
-        );
+        const [problemsA] = await db.query(`
+            SELECT * 
+            FROM user_solved_questions
+            WHERE user_id = ? 
+            AND solved_date BETWEEN ? AND ?
+        `, [userId, periodA.start, periodA.end]);
 
-        // Period B data
+
+        // ======================
+        // PERIOD B
+        // ======================
         const [learningB] = await db.query(
             'SELECT * FROM learning_logs WHERE user_id = ? AND log_date BETWEEN ? AND ?',
             [userId, periodB.start, periodB.end]
         );
 
-        const [codingB] = await db.query(
-            'SELECT cl.* FROM coding_logs cl WHERE cl.user_id = ? AND cl.log_date BETWEEN ? AND ?',
-            [userId, periodB.start, periodB.end]
-        );
+        const [codingB] = await db.query(`
+            SELECT * FROM user_solved_questions 
+            WHERE user_id = ? AND solved_date BETWEEN ? AND ?
+        `, [userId, periodB.start, periodB.end]);
 
-        const [problemsB] = await db.query(
-            'SELECT cp.* FROM coding_problems cp JOIN coding_logs cl ON cp.coding_log_id = cl.id WHERE cl.user_id = ? AND cl.log_date BETWEEN ? AND ?',
-            [userId, periodB.start, periodB.end]
-        );
+        const [problemsB] = await db.query(`
+            SELECT * 
+            FROM user_solved_questions
+            WHERE user_id = ? 
+            AND solved_date BETWEEN ? AND ?
+        `, [userId, periodB.start, periodB.end]);
 
-        console.log('✅ Comparison data retrieved');
+        console.log('✅ Comparison data ready');
 
         res.json({
             success: true,
@@ -580,3 +786,284 @@ router.post('/analytics/compare', auth, async (req, res) => {
 
 // MOVED TO END - Module export
 module.exports = router;
+
+// ========================================
+// SEARCH & FILTER ROUTES
+// ========================================
+
+// Search logs by date/filters
+router.post('/search', auth, async (req, res) => {
+    try {
+        const { date, startDate, endDate, type, sortBy } = req.body;
+        const userId = req.user.userId;
+        
+        console.log('🔍 Search request:', { userId, date, startDate, endDate, type, sortBy });
+        
+        let learningLogs = [];
+        let codingLogs = [];
+        
+        // Build query based on filters
+        let learningQuery = 'SELECT * FROM learning_logs WHERE user_id = ?';
+        let codingQuery = 'SELECT * FROM user_solved_questions WHERE user_id = ?';
+        
+        const learningParams = [userId];
+        const codingParams = [userId];
+        
+        // Date filters
+        if (date) {
+            learningQuery += ' AND log_date = ?';
+            codingQuery += ' AND solved_date = ?';
+            learningParams.push(date);
+            codingParams.push(date);
+        } else if (startDate && endDate) {
+            learningQuery += ' AND log_date BETWEEN ? AND ?';
+            codingQuery += ' AND solved_date BETWEEN ? AND ?';
+            learningParams.push(startDate, endDate);
+            codingParams.push(startDate, endDate);
+        }
+        
+        // Sorting
+        const sortOrder = sortBy === 'oldest' ? 'ASC' : 'DESC';
+        learningQuery += ` ORDER BY log_date ${sortOrder}, created_at ${sortOrder}`;
+        codingQuery += ` ORDER BY solved_date ${sortOrder}, created_at ${sortOrder}`;
+        
+        // Fetch based on type filter
+        if (!type || type === 'all' || type === 'learning') {
+            const [results] = await db.query(learningQuery, learningParams);
+            learningLogs = results.map(log => ({
+                ...log,
+                type: 'learning',
+                log_id: log.id,
+                title: log.topic,
+                description: log.content,
+                date: log.log_date
+            }));
+        }
+        
+        if (!type || type === 'all' || type === 'coding') {
+            const [results] = await db.query(codingQuery, codingParams);
+            codingLogs = results.map(log => ({
+                ...log,
+                type: 'coding',
+                log_id: log.id,
+                title: log.problem_name || 'Coding Problem',
+                description: log.approach_solution,
+                date: log.solved_date
+            }));
+        }
+        
+        const allLogs = [...learningLogs, ...codingLogs];
+        
+        // Sort combined results
+        allLogs.sort((a, b) => {
+            const dateA = new Date(a.date);
+            const dateB = new Date(b.date);
+            return sortBy === 'oldest' ? dateA - dateB : dateB - dateA;
+        });
+        
+        console.log('✅ Found', allLogs.length, 'logs');
+        
+        res.json({
+            success: true,
+            logs: allLogs,
+            count: allLogs.length
+        });
+        
+    } catch (error) {
+        console.error('❌ Search error:', error);
+        res.status(500).json({ success: false, logs: [], count: 0 });
+    }
+});
+
+// Get single log details
+router.get('/details/:type/:id', auth, async (req, res) => {
+    try {
+        const { type, id } = req.params;
+        const userId = req.user.userId;
+        
+        let log = null;
+        
+        if (type === 'learning') {
+            const [results] = await db.query(
+                'SELECT * FROM learning_logs WHERE id = ? AND user_id = ?',
+                [id, userId]
+            );
+            log = results[0];
+        } else if (type === 'coding') {
+            const [results] = await db.query(
+                'SELECT * FROM user_solved_questions WHERE id = ? AND user_id = ?',
+                [id, userId]
+            );
+            log = results[0];
+        }
+        
+        if (!log) {
+            return res.status(404).json({ success: false, message: 'Log not found' });
+        }
+        
+        res.json({ success: true, log });
+        
+    } catch (error) {
+        console.error('❌ Get log details error:', error);
+        res.status(500).json({ success: false });
+    }
+});
+
+// Update learning log
+router.put('/learning/:id', auth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { topic, content, challenges, log_date } = req.body;
+        const userId = req.user.userId;
+
+        // 1️⃣ Get OLD data
+        const [oldData] = await db.query(
+            'SELECT * FROM learning_logs WHERE id = ? AND user_id = ?',
+            [id, userId]
+        );
+
+        if (oldData.length === 0) {
+            return res.status(404).json({ success: false, message: 'Log not found' });
+        }
+
+        const old = oldData[0];
+
+        // 2️⃣ Save to history
+        await db.query(`
+            INSERT INTO log_edit_history 
+            (log_id, user_id, type, topic, content, challenges, log_date)
+            VALUES (?, ?, 'learning', ?, ?, ?, ?)
+        `, [
+            id,
+            userId,
+            old.topic,
+            old.content,
+            old.challenges,
+            old.log_date
+        ]);
+
+        // 3️⃣ Update main table
+        await db.query(
+            'UPDATE learning_logs SET topic = ?, content = ?, challenges = ?, log_date = ? WHERE id = ? AND user_id = ?',
+            [topic, content, challenges || '', log_date, id, userId]
+        );
+
+        res.json({ success: true, message: 'Learning log updated + history saved' });
+
+    } catch (error) {
+        console.error('❌ Update learning log error:', error);
+        res.status(500).json({ success: false });
+    }
+});
+
+// Update coding log
+router.put('/coding/:id', auth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { topic, approach_solution, logic_steps, mistakes_faced, solved_date } = req.body;
+        const userId = req.user.userId;
+
+        // 1️⃣ Get existing log (OLD DATA)
+        const [oldData] = await db.query(
+            'SELECT * FROM user_solved_questions WHERE id = ? AND user_id = ?',
+            [id, userId]
+        );
+
+        if (oldData.length === 0) {
+            return res.status(404).json({ success: false, message: 'Log not found' });
+        }
+
+        const old = oldData[0];
+
+        // 2️⃣ SAVE OLD DATA TO HISTORY
+        await db.query(`
+            INSERT INTO log_edit_history 
+            (log_id, user_id, type, topic, approach_solution, logic_steps, mistakes_faced, log_date)
+            VALUES (?, ?, 'coding', ?, ?, ?, ?, ?)
+        `, [
+            id,
+            userId,
+            old.topic_name,
+            old.approach_solution,
+            old.logic_steps,
+            old.mistakes_faced,
+            old.solved_date
+        ]);
+
+        // 3️⃣ UPDATE MAIN TABLE
+        const [result] = await db.query(
+            'UPDATE user_solved_questions SET topic_name = ?, approach_solution = ?, logic_steps = ?, mistakes_faced = ?, solved_date = ? WHERE id = ? AND user_id = ?',
+            [
+                topic,
+                approach_solution || '',
+                logic_steps || '',
+                mistakes_faced,
+                solved_date,
+                id,
+                userId
+            ]
+        );
+
+        res.json({ success: true, message: 'Coding log updated + history saved' });
+
+    } catch (error) {
+        console.error('❌ Update coding log error:', error);
+        res.status(500).json({ success: false });
+    }
+});
+
+router.get('/history/:type/:id', auth, async (req, res) => {
+    try {
+        const { id, type } = req.params;
+        const userId = req.user.userId;
+
+        const [rows] = await db.query(
+            'SELECT * FROM log_edit_history WHERE log_id = ? AND user_id = ? AND type = ? ORDER BY edited_at DESC',
+            [id, userId, type]
+        );
+
+        res.json({ success: true, history: rows });
+
+    } catch (err) {
+        console.error('History error:', err);
+        res.status(500).json({ success: false });
+    }
+});
+
+// Delete log
+router.delete('/:type/:id', auth, async (req, res) => {
+    try {
+        const { type, id } = req.params;
+        const userId = req.user.userId;
+        
+        console.log('🗑️ Deleting log:', type, id);
+        
+        if (type === 'learning') {
+            const [result] = await db.query(
+                'DELETE FROM learning_logs WHERE id = ? AND user_id = ?',
+                [id, userId]
+            );
+            
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ success: false, message: 'Log not found' });
+            }
+        } else if (type === 'coding') {
+            const [result] = await db.query(
+                'DELETE FROM user_solved_questions WHERE id = ? AND user_id = ?',
+                [id, userId]
+            );
+            
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ success: false, message: 'Log not found' });
+            }
+        }
+        
+        console.log('✅ Log deleted');
+        
+        res.json({ success: true, message: 'Log deleted successfully' });
+        
+    } catch (error) {
+        console.error('❌ Delete log error:', error);
+        res.status(500).json({ success: false, message: 'Failed to delete log' });
+    }
+});

@@ -310,6 +310,10 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
             <span class="nav-icon">📈</span>
             <span>Analytics</span>
         </a>
+        <a href="manage-logs.html" class="nav-item">
+            <span class="nav-icon">🔍</span>
+            <span>Manage Logs</span>
+        </a>
     </nav>
     
     <div class="user-section">
@@ -437,7 +441,8 @@ async function generateRecap() {
         const logsResponse = await fetch(`${API_URL}/logs/ai-recap/logs`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ startDate, endDate })
         });
@@ -467,7 +472,8 @@ async function generateRecap() {
         const summaryResponse = await fetch(`${API_URL}/logs/ai-recap/summary`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({
             groupedLogs: logsData.groupedLogs,
@@ -517,7 +523,8 @@ async function generateChecklistFromAPI(topics) {
         const response = await fetch(`${API_URL}/logs/ai-recap/checklist`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ topics })
         });
@@ -608,7 +615,8 @@ async function generateOverview() {
         const response = await fetch(`${API_URL}/logs/ai-recap/overview`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ topics: uncheckedTopics })
         });

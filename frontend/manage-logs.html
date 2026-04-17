@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRACE - Manage Logs</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+    --charcoal: #2a2a2a;
+    --dark-charcoal: #1a1a1a;
+    --beige: #f5f1e8;
+    --teal: #5a9f9f;
+    --border: rgba(90, 159, 159, 0.15);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh; }
+
+.sidebar {
+    position: fixed; left: 0; top: 0; width: 260px; height: 100vh;
+    background: var(--charcoal); border-right: 1px solid var(--border);
+    padding: 25px 15px; display: flex; flex-direction: column; overflow-y: auto;
+}
+
+.logo-section {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 35px;
+    padding: 15px; background: var(--beige); border-radius: 10px;
+}
+
+.logo-small {
+    width: 45px; height: 45px; border-radius: 8px;
+    background: var(--charcoal); color: var(--beige);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 20px;
+}
+
+.logo-text { font-size: 24px; font-weight: 800; color: var(--charcoal); }
+.nav-menu { flex: 1; }
+
+.nav-item {
+    padding: 14px 16px; margin-bottom: 8px; border-radius: 8px;
+    cursor: pointer; display: flex; align-items: center; gap: 14px;
+    font-size: 14px; font-weight: 500; color: rgba(245, 241, 232, 0.7);
+    text-decoration: none; transition: all 0.2s;
+}
+
+.nav-item:hover { background: rgba(245, 241, 232, 0.1); color: var(--beige); }
+.nav-item.active { background: var(--beige); color: var(--charcoal); font-weight: 600; }
+.nav-icon { font-size: 20px; }
+
+.user-section {
+    padding: 15px; background: rgba(245, 241, 232, 0.05);
+    border-radius: 10px; display: flex; align-items: center; gap: 12px;
+    border: 1px solid var(--border);
+}
+
+.user-avatar {
+    width: 42px; height: 42px; border-radius: 8px;
+    background: var(--teal); color: var(--beige);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 18px;
+}
+
+.user-info { flex: 1; }
+.user-name { font-size: 14px; font-weight: 600; color: var(--beige); }
+.user-email { font-size: 11px; color: rgba(245, 241, 232, 0.5); }
+
+.logout-btn {
+    background: rgba(90, 159, 159, 0.15); border: none;
+    color: var(--teal); cursor: pointer; width: 36px; height: 36px;
+    border-radius: 8px; font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s;
+}
+
+.logout-btn:hover { background: var(--teal); color: var(--beige); }
+
+.main-content { margin-left: 260px; padding: 30px; }
+
+.page-header {
+    background: var(--charcoal); padding: 30px; border-radius: 12px;
+    margin-bottom: 30px; border: 1px solid var(--border);
+}
+
+.page-title {
+    font-size: 28px; font-weight: 800; color: var(--beige); margin-bottom: 8px;
+}
+
+.page-subtitle { font-size: 14px; color: rgba(245, 241, 232, 0.7); }
+
+.filters-container {
+    background: var(--charcoal); padding: 25px; border-radius: 12px;
+    border: 1px solid var(--border); margin-bottom: 30px;
+}
+
+.filters-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px; margin-bottom: 20px;
+}
+
+.filter-group {
+    display: flex; flex-direction: column; gap: 8px;
+}
+
+.filter-label {
+    font-size: 12px; font-weight: 600; color: var(--beige);
+}
+
+.filter-input, .filter-select {
+    padding: 10px 12px; border-radius: 8px;
+    border: 1px solid var(--border); background: rgba(245, 241, 232, 0.05);
+    color: var(--beige); font-size: 14px; transition: all 0.3s;
+}
+
+.filter-input:hover, .filter-select:hover {
+    border-color: var(--beige);
+    box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1);
+}
+
+.filter-input:focus, .filter-select:focus {
+    outline: none; border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(90, 159, 159, 0.15);
+}
+
+.filter-select {
+    cursor: pointer; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23f5f1e8' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 35px;
+}
+
+.filter-actions {
+    display: flex; gap: 12px; justify-content: flex-end;
+}
+
+.btn {
+    padding: 10px 24px; border-radius: 8px; font-size: 14px;
+    font-weight: 600; cursor: pointer; transition: all 0.2s;
+    border: none;
+}
+
+.btn-primary {
+    background: var(--teal); color: var(--beige);
+}
+
+.btn-primary:hover {
+    background: #4a8f8f; transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: rgba(245, 241, 232, 0.1);
+    color: var(--beige); border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: rgba(245, 241, 232, 0.15);
+    border-color: var(--beige);
+}
+
+.results-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px;
+}
+
+.results-count {
+    font-size: 14px; color: rgba(245, 241, 232, 0.7);
+}
+
+.results-count strong {
+    color: var(--teal); font-weight: 700;
+}
+
+.logs-container {
+    display: grid; gap: 20px;
+}
+
+.log-card {
+    background: var(--charcoal); padding: 25px; border-radius: 12px;
+    border: 1px solid var(--border); transition: all 0.2s;
+}
+
+.log-card:hover {
+    border-color: var(--beige);
+    box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1);
+}
+
+.log-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.log-type-badge {
+    padding: 4px 12px; border-radius: 6px; font-size: 11px;
+    font-weight: 700; text-transform: uppercase;
+}
+
+.badge-learning {
+    background: rgba(90, 159, 159, 0.2); color: var(--teal);
+}
+
+.badge-coding {
+    background: rgba(240, 168, 50, 0.2); color: #f0a832;
+}
+
+.log-actions {
+    display: flex; gap: 8px;
+}
+
+.icon-btn {
+    background: rgba(245, 241, 232, 0.1); border: 1px solid var(--border);
+    color: var(--beige); cursor: pointer; width: 36px; height: 36px;
+    border-radius: 6px; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+}
+
+.icon-btn:hover {
+    background: rgba(245, 241, 232, 0.15);
+    border-color: var(--beige);
+}
+
+.icon-btn.delete:hover {
+    background: rgba(255, 68, 68, 0.2);
+    border-color: #ff4444;
+    color: #ff4444;
+}
+
+.log-title {
+    font-size: 18px; font-weight: 700; color: var(--beige);
+    margin-bottom: 10px;
+}
+
+.log-description {
+    font-size: 14px; color: rgba(245, 241, 232, 0.8);
+    line-height: 1.6; margin-bottom: 15px;
+}
+
+.log-meta {
+    display: flex; gap: 20px; font-size: 12px;
+    color: rgba(245, 241, 232, 0.6);
+    padding-top: 15px; border-top: 1px solid var(--border);
+}
+
+.log-meta-item {
+    display: flex; align-items: center; gap: 6px;
+}
+
+.empty-state {
+    text-align: center; padding: 80px 20px;
+    color: rgba(245, 241, 232, 0.5);
+}
+
+.empty-state-icon {
+    font-size: 64px; margin-bottom: 20px;
+}
+
+.alert {
+    padding: 13px 18px; border-radius: 8px; margin-bottom: 20px;
+    font-size: 13px; display: none; align-items: center; gap: 10px;
+}
+
+.alert.show { display: flex; }
+.alert-success { background: rgba(90, 159, 159, 0.2); color: var(--teal); border: 1px solid var(--teal); }
+.alert-error { background: rgba(255, 68, 68, 0.2); color: #ff4444; border: 1px solid #ff4444; }
+
+/* Modal */
+.modal-overlay {
+    position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8);
+    display: none; align-items: center; justify-content: center;
+    z-index: 1000; overflow-y: auto; padding: 20px;
+}
+
+.modal-overlay.show { display: flex; }
+
+.modal {
+    background: var(--charcoal); border: 1px solid var(--border);
+    border-radius: 12px; padding: 30px; max-width: 700px;
+    width: 100%; max-height: 90vh; overflow-y: auto;
+}
+
+.modal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 25px; padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.modal-title {
+    font-size: 20px; font-weight: 800; color: var(--beige);
+}
+
+.modal-close {
+    background: none; border: none; color: rgba(245, 241, 232, 0.5);
+    cursor: pointer; font-size: 28px; line-height: 1;
+    transition: color 0.2s;
+}
+
+.modal-close:hover { color: var(--beige); }
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block; font-size: 12px; font-weight: 600;
+    color: var(--beige); margin-bottom: 8px;
+}
+
+.form-input, .form-textarea {
+    width: 100%; padding: 12px 14px; border-radius: 8px;
+    border: 1px solid var(--border); background: rgba(245, 241, 232, 0.05);
+    color: var(--beige); font-size: 14px; transition: all 0.3s;
+}
+
+.form-input:hover, .form-textarea:hover {
+    border-color: var(--beige);
+    box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1);
+}
+
+.form-input:focus, .form-textarea:focus {
+    outline: none; border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(90, 159, 159, 0.15);
+}
+
+.form-textarea {
+    min-height: 120px; resize: vertical;
+}
+
+.modal-actions {
+    display: flex; gap: 12px; justify-content: flex-end;
+    margin-top: 25px; padding-top: 20px;
+    border-top: 1px solid var(--border);
+}
+
+@media (max-width: 1024px) {
+    .sidebar { width: 70px; padding: 20px 10px; }
+    .logo-text, .nav-item span, .user-info { display: none; }
+    .main-content { margin-left: 70px; padding: 20px; }
+    .filters-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="logo-section">
+        <div class="logo-small">TR</div>
+        <div class="logo-text">TRACE</div>
+    </div>
+    
+    <nav class="nav-menu">
+        <a href="dashboard.html" class="nav-item">
+            <span class="nav-icon">📊</span>
+            <span>Dashboard</span>
+        </a>
+        <a href="learning-log.html" class="nav-item">
+            <span class="nav-icon">📝</span>
+            <span>Learning Log</span>
+        </a>
+        <a href="coding-log.html" class="nav-item">
+            <span class="nav-icon">💻</span>
+            <span>Coding Log</span>
+        </a>
+        <a href="ai-recaps.html" class="nav-item">
+            <span class="nav-icon">🤖</span>
+            <span>AI Recaps</span>
+        </a>
+        <a href="analytics.html" class="nav-item">
+            <span class="nav-icon">📈</span>
+            <span>Analytics</span>
+        </a>
+        <a href="manage-logs.html" class="nav-item active">
+            <span class="nav-icon">🔍</span>
+            <span>Manage Logs</span>
+        </a>
+    </nav>
+    
+    <div class="user-section">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <div class="user-info">
+            <div class="user-name" id="userName">User</div>
+            <div class="user-email" id="userEmail">user@example.com</div>
+        </div>
+        <button class="logout-btn" onclick="handleLogout()" title="Logout">🚪</button>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="modalTitle">Edit Log</div>
+            <button class="modal-close" onclick="closeEditModal()">×</button>
+        </div>
+        
+        <form id="editForm" onsubmit="saveEdit(event)">
+            <input type="hidden" id="editLogId">
+            <input type="hidden" id="editLogType">
+            
+            <div class="form-group" id="topicGroup">
+                <label class="form-label">Topic *</label>
+                <input type="text" id="editTopic" class="form-input" required>
+            </div>
+            
+            <div class="form-group" id="contentGroup">
+                <label class="form-label">Content/Notes *</label>
+                <textarea id="editContent" class="form-textarea" required></textarea>
+            </div>
+            
+            <div class="form-group" id="challengesGroup">
+                <label class="form-label">Challenges (Optional)</label>
+                <textarea id="editChallenges" class="form-textarea"></textarea>
+            </div>
+            
+            <div class="form-group" id="approachGroup" style="display:none;">
+                <label class="form-label">Approach/Solution (Optional)</label>
+                <textarea id="editApproach" class="form-textarea"></textarea>
+            </div>
+            <div class="form-group" id="logicGroup" style="display:none;">
+                <label class="form-label">Logic Steps *</label>
+                <textarea id="editLogic" class="form-textarea" required></textarea>
+            </div>
+            
+            <div class="form-group" id="mistakesGroup" style="display:none;">
+                <label class="form-label">Mistakes/Challenges Faced *</label>
+                <textarea id="editMistakes" class="form-textarea" required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Date *</label>
+                <input type="date" id="editDate" class="form-input" required>
+            </div>
+            
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="saveBtn">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal-overlay" id="historyModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Edit History</div>
+                <button class="modal-close" onclick="closeHistoryModal()">×</button>
+            </div>
+
+            <div id="historyContainer">
+                <div class="loading">Loading history...</div>
+            </div>
+        </div>
+    </div>
+
+<div class="main-content">
+    
+    <div class="page-header">
+        <div class="page-title">🔍 Manage Logs</div>
+        <div class="page-subtitle">Search, filter, and edit your learning and coding logs</div>
+    </div>
+    
+    <div id="alert" class="alert"></div>
+    
+    <div class="filters-container">
+        <div class="filters-grid">
+            <div class="filter-group">
+                <label class="filter-label">Single Date</label>
+                <input type="date" id="filterDate" class="filter-input">
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Start Date (Range)</label>
+                <input type="date" id="filterStartDate" class="filter-input">
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">End Date (Range)</label>
+                <input type="date" id="filterEndDate" class="filter-input">
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Type</label>
+                <select id="filterType" class="filter-select">
+                    <option value="all">All Logs</option>
+                    <option value="learning">Learning Logs</option>
+                    <option value="coding">Coding Logs</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Sort By</label>
+                <select id="filterSort" class="filter-select">
+                    <option value="latest">Latest First</option>
+                    <option value="oldest">Oldest First</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="filter-actions">
+            <button class="btn btn-secondary" onclick="resetFilters()">Reset</button>
+            <button class="btn btn-primary" onclick="searchLogs()">🔍 Search</button>
+        </div>
+    </div>
+    
+    <div class="results-header" id="resultsHeader" style="display:none;">
+        <div class="results-count" id="resultsCount">Found <strong>0</strong> logs</div>
+    </div>
+    
+    <div class="logs-container" id="logsContainer">
+        <div class="empty-state">
+            <div class="empty-state-icon">🔍</div>
+            <div style="font-size: 16px; color: var(--beige); margin-bottom: 8px;">No logs displayed</div>
+            <div>Use the filters above to search for logs</div>
+        </div>
+    </div>
+    
+</div>
+
+<script>
+const API_URL = 'http://localhost:5000/api';
+const token = localStorage.getItem('token');
+
+let currentLogs = [];
+
+async function init() {
+    checkAuth();
+    loadUserData();
+    // Auto-load today's logs
+    document.getElementById('filterDate').value = new Date().toISOString().split('T')[0];
+    searchLogs();
+}
+
+async function searchLogs() {
+    const date = document.getElementById('filterDate').value;
+    const startDate = document.getElementById('filterStartDate').value;
+    const endDate = document.getElementById('filterEndDate').value;
+    const type = document.getElementById('filterType').value;
+    const sortBy = document.getElementById('filterSort').value;
+    
+    if (!date && (!startDate || !endDate)) {
+        showAlert('Please select a date or date range', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_URL}/logs/search`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ date, startDate, endDate, type, sortBy })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            currentLogs = data.logs;
+            renderLogs(data.logs);
+            document.getElementById('resultsHeader').style.display = 'flex';
+            document.getElementById('resultsCount').innerHTML = `Found <strong>${data.count}</strong> log${data.count !== 1 ? 's' : ''}`;
+        } else {
+            showAlert('Failed to search logs', 'error');
+        }
+        
+    } catch (error) {
+        console.error('Search error:', error);
+        showAlert('Cannot connect to server', 'error');
+    }
+}
+
+function renderLogs(logs) {
+    const container = document.getElementById('logsContainer');
+    
+    if (logs.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <div style="font-size: 16px; color: var(--beige); margin-bottom: 8px;">No logs found</div>
+                <div>Try adjusting your filters</div>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = logs.map(log => `
+        <div class="log-card">
+            <div class="log-header">
+                <span class="log-type-badge badge-${log.type}">${log.type === 'learning' ? '📝 Learning' : '💻 Coding'}</span>
+                <div class="log-actions">
+                    <button class="icon-btn" onclick="editLog('${log.type}', ${log.log_id})" title="Edit">
+                        ✏️
+                    </button>
+                    <button class="icon-btn" onclick="viewHistory('${log.type}', ${log.log_id})" title="History">
+                        🕘
+                    </button>
+                    <button class="icon-btn delete" onclick="deleteLog('${log.type}', ${log.log_id})" title="Delete">
+                        🗑️
+                    </button>
+                </div>
+            </div>
+            
+            <div class="log-title">${log.title || 'Untitled'}</div>
+            <div class="log-description">${truncate(log.description || 'No description', 200)}</div>
+            
+            <div class="log-meta">
+                <div class="log-meta-item">
+                    📅 ${formatDate(log.date)}
+                </div>
+                ${log.platform ? `<div class="log-meta-item">🔗 ${log.platform}</div>` : ''}
+                ${log.difficulty ? `<div class="log-meta-item">📊 ${log.difficulty}</div>` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+async function editLog(type, id) {
+    try {
+        const response = await fetch(`${API_URL}/logs/details/${type}/${id}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+            showAlert('Failed to load log details', 'error');
+            return;
+        }
+        
+        const log = data.log;
+        
+        document.getElementById('editLogId').value = id;
+        document.getElementById('editLogType').value = type;
+        
+        if (type === 'learning') {
+            document.getElementById('modalTitle').textContent = 'Edit Learning Log';
+
+            document.getElementById('topicGroup').style.display = 'block';
+            document.getElementById('contentGroup').style.display = 'block';
+            document.getElementById('challengesGroup').style.display = 'block';
+
+            document.getElementById('approachGroup').style.display = 'none';
+            document.getElementById('logicGroup').style.display = 'none';   // ✅ FIX
+            document.getElementById('mistakesGroup').style.display = 'none';
+
+            document.getElementById('editTopic').value = log.topic || '';
+            document.getElementById('editContent').value = log.content || '';
+            document.getElementById('editChallenges').value = log.challenges || '';
+            document.getElementById('editDate').value = log.log_date || '';
+
+            document.getElementById('editLogic').value = ''; // cleanup
+            document.getElementById('editMistakes').required = false;
+            document.getElementById('editLogic').required = false;
+        }
+        else {
+            document.getElementById('modalTitle').textContent = 'Edit Coding Log';
+
+            document.getElementById('topicGroup').style.display = 'block';
+
+            document.getElementById('contentGroup').style.display = 'none';
+            document.getElementById('challengesGroup').style.display = 'none';
+
+            document.getElementById('approachGroup').style.display = 'block';
+            document.getElementById('logicGroup').style.display = 'block';   // ✅ FIX
+            document.getElementById('mistakesGroup').style.display = 'block';
+            document.getElementById('editMistakes').required = true;
+            document.getElementById('editLogic').required = true;
+
+            document.getElementById('editTopic').value = log.topic || '';
+            document.getElementById('editApproach').value = log.approach_solution || '';
+            document.getElementById('editLogic').value = log.logic_steps || '';
+            document.getElementById('editMistakes').value = log.mistakes_faced || '';
+            document.getElementById('editDate').value = log.solved_date || '';
+        }
+        
+        document.getElementById('editModal').classList.add('show');
+        
+    } catch (error) {
+        console.error('Edit log error:', error);
+        showAlert('Failed to load log', 'error');
+    }
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').classList.remove('show');
+    document.getElementById('editForm').reset();
+}
+
+async function saveEdit(event) {
+    event.preventDefault();
+    
+    const id = document.getElementById('editLogId').value;
+    const type = document.getElementById('editLogType').value;
+    
+    const saveBtn = document.getElementById('saveBtn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+    
+    try {
+        let data = {};
+        
+        if (type === 'learning') {
+            data = {
+                topic: document.getElementById('editTopic').value,
+                content: document.getElementById('editContent').value,
+                challenges: document.getElementById('editChallenges').value,
+                log_date: document.getElementById('editDate').value
+            };
+        } else {
+            data = {
+                topic: document.getElementById('editTopic').value,
+                approach_solution: document.getElementById('editApproach').value,
+                logic_steps: document.getElementById('editLogic').value,   // ✅ THIS WAS MISSING
+                mistakes_faced: document.getElementById('editMistakes').value,
+                solved_date: document.getElementById('editDate').value
+            };
+        }
+        
+        const response = await fetch(`${API_URL}/logs/${type}/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showAlert('✅ Log updated successfully!', 'success');
+            closeEditModal();
+            searchLogs(); // Refresh list
+        } else {
+            showAlert('❌ ' + result.message, 'error');
+        }
+        
+    } catch (error) {
+        console.error('Save error:', error);
+        showAlert('❌ Failed to update log', 'error');
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save Changes';
+    }
+}
+
+async function deleteLog(type, id) {
+    if (!confirm('Are you sure you want to delete this log? This action cannot be undone.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_URL}/logs/${type}/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showAlert('✅ Log deleted successfully', 'success');
+            searchLogs(); // Refresh list
+        } else {
+            showAlert('❌ ' + result.message, 'error');
+        }
+        
+    } catch (error) {
+        console.error('Delete error:', error);
+        showAlert('❌ Failed to delete log', 'error');
+    }
+}
+
+function resetFilters() {
+    document.getElementById('filterDate').value = '';
+    document.getElementById('filterStartDate').value = '';
+    document.getElementById('filterEndDate').value = '';
+    document.getElementById('filterType').value = 'all';
+    document.getElementById('filterSort').value = 'latest';
+    
+    document.getElementById('logsContainer').innerHTML = `
+        <div class="empty-state">
+            <div class="empty-state-icon">🔍</div>
+            <div style="font-size: 16px; color: var(--beige); margin-bottom: 8px;">No logs displayed</div>
+            <div>Use the filters above to search for logs</div>
+        </div>
+    `;
+    
+    document.getElementById('resultsHeader').style.display = 'none';
+}
+
+function showAlert(message, type) {
+    const alert = document.getElementById('alert');
+    alert.textContent = message;
+    alert.className = `alert alert-${type} show`;
+    setTimeout(() => alert.classList.remove('show'), 5000);
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+    });
+}
+
+function truncate(text, maxLength) {
+    if (!text) return 'No description';
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+}
+
+function loadUserData() {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user.name) {
+        document.getElementById('userName').textContent = user.name;
+        document.getElementById('userAvatar').textContent = user.name.charAt(0).toUpperCase();
+    }
+    if (user.email) {
+        document.getElementById('userEmail').textContent = user.email;
+    }
+}
+
+function handleLogout() {
+    if (confirm('👋 Logout?')) {
+        localStorage.clear();
+        window.location.href = 'index.html';
+    }
+}
+
+function checkAuth() {
+    if (!localStorage.getItem('token')) {
+        window.location.href = 'index.html';
+    }
+}
+
+async function viewHistory(type, id) {
+    try {
+        const response = await fetch(`${API_URL}/logs/history/${type}/${id}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+            showAlert('Failed to load history', 'error');
+            return;
+        }
+
+        const container = document.getElementById('historyContainer');
+
+        if (data.history.length === 0) {
+            container.innerHTML = `<div>No history found</div>`;
+        } else {
+            container.innerHTML = data.history.map(h => `
+                <div style="margin-bottom:15px; padding:10px; border:1px solid #444; border-radius:8px;">
+                    <div><strong>Log Date:</strong> ${formatDate(h.log_date)}</div>
+                    <div><strong>Edited On:</strong> ${formatDate(h.edited_at)}</div>
+                    <div><strong>Topic:</strong> ${h.topic || ''}</div>
+                    
+                    ${h.approach_solution ? `<div><strong>Approach:</strong> ${h.approach_solution}</div>` : ''}
+                    ${h.logic_steps ? `<div><strong>Logic:</strong> ${h.logic_steps}</div>` : ''}
+                    ${h.mistakes_faced ? `<div><strong>Mistakes:</strong> ${h.mistakes_faced}</div>` : ''}
+                    ${h.content ? `<div><strong>Content:</strong> ${h.content}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('historyModal').classList.add('show');
+
+    } catch (error) {
+        console.error('History error:', error);
+        showAlert('Failed to load history', 'error');
+    }
+}
+
+function closeHistoryModal() {
+    document.getElementById('historyModal').classList.remove('show');
+}
+
+init();
+</script>
+
+</body>
+</html>
