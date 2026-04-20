@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>TRACE - Coding Log</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -17,10 +17,11 @@
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh; }
 
+/* ===== SIDEBAR (Desktop) ===== */
 .sidebar {
     position: fixed; left: 0; top: 0; width: 260px; height: 100vh;
     background: var(--charcoal); border-right: 1px solid var(--border);
-    padding: 25px 15px; display: flex; flex-direction: column; overflow-y: auto;
+    padding: 25px 15px; display: flex; flex-direction: column; overflow-y: auto; z-index: 100;
 }
 
 .logo-section {
@@ -59,23 +60,70 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
     width: 42px; height: 42px; border-radius: 8px;
     background: var(--teal); color: var(--beige);
     display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 18px;
+    font-weight: 700; font-size: 18px; flex-shrink: 0;
 }
 
-.user-info { flex: 1; }
-.user-name { font-size: 14px; font-weight: 600; color: var(--beige); }
-.user-email { font-size: 11px; color: rgba(245, 241, 232, 0.5); }
+.user-info { flex: 1; min-width: 0; }
+.user-name { font-size: 14px; font-weight: 600; color: var(--beige); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-email { font-size: 11px; color: rgba(245, 241, 232, 0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .logout-btn {
     background: rgba(90, 159, 159, 0.15); border: none;
     color: var(--teal); cursor: pointer; width: 36px; height: 36px;
-    border-radius: 8px; font-size: 18px;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.3s;
+    border-radius: 8px; font-size: 18px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; transition: all 0.3s;
 }
 
 .logout-btn:hover { background: var(--teal); color: var(--beige); }
 
+/* ===== MOBILE TOP HEADER ===== */
+.mobile-header {
+    display: none;
+    position: fixed; top: 0; left: 0; right: 0; height: 60px;
+    background: var(--charcoal); border-bottom: 1px solid var(--border);
+    align-items: center; justify-content: space-between;
+    padding: 0 16px; z-index: 200;
+}
+
+.mobile-logo { display: flex; align-items: center; gap: 10px; }
+
+.mobile-logo-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--beige); color: var(--charcoal);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 14px;
+}
+
+.mobile-logo-text { font-size: 20px; font-weight: 800; color: var(--beige); }
+
+.mobile-user-avatar {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--teal); color: var(--beige);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 16px;
+}
+
+/* ===== MOBILE BOTTOM NAV ===== */
+.mobile-bottom-nav {
+    display: none;
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--charcoal); border-top: 1px solid var(--border);
+    padding: 8px 0 env(safe-area-inset-bottom, 8px); z-index: 200;
+}
+
+.mobile-nav-items { display: flex; justify-content: space-around; align-items: center; }
+
+.mobile-nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 6px 10px; border-radius: 8px; text-decoration: none;
+    color: rgba(245, 241, 232, 0.5); transition: all 0.2s; min-width: 50px;
+}
+
+.mobile-nav-item.active { color: var(--teal); }
+.mobile-nav-item .m-icon { font-size: 20px; }
+.mobile-nav-item .m-label { font-size: 9px; font-weight: 600; text-align: center; white-space: nowrap; }
+
+/* ===== MAIN CONTENT ===== */
 .main-content { margin-left: 260px; padding: 30px; }
 
 .page-header {
@@ -83,10 +131,7 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
     margin-bottom: 30px; border: 1px solid var(--border);
 }
 
-.page-title {
-    font-size: 28px; font-weight: 800; color: var(--beige); margin-bottom: 8px;
-}
-
+.page-title { font-size: 28px; font-weight: 800; color: var(--beige); margin-bottom: 8px; }
 .page-subtitle { font-size: 14px; color: rgba(245, 241, 232, 0.7); }
 
 .form-container {
@@ -94,15 +139,12 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
     border: 1px solid var(--border); max-width: 1100px;
 }
 
+/* ===== FORM ELEMENTS ===== */
 .date-section {
-    margin-bottom: 30px; padding-bottom: 20px;
-    border-bottom: 1px solid var(--border);
+    margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--border);
 }
 
-.form-label {
-    display: block; font-size: 12px; font-weight: 600;
-    color: var(--beige); margin-bottom: 6px;
-}
+.form-label { display: block; font-size: 12px; font-weight: 600; color: var(--beige); margin-bottom: 6px; }
 
 .form-input {
     width: 100%; max-width: 300px; padding: 12px 14px; border-radius: 8px;
@@ -110,132 +152,45 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
     color: var(--beige); font-size: 14px; transition: all 0.3s;
 }
 
-.form-input:hover {
-    border-color: var(--beige);
-    box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1);
-}
+.form-input:hover { border-color: var(--beige); box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1); }
+.form-input:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px rgba(90, 159, 159, 0.15); }
 
-.form-input:focus {
-    outline: none; border-color: var(--teal);
-    box-shadow: 0 0 0 3px rgba(90, 159, 159, 0.15);
-}
+.problems-section { margin-bottom: 35px; }
 
-.topic-section {
-    margin-bottom: 35px; padding-bottom: 30px;
-    border-bottom: 1px solid var(--border);
-}
+.section-header { font-size: 16px; font-weight: 700; color: var(--beige); margin-bottom: 15px; }
 
-.section-header {
-    font-size: 16px; font-weight: 700; color: var(--beige);
-    margin-bottom: 15px;
-}
-
-.topic-input-group {
-    display: flex; gap: 12px; align-items: flex-end;
-}
-
-.topic-input-wrapper { flex: 1; max-width: 400px; }
-
-.topic-input {
-    width: 100%; padding: 12px 14px; border-radius: 8px;
-    border: 1px solid var(--border); background: rgba(245, 241, 232, 0.05);
-    color: var(--beige); font-size: 14px; transition: all 0.3s;
-}
-
-.topic-input:hover {
-    border-color: var(--beige);
-    box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1);
-}
-
-.topic-input:focus {
-    outline: none; border-color: var(--teal);
-    box-shadow: 0 0 0 3px rgba(90, 159, 159, 0.15);
-}
-
-.select-topic-btn {
-    padding: 12px 24px; border-radius: 8px; font-size: 14px;
-    font-weight: 600; cursor: pointer; transition: all 0.2s;
-    border: none; background: var(--teal); color: var(--beige);
-}
-
-.select-topic-btn:hover {
-    background: #4a8f8f; transform: translateY(-2px);
-}
-
-.selected-topic-display {
-    margin-top: 20px; padding: 15px; background: rgba(90, 159, 159, 0.15);
-    border-radius: 8px; border: 1px solid var(--teal); display: none;
-}
-
-.selected-topic-display.show { display: block; }
-
-.selected-topic-name {
-    font-size: 16px; font-weight: 700; color: var(--teal);
-    display: flex; align-items: center; gap: 10px;
-}
-
-.change-topic-btn {
-    background: rgba(245, 241, 232, 0.1); border: 1px solid var(--border);
-    color: var(--beige); cursor: pointer; padding: 6px 14px;
-    border-radius: 6px; font-size: 12px; font-weight: 600;
-    transition: all 0.2s; margin-left: auto;
-}
-
-.change-topic-btn:hover {
-    background: rgba(245, 241, 232, 0.15);
-    border-color: var(--beige);
-}
-
-.problems-section {
-    margin-bottom: 35px;
-}
-
-.add-problem-btn-container {
-    text-align: center; margin-bottom: 25px;
-}
+.add-problem-btn-container { text-align: center; margin-bottom: 25px; }
 
 .add-problem-btn {
     padding: 12px 30px; border-radius: 8px; font-size: 14px;
     font-weight: 600; cursor: pointer; transition: all 0.2s;
-    border: 1px solid var(--teal); background: rgba(90, 159, 159, 0.1);
-    color: var(--teal);
+    border: 1px solid var(--teal); background: rgba(90, 159, 159, 0.1); color: var(--teal);
 }
 
-.add-problem-btn:hover {
-    background: var(--teal); color: var(--beige);
-}
+.add-problem-btn:hover { background: var(--teal); color: var(--beige); }
 
-.problems-container {
-    display: flex; flex-direction: column; gap: 30px;
-}
+.problems-container { display: flex; flex-direction: column; gap: 30px; }
 
 .problem-card {
     background: rgba(245, 241, 232, 0.03); padding: 25px;
-    border-radius: 10px; border: 1px solid var(--border);
-    position: relative;
+    border-radius: 10px; border: 1px solid var(--border); position: relative;
 }
 
 .problem-card-header {
     display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 20px; padding-bottom: 15px;
-    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border);
 }
 
-.problem-number {
-    font-size: 15px; font-weight: 700; color: var(--teal);
-}
+.problem-number { font-size: 15px; font-weight: 700; color: var(--teal); }
 
 .delete-problem-btn {
     background: rgba(255, 68, 68, 0.1); border: none;
     color: #ff4444; cursor: pointer; width: 32px; height: 32px;
     border-radius: 6px; font-size: 16px;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; transition: all 0.2s;
 }
 
-.delete-problem-btn:hover {
-    background: #ff4444; color: var(--beige);
-}
+.delete-problem-btn:hover { background: #ff4444; color: var(--beige); }
 
 .form-group { margin-bottom: 20px; }
 
@@ -245,49 +200,33 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
     color: var(--beige); font-size: 14px; transition: all 0.3s;
 }
 
-.form-input-full:hover, .form-select:hover, .form-textarea:hover {
-    border-color: var(--beige);
-    box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1);
-}
-
-.form-input-full:focus, .form-select:focus, .form-textarea:focus {
-    outline: none; border-color: var(--teal);
-    box-shadow: 0 0 0 3px rgba(90, 159, 159, 0.15);
-}
-
-.form-input-full:disabled {
-    opacity: 0.6; cursor: not-allowed;
-    background: rgba(245, 241, 232, 0.02);
-}
+.form-input-full:hover, .form-select:hover, .form-textarea:hover { border-color: var(--beige); box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1); }
+.form-input-full:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px rgba(90, 159, 159, 0.15); }
+.form-input-full:disabled { opacity: 0.6; cursor: not-allowed; background: rgba(245, 241, 232, 0.02); }
 
 .form-select {
     cursor: pointer; appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23f5f1e8' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    padding-right: 40px;
-    background-color: #2a2a2a;
-    color: #f5f1e8;
+    background-repeat: no-repeat; background-position: right 14px center;
+    padding-right: 40px; background-color: #2a2a2a; color: #f5f1e8;
 }
 
-.form-textarea {
-    min-height: 100px; resize: vertical;
+.form-textarea { min-height: 100px; resize: vertical; }
+
+/* ===== VOICE BUTTON ===== */
+.voice-row {
+    display: flex; justify-content: flex-end; align-items: center;
+    gap: 10px; margin-bottom: 15px;
 }
 
-.suggestions-section {
-    margin-top: 25px; padding-top: 25px;
-    border-top: 1px solid var(--border);
-}
+.voice-status-text { font-size: 12px; color: rgba(245, 241, 232, 0.6); }
 
-.suggestions-header {
-    font-size: 14px; font-weight: 600; color: var(--teal);
-    margin-bottom: 15px; display: flex; align-items: center; gap: 8px;
-}
+/* ===== SUGGESTIONS ===== */
+.suggestions-section { margin-top: 25px; padding-top: 25px; border-top: 1px solid var(--border); }
 
-.suggestions-grid {
-    display: grid; grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-}
+.suggestions-header { font-size: 14px; font-weight: 600; color: var(--teal); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+
+.suggestions-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 
 .suggestion-card {
     background: rgba(90, 159, 159, 0.05); padding: 12px;
@@ -295,79 +234,36 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
     cursor: pointer; transition: all 0.2s;
 }
 
-.suggestion-card:hover {
-    background: rgba(90, 159, 159, 0.15);
-    border-color: var(--teal);
-    transform: translateY(-2px);
-}
+.suggestion-card:hover { background: rgba(90, 159, 159, 0.15); border-color: var(--teal); transform: translateY(-2px); }
 
-.suggestion-name {
-    font-size: 13px; font-weight: 600; color: var(--beige);
-    margin-bottom: 6px;
-}
+.suggestion-name { font-size: 13px; font-weight: 600; color: var(--beige); margin-bottom: 6px; }
 
-.suggestion-meta {
-    display: flex; gap: 8px; flex-wrap: wrap;
-}
+.suggestion-meta { display: flex; gap: 8px; flex-wrap: wrap; }
 
-.suggestion-badge {
-    padding: 3px 8px; border-radius: 4px; font-size: 10px;
-    font-weight: 600;
-}
-
+.suggestion-badge { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; }
 .badge-easy { background: rgba(78, 201, 148, 0.2); color: #4ec994; }
 .badge-medium { background: rgba(240, 168, 50, 0.2); color: #f0a832; }
 .badge-hard { background: rgba(224, 92, 92, 0.2); color: #e05c5c; }
 .badge-platform { background: rgba(245, 241, 232, 0.1); color: rgba(245, 241, 232, 0.7); }
 
-.hint-text {
-    font-size: 11px; color: rgba(245, 241, 232, 0.5);
-    margin-top: 8px; padding: 10px 14px;
-    background: rgba(245, 241, 232, 0.03);
-    border-radius: 6px; border-left: 3px solid var(--teal);
-}
-
+/* ===== ACTION BUTTONS ===== */
 .action-buttons {
-    display: flex; gap: 15px; padding-top: 25px;
-    border-top: 1px solid var(--border);
+    display: flex; gap: 15px; padding-top: 25px; border-top: 1px solid var(--border);
 }
 
-.btn {
-    padding: 13px 30px; border-radius: 8px; font-size: 14px;
-    font-weight: 600; cursor: pointer; transition: all 0.2s; border: none;
-}
+.btn { padding: 13px 30px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; }
+.btn-primary { background: var(--teal); color: var(--beige); }
+.btn-primary:hover { background: #4a8f8f; transform: translateY(-2px); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-secondary { background: rgba(245, 241, 232, 0.1); color: var(--beige); border: 1px solid var(--border); }
+.btn-secondary:hover { background: rgba(245, 241, 232, 0.15); border-color: var(--beige); }
 
-.btn-primary {
-    background: var(--teal); color: var(--beige);
-}
-
-.btn-primary:hover {
-    background: #4a8f8f; transform: translateY(-2px);
-}
-
-.btn-primary:disabled {
-    opacity: 0.5; cursor: not-allowed; transform: none;
-}
-
-.btn-secondary {
-    background: rgba(245, 241, 232, 0.1);
-    color: var(--beige); border: 1px solid var(--border);
-}
-
-.btn-secondary:hover {
-    background: rgba(245, 241, 232, 0.15);
-    border-color: var(--beige);
-}
-
-.alert {
-    padding: 13px 18px; border-radius: 8px; margin-bottom: 20px;
-    font-size: 13px; display: none; align-items: center; gap: 10px;
-}
-
+.alert { padding: 13px 18px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; display: none; align-items: center; gap: 10px; }
 .alert.show { display: flex; }
 .alert-success { background: rgba(90, 159, 159, 0.2); color: var(--teal); border: 1px solid var(--teal); }
 .alert-error { background: rgba(255, 68, 68, 0.2); color: #ff4444; border: 1px solid #ff4444; }
 
+/* ===== MODAL ===== */
 .modal-overlay {
     position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8);
     display: none; align-items: center; justify-content: center; z-index: 1000;
@@ -380,33 +276,92 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
     border-radius: 12px; padding: 30px; max-width: 500px; width: 90%;
 }
 
-.modal-title {
-    font-size: 18px; font-weight: 700; color: var(--beige);
-    margin-bottom: 15px;
-}
+.modal-title { font-size: 18px; font-weight: 700; color: var(--beige); margin-bottom: 15px; }
+.modal-text { font-size: 14px; color: rgba(245, 241, 232, 0.8); margin-bottom: 20px; }
+.modal-actions { display: flex; gap: 12px; justify-content: flex-end; }
 
-.modal-text {
-    font-size: 14px; color: rgba(245, 241, 232, 0.8);
-    margin-bottom: 20px;
-}
-
-.modal-actions {
-    display: flex; gap: 12px; justify-content: flex-end;
-}
-
+/* ===== TABLET ===== */
 @media (max-width: 1024px) {
     .sidebar { width: 70px; padding: 20px 10px; }
     .logo-text, .nav-item span, .user-info { display: none; }
     .main-content { margin-left: 70px; padding: 20px; }
     .suggestions-grid { grid-template-columns: 1fr; }
 }
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+    .sidebar { display: none; }
+    .mobile-header { display: flex; }
+    .mobile-bottom-nav { display: block; }
+
+    .main-content {
+        margin-left: 0;
+        padding: 80px 16px 90px;
+    }
+
+    .page-header { padding: 20px; }
+    .page-title { font-size: 22px; }
+    .page-subtitle { font-size: 13px; }
+
+    .form-container { padding: 18px; }
+
+    /* Prevent iOS zoom on inputs */
+    .form-input,
+    .form-input-full,
+    .form-select,
+    .form-textarea { font-size: 16px; }
+
+    .form-input { max-width: 100%; }
+
+    .date-section { margin-bottom: 20px; padding-bottom: 16px; }
+
+    .problem-card { padding: 16px; }
+
+    .problem-card-header { margin-bottom: 16px; padding-bottom: 12px; }
+
+    .suggestions-grid { grid-template-columns: 1fr; }
+
+    .suggestion-card { padding: 10px; }
+    .suggestion-name { font-size: 12px; }
+
+    .action-buttons {
+        flex-direction: column;
+        gap: 10px;
+        padding-top: 20px;
+    }
+
+    .btn { width: 100%; padding: 15px; font-size: 15px; text-align: center; }
+
+    .add-problem-btn { width: 100%; padding: 14px; }
+
+    .voice-row { flex-wrap: wrap; gap: 8px; }
+    .voice-status-text { font-size: 11px; }
+
+    .modal { padding: 20px; }
+    .modal-actions { flex-direction: column-reverse; }
+    .modal-actions .btn { width: 100%; text-align: center; }
+}
 </style>
 </head>
 <body>
 
+<!-- ===== MOBILE TOP HEADER ===== -->
+<div class="mobile-header">
+    <div class="mobile-logo">
+        <div class="logo">
+            <img src="logo.png" alt="TRACE Logo" class="logo-small">
+        </div>
+        <div class="mobile-logo-text">TRACE</div>
+    </div>
+    <div class="mobile-user-avatar" id="mobileAvatar">U</div>
+</div>
+
+<!-- ===== DESKTOP SIDEBAR ===== -->
 <div class="sidebar">
     <div class="logo-section">
-        <div class="logo-small">TR</div>
+        <div class="logo">
+            <img src="logo.png" alt="TRACE Logo" class="logo-small">
+        </div>
         <div class="logo-text">TRACE</div>
     </div>
     
@@ -447,6 +402,37 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
     </div>
 </div>
 
+<!-- ===== MOBILE BOTTOM NAV ===== -->
+<div class="mobile-bottom-nav">
+    <div class="mobile-nav-items">
+        <a href="dashboard.html" class="mobile-nav-item">
+            <span class="m-icon">📊</span>
+            <span class="m-label">Home</span>
+        </a>
+        <a href="learning-log.html" class="mobile-nav-item">
+            <span class="m-icon">📝</span>
+            <span class="m-label">Learn</span>
+        </a>
+        <a href="coding-log.html" class="mobile-nav-item active">
+            <span class="m-icon">💻</span>
+            <span class="m-label">Code</span>
+        </a>
+        <a href="ai-recaps.html" class="mobile-nav-item">
+            <span class="m-icon">🤖</span>
+            <span class="m-label">AI</span>
+        </a>
+        <a href="analytics.html" class="mobile-nav-item">
+            <span class="m-icon">📈</span>
+            <span class="m-label">Stats</span>
+        </a>
+        <a href="manage-logs.html" class="mobile-nav-item">
+            <span class="m-icon">🔍</span>
+            <span class="m-label">Manage</span>
+        </a>
+    </div>
+</div>
+
+<!-- ===== MODAL ===== -->
 <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
         <div class="modal-title" id="modalTitle">Confirm</div>
@@ -458,6 +444,7 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
     </div>
 </div>
 
+<!-- ===== MAIN CONTENT ===== -->
 <div class="main-content">
     
     <div class="page-header">
@@ -468,21 +455,20 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
     <div class="form-container">
         
         <div id="alert" class="alert"></div>
-        <div style="display:flex; justify-content:flex-end; margin-bottom:15px; align-items:center; gap:10px;">
-            <span id="voiceStatus" style="font-size:12px; color:rgba(245,241,232,0.6);">
-                Click a field and speak
-            </span>
-            <button type="button" id="globalVoiceBtn" class="btn btn-secondary">
+
+        <div class="voice-row">
+            <span id="voiceStatus" class="voice-status-text">Click a field and speak</span>
+            <button type="button" id="globalVoiceBtn" class="btn btn-secondary" style="padding:10px 16px; font-size:18px; width:auto;">
                 🎤
             </button>
         </div>
+
         <form id="codingForm" onsubmit="saveCodingLog(event)">
             
             <div class="date-section">
                 <label class="form-label">📅 Date</label>
                 <input type="date" id="log_date" class="form-input" required>
             </div>
-            
             
             <div class="problems-section" id="problemsSection">
                 <div class="section-header">💻 Step 1: Add Problems</div>
@@ -515,7 +501,6 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
 const API_URL = 'http://localhost:5000/api';
 const token = localStorage.getItem('token');
 
-
 let suggestions = [];
 let problems = [];
 let problemCounter = 0;
@@ -528,229 +513,124 @@ async function init() {
 
 function normalizeTopic(topic) {
     if (!topic) return '';
-
-    // Step 1: lowercase + trim
     let t = topic.toLowerCase().trim();
-
-    // Step 2: replace symbols with space
     t = t.replace(/[^a-z0-9]/g, ' ');
-
-    // Step 3: remove extra spaces
     t = t.replace(/\s+/g, ' ').trim();
-
-    // Step 4: split into words
     const words = t.split(' ');
-
-    // Step 5: normalize each word
     const keywordMap = {
-        'dp': 'dynamic programming',
-        'dynamic': 'dynamic programming',
-        'programming': 'dynamic programming',
-
-        'array': 'array',
-        'arrays': 'array',
-
-        'hash': 'hashing',
-        'hashing': 'hashing',
-
-        'graph': 'graph',
-        'graphs': 'graph',
-        'bfs': 'graph',
-        'dfs': 'graph',
-
-        'tree': 'tree',
-        'trees': 'tree',
-        'binary': 'tree',
-
-        'linked': 'linked list',
-        'list': 'linked list',
-
-        'two': 'two pointers',
-        'pointer': 'two pointers',
-        'pointers': 'two pointers',
-
-        'sliding': 'sliding window',
-        'window': 'sliding window',
-
-        'recursion': 'recursion',
-        'backtracking': 'backtracking',
-        'greedy': 'greedy',
-
-        'heap': 'heap',
-        'priority': 'heap',
-        'queue': 'queue',
-        'stack': 'stack',
-
+        'dp': 'dynamic programming', 'dynamic': 'dynamic programming', 'programming': 'dynamic programming',
+        'array': 'array', 'arrays': 'array',
+        'hash': 'hashing', 'hashing': 'hashing',
+        'graph': 'graph', 'graphs': 'graph', 'bfs': 'graph', 'dfs': 'graph',
+        'tree': 'tree', 'trees': 'tree', 'binary': 'tree',
+        'linked': 'linked list', 'list': 'linked list',
+        'two': 'two pointers', 'pointer': 'two pointers', 'pointers': 'two pointers',
+        'sliding': 'sliding window', 'window': 'sliding window',
+        'recursion': 'recursion', 'backtracking': 'backtracking', 'greedy': 'greedy',
+        'heap': 'heap', 'priority': 'heap', 'queue': 'queue', 'stack': 'stack',
         'search': 'binary search'
     };
-
     let resultSet = new Set();
-
-    for (let word of words) {
-        if (keywordMap[word]) {
-            resultSet.add(keywordMap[word]);
-        }
-    }
-
-    // Step 6: return best match
-    if (resultSet.size > 0) {
-        return Array.from(resultSet)[0];
-    }
-
-    // fallback
+    for (let word of words) { if (keywordMap[word]) resultSet.add(keywordMap[word]); }
+    if (resultSet.size > 0) return Array.from(resultSet)[0];
     return t;
 }
-
 
 async function loadSuggestions(normalized) {
     try {
         const response = await fetch(`${API_URL}/logs/questions/${encodeURIComponent(normalized)}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        
         const data = await response.json();
-        
-        if (data.success) {
-            suggestions = data.questions;
-        }
-    } catch (error) {
-        console.error('Load suggestions error:', error);
-    }
+        if (data.success) suggestions = data.questions;
+    } catch (error) { console.error('Load suggestions error:', error); }
 }
 
-    function addProblem() {
+function addProblem() {
     problemCounter++;
-
     const problem = {
-        id: problemCounter,
-        question_id: null,
-        number: problems.length + 1,
-        topic: '', // now user enters
-        problem_name: '',
-        platform: 'LeetCode',
-        difficulty: 'Easy',
-        approach_solution: '',
-        logic_steps: '',
-        mistakes_faced: '',
-        suggestions: [] // per problem
+        id: problemCounter, question_id: null, number: problems.length + 1,
+        topic: '', problem_name: '', platform: 'LeetCode', difficulty: 'Easy',
+        approach_solution: '', logic_steps: '', mistakes_faced: '', suggestions: []
     };
-
     problems.push(problem);
     renderProblems();
-
     document.getElementById('actionButtons').style.display = 'flex';
 }
 
-
 function deleteProblem(id) {
     problems = problems.filter(p => p.id !== id);
-    problems.forEach((p, index) => {
-        p.number = index + 1;
-    });
+    problems.forEach((p, index) => { p.number = index + 1; });
     renderProblems();
-    
-    if (problems.length === 0) {
-        document.getElementById('actionButtons').style.display = 'none';
-    }
+    if (problems.length === 0) document.getElementById('actionButtons').style.display = 'none';
 }
 
 function renderProblems() {
     const container = document.getElementById('problemsContainer');
-
-    if (problems.length === 0) {
-        container.innerHTML = '';
-        return;
-    }
-
+    if (problems.length === 0) { container.innerHTML = ''; return; }
     container.innerHTML = problems.map(problem => `
         <div class="problem-card" data-id="${problem.id}">
-            
             <div class="problem-card-header">
                 <div class="problem-number">Problem #${problem.number}</div>
-                <button type="button" class="delete-problem-btn" onclick="deleteProblem(${problem.id})">
-                    🗑️
-                </button>
+                <button type="button" class="delete-problem-btn" onclick="deleteProblem(${problem.id})">🗑️</button>
             </div>
-
             <div class="form-group">
                 <label class="form-label">Topic Name *</label>
-                <input type="text" class="form-input-full" 
-                       id="topic_${problem.id}"
-                       placeholder="Enter topic (e.g., Arrays, DP...)"
-                       value="${problem.topic}"
+                <input type="text" class="form-input-full" id="topic_${problem.id}"
+                       placeholder="Enter topic (e.g., Arrays, DP...)" value="${problem.topic}"
                        onchange="updateTopic(${problem.id}, this.value)">
             </div>
-
             <div class="form-group">
                 <label class="form-label">Problem Name *</label>
-                <input type="text" class="form-input-full"
-                       id="name_${problem.id}"
+                <input type="text" class="form-input-full" id="name_${problem.id}"
                        value="${problem.problem_name}"
                        onchange="updateProblem(${problem.id}, 'problem_name', this.value)">
             </div>
-
             <div class="form-group">
                 <label class="form-label">Platform</label>
-                <select class="form-select"
-                    onchange="updateProblem(${problem.id}, 'platform', this.value)">
-                <option value="LeetCode" ${problem.platform === 'LeetCode' ? 'selected' : ''}>LeetCode</option>
-                <option value="HackerRank" ${problem.platform === 'HackerRank' ? 'selected' : ''}>HackerRank</option>
-                <option value="CodeChef" ${problem.platform === 'CodeChef' ? 'selected' : ''}>CodeChef</option>
-                <option value="Codeforces" ${problem.platform === 'Codeforces' ? 'selected' : ''}>Codeforces</option>
-                <option value="GFG" ${problem.platform === 'GFG' ? 'selected' : ''}>GFG</option>
-            </select>
+                <select class="form-select" onchange="updateProblem(${problem.id}, 'platform', this.value)">
+                    <option value="LeetCode" ${problem.platform === 'LeetCode' ? 'selected' : ''}>LeetCode</option>
+                    <option value="HackerRank" ${problem.platform === 'HackerRank' ? 'selected' : ''}>HackerRank</option>
+                    <option value="CodeChef" ${problem.platform === 'CodeChef' ? 'selected' : ''}>CodeChef</option>
+                    <option value="Codeforces" ${problem.platform === 'Codeforces' ? 'selected' : ''}>Codeforces</option>
+                    <option value="GFG" ${problem.platform === 'GFG' ? 'selected' : ''}>GFG</option>
+                </select>
             </div>
-
             <div class="form-group">
                 <label class="form-label">Difficulty</label>
-                <select class="form-select"
-                    onchange="updateProblem(${problem.id}, 'difficulty', this.value)">
-                <option value="Easy" ${problem.difficulty === 'Easy' ? 'selected' : ''}>Easy</option>
-                <option value="Medium" ${problem.difficulty === 'Medium' ? 'selected' : ''}>Medium</option>
-                <option value="Hard" ${problem.difficulty === 'Hard' ? 'selected' : ''}>Hard</option>
-            </select>
+                <select class="form-select" onchange="updateProblem(${problem.id}, 'difficulty', this.value)">
+                    <option value="Easy" ${problem.difficulty === 'Easy' ? 'selected' : ''}>Easy</option>
+                    <option value="Medium" ${problem.difficulty === 'Medium' ? 'selected' : ''}>Medium</option>
+                    <option value="Hard" ${problem.difficulty === 'Hard' ? 'selected' : ''}>Hard</option>
+                </select>
             </div>
-
             <div class="form-group">
                 <label class="form-label">Approach (Idea) *</label>
-                <textarea class="form-textarea"
-                        placeholder="What strategy did you use? (e.g., hashmap, sliding window...)"
+                <textarea class="form-textarea" placeholder="What strategy did you use? (e.g., hashmap, sliding window...)"
                         oninput="updateProblem(${problem.id}, 'approach_solution', this.value)">${problem.approach_solution || ''}</textarea>
             </div>
-
             <div class="form-group">
                 <label class="form-label">Logic (Steps) *</label>
-                <textarea class="form-textarea"
-                        placeholder="Write step-by-step logic (not full code)..."
+                <textarea class="form-textarea" placeholder="Write step-by-step logic (not full code)..."
                         oninput="updateProblem(${problem.id}, 'logic_steps', this.value)">${problem.logic_steps || ''}</textarea>
             </div>
-
             <div class="form-group">
                 <label class="form-label">Mistakes *</label>
                 <textarea class="form-textarea"
-          oninput="updateProblem(${problem.id}, 'mistakes_faced', this.value)">${problem.mistakes_faced || ''}</textarea>
+                  oninput="updateProblem(${problem.id}, 'mistakes_faced', this.value)">${problem.mistakes_faced || ''}</textarea>
             </div>
-
             ${renderSuggestions(problem)}
-
         </div>
     `).join('');
 }
 
 function renderSuggestions(problem) {
     if (!problem.suggestions || problem.suggestions.length === 0) {
-        return `<div class="suggestions-section">
-            <div style="text-align:center;color:rgba(245,241,232,0.5);">
-                Enter topic to get suggestions
-            </div>
-        </div>`;
+        return `<div class="suggestions-section"><div style="text-align:center;color:rgba(245,241,232,0.5);">Enter topic to get suggestions</div></div>`;
     }
-
     return `
         <div class="suggestions-section">
-            <div class="suggestions-header">
-                💡 Suggested Problems
-            </div>
+            <div class="suggestions-header">💡 Suggested Problems</div>
             <div class="suggestions-grid">
                 ${problem.suggestions.map(q => `
                     <div class="suggestion-card" onclick="handleSuggestionClick(${q.id}, '${problem.topic}', \`${q.question_url}\`, ${problem.id})">
@@ -765,132 +645,73 @@ function renderSuggestions(problem) {
         </div>
     `;
 }
+
 async function handleSuggestionClick(questionId, topic, url, problemId) {
     const problem = problems.find(p => p.id === problemId);
-    if (problem) {
-        problem.question_id = questionId;
-    }
-
+    if (problem) problem.question_id = questionId;
     try {
         await fetch(`${API_URL}/logs/suggestion/click`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                question_id: questionId,
-                topic: topic
-            })
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ question_id: questionId, topic: topic })
         });
-    } catch (err) {
-        console.error('Tracking failed:', err);
-    }
-
-    if (url && url !== 'null') {
-        window.open(url, '_blank');
-    }
+    } catch (err) { console.error('Tracking failed:', err); }
+    if (url && url !== 'null') window.open(url, '_blank');
 }
 
 function applySuggestion(problemId, questionId, name, platform, difficulty) {
     const problem = problems.find(p => p.id === problemId);
     if (!problem) return;
-    
-    problem.problem_name = name;
-    problem.platform = platform;
-    problem.difficulty = difficulty;
-    problem.question_id = questionId;
-    
+    problem.problem_name = name; problem.platform = platform;
+    problem.difficulty = difficulty; problem.question_id = questionId;
     document.getElementById(`name_${problemId}`).value = name;
     document.getElementById(`platform_${problemId}`).value = platform;
     document.getElementById(`difficulty_${problemId}`).value = difficulty;
-    
     showAlert('✅ Suggestion applied! You can edit if needed', 'success');
 }
 
 function updateProblem(id, field, value) {
     const problem = problems.find(p => p.id === id);
-    if (problem) {
-        problem[field] = value;
-    }
+    if (problem) problem[field] = value;
 }
 
 async function saveCodingLog(event) {
     event.preventDefault();
-    
-    if (problems.length === 0) {
-        showAlert('Please add at least one problem', 'error');
-        return;
-    }
-    
-    // Validate all problems
+    if (problems.length === 0) { showAlert('Please add at least one problem', 'error'); return; }
     for (const problem of problems) {
-        if (!problem.problem_name || problem.problem_name.trim() === '') {
-            showAlert(`Problem #${problem.number}: Problem name is required`, 'error');
-            return;
-        }
-        if (!problem.topic || problem.topic.trim() === '') {
-            showAlert(`Problem #${problem.number}: Topic is required`, 'error');
-            return;
-        }
-        if (!problem.mistakes_faced || problem.mistakes_faced.trim() === '') {
-            showAlert(`Problem #${problem.number}: Mistakes field is required`, 'error');
-            return;
-        }
-        if (!problem.logic_steps || problem.logic_steps.trim() === '') {
-            showAlert(`Problem #${problem.number}: Logic field is required`, 'error');
-            return;
-        }
+        if (!problem.problem_name || problem.problem_name.trim() === '') { showAlert(`Problem #${problem.number}: Problem name is required`, 'error'); return; }
+        if (!problem.topic || problem.topic.trim() === '') { showAlert(`Problem #${problem.number}: Topic is required`, 'error'); return; }
+        if (!problem.mistakes_faced || problem.mistakes_faced.trim() === '') { showAlert(`Problem #${problem.number}: Mistakes field is required`, 'error'); return; }
+        if (!problem.logic_steps || problem.logic_steps.trim() === '') { showAlert(`Problem #${problem.number}: Logic field is required`, 'error'); return; }
     }
-    
     const saveBtn = document.getElementById('saveBtn');
     saveBtn.disabled = false;
     saveBtn.textContent = '💾 Save Log';
     try {
-    for (const problem of problems) {
-        const response = await fetch(`${API_URL}/logs/question/solve`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                question_id: problem.question_id || null,
-
-                problem_name: problem.problem_name,
-                difficulty: problem.difficulty,
-                platform: problem.platform,
-                topic_name: problem.topic,
-
-                approach_solution: problem.approach_solution,
-                logic_steps: problem.logic_steps,
-                mistakes_faced: problem.mistakes_faced,
-
-                solved_date: document.getElementById('log_date').value
-            })
-        });
-
-        const result = await response.json();
-
-        if (!result.success) {
-            console.error("Backend error:", result);
-            throw new Error(result.message || JSON.stringify(result));
+        for (const problem of problems) {
+            const response = await fetch(`${API_URL}/logs/question/solve`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({
+                    question_id: problem.question_id || null,
+                    problem_name: problem.problem_name, difficulty: problem.difficulty,
+                    platform: problem.platform, topic_name: problem.topic,
+                    approach_solution: problem.approach_solution, logic_steps: problem.logic_steps,
+                    mistakes_faced: problem.mistakes_faced,
+                    solved_date: document.getElementById('log_date').value
+                })
+            });
+            const result = await response.json();
+            if (!result.success) { console.error("Backend error:", result); throw new Error(result.message || JSON.stringify(result)); }
         }
+        showAlert('✅ All problems saved successfully!', 'success');
+        setTimeout(() => { window.location.href = 'dashboard.html'; }, 1500);
+    } catch (error) {
+        console.error('Save error:', error);
+        showAlert('❌ Cannot connect to server', 'error');
+        saveBtn.disabled = false;
+        saveBtn.textContent = '💾 Save Log';
     }
-
-    // ✅ If all saved
-    showAlert('✅ All problems saved successfully!', 'success');
-    setTimeout(() => {
-        window.location.href = 'dashboard.html';
-    }, 1500);
-
-} catch (error) {
-    console.error('Save error:', error);
-    showAlert('❌ Cannot connect to server', 'error');
-    saveBtn.disabled = false;
-    saveBtn.textContent = '💾 Save Log';
-}
-    
 }
 
 function showAlert(message, type) {
@@ -903,22 +724,13 @@ function showAlert(message, type) {
 function showModal(title, text, onConfirm) {
     document.getElementById('modalTitle').textContent = title;
     document.getElementById('modalText').textContent = text;
-    document.getElementById('modalConfirmBtn').onclick = () => {
-        closeModal();
-        onConfirm();
-    };
+    document.getElementById('modalConfirmBtn').onclick = () => { closeModal(); onConfirm(); };
     document.getElementById('modalOverlay').classList.add('show');
 }
 
-function closeModal() {
-    document.getElementById('modalOverlay').classList.remove('show');
-}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
 
-function resetForm() {
-    if (confirm('Reset the entire form?')) {
-        window.location.reload();
-    }
-}
+function resetForm() { if (confirm('Reset the entire form?')) window.location.reload(); }
 
 function setTodayDate() {
     const today = new Date().toISOString().split('T')[0];
@@ -930,72 +742,34 @@ function loadUserData() {
     if (user.name) {
         document.getElementById('userName').textContent = user.name;
         document.getElementById('userAvatar').textContent = user.name.charAt(0).toUpperCase();
+        const mob = document.getElementById('mobileAvatar');
+        if (mob) mob.textContent = user.name.charAt(0).toUpperCase();
     }
-    if (user.email) {
-        document.getElementById('userEmail').textContent = user.email;
-    }
+    if (user.email) document.getElementById('userEmail').textContent = user.email;
 }
 
-function handleLogout() {
-    if (confirm('👋 Logout?')) {
-        localStorage.clear();
-        window.location.href = 'index.html';
-    }
-}
-
-function checkAuth() {
-    if (!localStorage.getItem('token')) {
-        window.location.href = 'index.html';
-    }
-}
+function handleLogout() { if (confirm('👋 Logout?')) { localStorage.clear(); window.location.href = 'index.html'; } }
+function checkAuth() { if (!localStorage.getItem('token')) window.location.href = 'index.html'; }
 
 async function updateTopic(problemId, topic) {
     const problem = problems.find(p => p.id === problemId);
     if (!problem) return;
-
     problem.topic = topic;
-
-    if (!topic.trim()) {
-        problem.suggestions = [];
-        renderProblems();
-        return;
-    }
-
+    if (!topic.trim()) { problem.suggestions = []; renderProblems(); return; }
     try {
         const normalized = normalizeTopic(topic);
-        console.log("INPUT:", topic);
-        console.log("NORMALIZED:", normalized);
-
         const response = await fetch(`${API_URL}/logs/questions/${encodeURIComponent(normalized)}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-
         const data = await response.json();
-
         if (data.success) {
             const easy = data.questions.filter(q => q.difficulty === "Easy");
             const medium = data.questions.filter(q => q.difficulty === "Medium");
             const hard = data.questions.filter(q => q.difficulty === "Hard");
-
-            // shuffle helper
-            function shuffle(arr) {
-                return arr.sort(() => Math.random() - 0.5);
-            }
-
-            problem.suggestions = [
-                ...shuffle(easy).slice(0, 3),
-                ...shuffle(medium).slice(0, 4),
-                ...shuffle(hard).slice(0, 3)
-            ];
-        } else {
-            problem.suggestions = [];
-        }
-
-    } catch (error) {
-        console.error(error);
-        problem.suggestions = [];
-    }
-
+            function shuffle(arr) { return arr.sort(() => Math.random() - 0.5); }
+            problem.suggestions = [...shuffle(easy).slice(0, 3), ...shuffle(medium).slice(0, 4), ...shuffle(hard).slice(0, 3)];
+        } else { problem.suggestions = []; }
+    } catch (error) { console.error(error); problem.suggestions = []; }
     renderProblems();
 }
 
@@ -1003,91 +777,47 @@ let recognition;
 let isRecording = false;
 
 function initVoice() {
-    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-        console.warn("Voice not supported");
-        return;
-    }
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) { console.warn("Voice not supported"); return; }
     let lastFocusedField = null;
     document.addEventListener('focusin', (e) => {
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-            lastFocusedField = e.target;
-        }
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') lastFocusedField = e.target;
     });
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
     recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = 'en-IN';
-
+    recognition.continuous = false; recognition.interimResults = false; recognition.lang = 'en-IN';
     recognition.onstart = () => {
         isRecording = true;
         document.getElementById('voiceStatus').textContent = 'Listening...';
         document.getElementById('globalVoiceBtn').classList.add('recording');
     };
-
     recognition.onend = () => {
         isRecording = false;
         document.getElementById('voiceStatus').textContent = 'Click a field and speak';
         document.getElementById('globalVoiceBtn').classList.remove('recording');
     };
-
-recognition.onresult = (event) => {
-    const result = event.results[event.resultIndex];
-
-    if (!result.isFinal) return;
-
-    const transcript = result[0].transcript.trim();
-
-    const field = lastFocusedField;
-
-    if (!field) return;
-
-    // ❗ Avoid duplicate same text
-    if (field.value.endsWith(transcript)) return;
-
-    field.value = field.value
-        ? field.value + ' ' + transcript
-        : transcript;
-
-    field.dispatchEvent(new Event('input'));
-};
-
+    recognition.onresult = (event) => {
+        const result = event.results[event.resultIndex];
+        if (!result.isFinal) return;
+        const transcript = result[0].transcript.trim();
+        const field = lastFocusedField;
+        if (!field) return;
+        if (field.value.endsWith(transcript)) return;
+        field.value = field.value ? field.value + ' ' + transcript : transcript;
+        field.dispatchEvent(new Event('input'));
+    };
     recognition.onerror = (event) => {
         if (event.error === 'no-speech') return;
-
         console.error('Speech error:', event.error);
         showAlert('Voice error: ' + event.error, 'error');
     };
 
-    document.addEventListener('DOMContentLoaded', () => {
-    const btn = document.getElementById('globalVoiceBtn');
-
-    if (!btn) return;
-
-    btn.addEventListener('click', () => {
+    document.getElementById('globalVoiceBtn').addEventListener('click', () => {
         const field = lastFocusedField;
-
-        if (!field) {
-            showAlert('Click inside a field first', 'error');
-            return;
-        }
-
-
-        if (!recognition) {
-            showAlert('Voice not supported', 'error');
-            return;
-        }
-
-        if (!isRecording) {
-            try {
-                recognition.start();
-            } catch (e) {}
-        } else {
-            recognition.stop();
-        }
+        if (!field) { showAlert('Click inside a field first', 'error'); return; }
+        if (!recognition) { showAlert('Voice not supported', 'error'); return; }
+        if (!isRecording) { try { recognition.start(); } catch (e) {} }
+        else { recognition.stop(); }
     });
-});
 }
 
 init();

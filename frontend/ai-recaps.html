@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>TRACE - AI Recaps</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -17,11 +17,11 @@
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh; }
 
-/* Sidebar */
+/* ===== SIDEBAR (Desktop) ===== */
 .sidebar {
     position: fixed; left: 0; top: 0; width: 260px; height: 100vh;
     background: var(--charcoal); border-right: 1px solid var(--border);
-    padding: 25px 15px; display: flex; flex-direction: column;
+    padding: 25px 15px; display: flex; flex-direction: column; z-index: 100;
 }
 
 .logo-section {
@@ -37,7 +37,6 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
 }
 
 .logo-text { font-size: 24px; font-weight: 800; color: var(--charcoal); }
-
 .nav-menu { flex: 1; }
 
 .nav-item {
@@ -61,24 +60,70 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
     width: 42px; height: 42px; border-radius: 8px;
     background: var(--teal); color: var(--beige);
     display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 18px;
+    font-weight: 700; font-size: 18px; flex-shrink: 0;
 }
 
-.user-info { flex: 1; }
-.user-name { font-size: 14px; font-weight: 600; color: var(--beige); }
-.user-email { font-size: 11px; color: rgba(245, 241, 232, 0.5); }
+.user-info { flex: 1; min-width: 0; }
+.user-name { font-size: 14px; font-weight: 600; color: var(--beige); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-email { font-size: 11px; color: rgba(245, 241, 232, 0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .logout-btn {
     background: rgba(90, 159, 159, 0.15); border: none;
     color: var(--teal); cursor: pointer; width: 36px; height: 36px;
-    border-radius: 8px; font-size: 18px;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.3s; position: relative; overflow: hidden;
+    border-radius: 8px; font-size: 18px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; transition: all 0.3s;
 }
 
 .logout-btn:hover { background: var(--teal); color: var(--beige); }
 
-/* Main Content */
+/* ===== MOBILE TOP HEADER ===== */
+.mobile-header {
+    display: none;
+    position: fixed; top: 0; left: 0; right: 0; height: 60px;
+    background: var(--charcoal); border-bottom: 1px solid var(--border);
+    align-items: center; justify-content: space-between;
+    padding: 0 16px; z-index: 200;
+}
+
+.mobile-logo { display: flex; align-items: center; gap: 10px; }
+
+.mobile-logo-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--beige); color: var(--charcoal);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 14px;
+}
+
+.mobile-logo-text { font-size: 20px; font-weight: 800; color: var(--beige); }
+
+.mobile-user-avatar {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--teal); color: var(--beige);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 16px;
+}
+
+/* ===== MOBILE BOTTOM NAV ===== */
+.mobile-bottom-nav {
+    display: none;
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--charcoal); border-top: 1px solid var(--border);
+    padding: 8px 0 env(safe-area-inset-bottom, 8px); z-index: 200;
+}
+
+.mobile-nav-items { display: flex; justify-content: space-around; align-items: center; }
+
+.mobile-nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 6px 10px; border-radius: 8px; text-decoration: none;
+    color: rgba(245, 241, 232, 0.5); transition: all 0.2s; min-width: 50px;
+}
+
+.mobile-nav-item.active { color: var(--teal); }
+.mobile-nav-item .m-icon { font-size: 20px; }
+.mobile-nav-item .m-label { font-size: 9px; font-weight: 600; text-align: center; white-space: nowrap; }
+
+/* ===== MAIN CONTENT ===== */
 .main-content { margin-left: 260px; padding: 30px; }
 
 .page-header {
@@ -86,13 +131,10 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
     margin-bottom: 30px; border: 1px solid var(--border);
 }
 
-.page-title {
-    font-size: 28px; font-weight: 800; color: var(--beige); margin-bottom: 8px;
-}
-
+.page-title { font-size: 28px; font-weight: 800; color: var(--beige); margin-bottom: 8px; }
 .page-subtitle { font-size: 14px; color: rgba(245, 241, 232, 0.7); }
 
-/* Date Selector */
+/* ===== DATE SELECTOR ===== */
 .date-selector {
     background: var(--charcoal); padding: 30px; border-radius: 12px;
     margin-bottom: 30px; border: 1px solid var(--border);
@@ -102,14 +144,9 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
     display: flex; gap: 20px; align-items: flex-end; margin-bottom: 20px;
 }
 
-.date-group {
-    flex: 1;
-}
+.date-group { flex: 1; }
 
-.date-label {
-    display: block; font-size: 13px; font-weight: 600;
-    color: var(--beige); margin-bottom: 8px;
-}
+.date-label { display: block; font-size: 13px; font-weight: 600; color: var(--beige); margin-bottom: 8px; }
 
 .date-input {
     width: 100%; padding: 12px 14px; border-radius: 8px;
@@ -117,39 +154,21 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
     color: var(--beige); font-size: 14px; transition: all 0.3s;
 }
 
-.date-input:hover {
-    border-color: var(--beige);
-    box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1);
-}
-
-.date-input:focus {
-    outline: none; border-color: var(--teal);
-    box-shadow: 0 0 0 3px rgba(90, 159, 159, 0.15);
-}
+.date-input:hover { border-color: var(--beige); box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1); }
+.date-input:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px rgba(90, 159, 159, 0.15); }
 
 .generate-btn {
     padding: 12px 30px; border-radius: 8px; font-size: 14px;
     font-weight: 600; cursor: pointer; background: var(--teal);
-    color: var(--beige); border: none; transition: all 0.2s;
-    white-space: nowrap;
+    color: var(--beige); border: none; transition: all 0.2s; white-space: nowrap;
 }
 
-.generate-btn:hover {
-    background: #4a8f8f; transform: translateY(-2px);
-}
+.generate-btn:hover { background: #4a8f8f; transform: translateY(-2px); }
+.generate-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-.generate-btn:disabled {
-    opacity: 0.5; cursor: not-allowed; transform: none;
-}
-
-/* Results */
-.results-container {
-    display: none;
-}
-
-.results-container.show {
-    display: block;
-}
+/* ===== RESULTS ===== */
+.results-container { display: none; }
+.results-container.show { display: block; }
 
 .result-section {
     background: var(--charcoal); padding: 30px; border-radius: 12px;
@@ -161,57 +180,29 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
     margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
 }
 
-.summary-text {
-    line-height: 1.8; color: rgba(245, 241, 232, 0.9);
-    font-size: 14px;
-}
+.summary-text { line-height: 1.8; color: rgba(245, 241, 232, 0.9); font-size: 14px; }
+.summary-text strong { color: var(--beige); font-weight: 700; }
 
-.summary-text strong {
-    color: var(--beige); font-weight: 700;
-}
-
-/* Checklist */
-.checklist-container {
-    display: flex; flex-direction: column; gap: 25px;
-}
+.checklist-container { display: flex; flex-direction: column; gap: 25px; }
 
 .topic-group {
     background: rgba(245, 241, 232, 0.03); padding: 20px;
     border-radius: 10px; border: 1px solid var(--border);
 }
 
-.topic-name {
-    font-size: 16px; font-weight: 700; color: var(--teal);
-    margin-bottom: 15px;
-}
+.topic-name { font-size: 16px; font-weight: 700; color: var(--teal); margin-bottom: 15px; }
 
-.subtopics-list {
-    display: flex; flex-direction: column; gap: 12px;
-}
+.subtopics-list { display: flex; flex-direction: column; gap: 12px; }
 
 .subtopic-item {
     display: flex; align-items: center; gap: 12px;
-    padding: 10px; border-radius: 6px;
-    transition: all 0.2s;
+    padding: 10px; border-radius: 6px; transition: all 0.2s;
 }
 
-.subtopic-item:hover {
-    background: rgba(245, 241, 232, 0.05);
-}
-
-.subtopic-checkbox {
-    width: 20px; height: 20px; cursor: pointer;
-    accent-color: var(--teal);
-}
-
-.subtopic-label {
-    font-size: 14px; color: var(--beige); cursor: pointer;
-}
-
-.subtopic-item.checked .subtopic-label {
-    text-decoration: line-through;
-    color: rgba(245, 241, 232, 0.5);
-}
+.subtopic-item:hover { background: rgba(245, 241, 232, 0.05); }
+.subtopic-checkbox { width: 20px; height: 20px; cursor: pointer; accent-color: var(--teal); flex-shrink: 0; }
+.subtopic-label { font-size: 14px; color: var(--beige); cursor: pointer; }
+.subtopic-item.checked .subtopic-label { text-decoration: line-through; color: rgba(245, 241, 232, 0.5); }
 
 .generate-overview-btn {
     margin-top: 25px; padding: 12px 30px; border-radius: 8px;
@@ -220,100 +211,92 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
     border: 1px solid var(--teal); transition: all 0.2s;
 }
 
-.generate-overview-btn:hover {
-    background: var(--teal); color: var(--beige);
-}
+.generate-overview-btn:hover { background: var(--teal); color: var(--beige); }
+.generate-overview-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.generate-overview-btn:disabled {
-    opacity: 0.5; cursor: not-allowed;
-}
+.overview-content { line-height: 1.8; color: rgba(245, 241, 232, 0.9); font-size: 14px; }
+.overview-content strong { color: var(--teal); font-weight: 700; }
 
-/* Overview */
-.overview-content {
-    line-height: 1.8; color: rgba(245, 241, 232, 0.9);
-    font-size: 14px;
-}
+.loading { text-align: center; padding: 40px; color: rgba(245, 241, 232, 0.7); }
+.loading-spinner { font-size: 32px; margin-bottom: 15px; animation: spin 1s linear infinite; display: block; }
 
-.overview-content strong {
-    color: var(--teal); font-weight: 700;
-}
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-/* Loading */
-.loading {
-    text-align: center; padding: 40px; color: rgba(245, 241, 232, 0.7);
-}
-
-.loading-spinner {
-    font-size: 32px; margin-bottom: 15px;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-/* Alert */
-.alert {
-    padding: 13px 18px; border-radius: 8px; margin-bottom: 20px;
-    font-size: 13px; display: none;
-}
-
+.alert { padding: 13px 18px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; display: none; }
 .alert.show { display: block; }
-.alert-error {
-    background: rgba(255, 68, 68, 0.2); color: #ff4444;
-    border: 1px solid #ff4444;
-}
-.alert-success {
-    background: rgba(90, 159, 159, 0.2); color: var(--teal);
-    border: 1px solid var(--teal);
-}
+.alert-error { background: rgba(255, 68, 68, 0.2); color: #ff4444; border: 1px solid #ff4444; }
+.alert-success { background: rgba(90, 159, 159, 0.2); color: var(--teal); border: 1px solid var(--teal); }
 
-/* Responsive */
+/* ===== TABLET ===== */
 @media (max-width: 1024px) {
     .sidebar { width: 70px; padding: 20px 10px; }
     .logo-text, .nav-item span, .user-info { display: none; }
     .main-content { margin-left: 70px; padding: 20px; }
     .date-inputs { flex-direction: column; }
 }
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+    .sidebar { display: none; }
+    .mobile-header { display: flex; }
+    .mobile-bottom-nav { display: block; }
+
+    .main-content { margin-left: 0; padding: 80px 16px 90px; }
+
+    .page-header { padding: 20px; }
+    .page-title { font-size: 22px; }
+    .page-subtitle { font-size: 13px; }
+
+    .date-selector { padding: 20px; }
+
+    .date-inputs { flex-direction: column; gap: 14px; }
+
+    .date-input { font-size: 16px; }
+
+    .generate-btn { width: 100%; padding: 14px; font-size: 15px; }
+
+    .result-section { padding: 20px; }
+    .section-title { font-size: 17px; }
+    .summary-text { font-size: 13px; }
+
+    .topic-group { padding: 16px; }
+    .topic-name { font-size: 14px; }
+    .subtopic-label { font-size: 13px; }
+
+    .generate-overview-btn { width: 100%; padding: 14px; font-size: 14px; }
+    .overview-content { font-size: 13px; }
+}
 </style>
 </head>
 <body>
 
-<!-- Sidebar -->
+<div class="mobile-header">
+    <div class="mobile-logo">
+        <div class="logo">
+            <img src="logo.png" alt="TRACE Logo" class="logo-small">
+        </div>
+        <div class="mobile-logo-text">TRACE</div>
+    </div>
+    <div class="mobile-user-avatar" id="mobileAvatar">U</div>
+</div>
+
+<!-- ===== DESKTOP SIDEBAR ===== -->
 <div class="sidebar">
     <div class="logo-section">
         <div class="logo">
-        <img src="logo.png" alt="TRACE Logo" class="logo-small">
+            <img src="logo.png" alt="TRACE Logo" class="logo-small">
         </div>
         <div class="logo-text">TRACE</div>
     </div>
     
+    
     <nav class="nav-menu">
-        <a href="dashboard.html" class="nav-item">
-            <span class="nav-icon">📊</span>
-            <span>Dashboard</span>
-        </a>
-        <a href="learning-log.html" class="nav-item">
-            <span class="nav-icon">📝</span>
-            <span>Learning Log</span>
-        </a>
-        <a href="coding-log.html" class="nav-item">
-            <span class="nav-icon">💻</span>
-            <span>Coding Log</span>
-        </a>
-        <a href="ai-recaps.html" class="nav-item active">
-            <span class="nav-icon">🤖</span>
-            <span>AI Recaps</span>
-        </a>
-        <a href="analytics.html" class="nav-item" >
-            <span class="nav-icon">📈</span>
-            <span>Analytics</span>
-        </a>
-        <a href="manage-logs.html" class="nav-item">
-            <span class="nav-icon">🔍</span>
-            <span>Manage Logs</span>
-        </a>
+        <a href="dashboard.html" class="nav-item"><span class="nav-icon">📊</span><span>Dashboard</span></a>
+        <a href="learning-log.html" class="nav-item"><span class="nav-icon">📝</span><span>Learning Log</span></a>
+        <a href="coding-log.html" class="nav-item"><span class="nav-icon">💻</span><span>Coding Log</span></a>
+        <a href="ai-recaps.html" class="nav-item active"><span class="nav-icon">🤖</span><span>AI Recaps</span></a>
+        <a href="analytics.html" class="nav-item"><span class="nav-icon">📈</span><span>Analytics</span></a>
+        <a href="manage-logs.html" class="nav-item"><span class="nav-icon">🔍</span><span>Manage Logs</span></a>
     </nav>
     
     <div class="user-section">
@@ -326,19 +309,28 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
     </div>
 </div>
 
-<!-- Main -->
+<!-- ===== MOBILE BOTTOM NAV ===== -->
+<div class="mobile-bottom-nav">
+    <div class="mobile-nav-items">
+        <a href="dashboard.html" class="mobile-nav-item"><span class="m-icon">📊</span><span class="m-label">Home</span></a>
+        <a href="learning-log.html" class="mobile-nav-item"><span class="m-icon">📝</span><span class="m-label">Learn</span></a>
+        <a href="coding-log.html" class="mobile-nav-item"><span class="m-icon">💻</span><span class="m-label">Code</span></a>
+        <a href="ai-recaps.html" class="mobile-nav-item active"><span class="m-icon">🤖</span><span class="m-label">AI</span></a>
+        <a href="analytics.html" class="mobile-nav-item"><span class="m-icon">📈</span><span class="m-label">Stats</span></a>
+        <a href="manage-logs.html" class="mobile-nav-item"><span class="m-icon">🔍</span><span class="m-label">Manage</span></a>
+    </div>
+</div>
+
+<!-- ===== MAIN CONTENT ===== -->
 <div class="main-content">
     
-    <!-- Page Header -->
     <div class="page-header">
         <div class="page-title">🤖 AI Recaps</div>
         <div class="page-subtitle">Get AI-powered insights from your learning logs</div>
     </div>
     
-    <!-- Date Selector -->
     <div class="date-selector">
         <div id="alert" class="alert"></div>
-        
         <div class="date-inputs">
             <div class="date-group">
                 <label class="date-label">📅 Start Date</label>
@@ -354,36 +346,23 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
         </div>
     </div>
     
-    <!-- Results -->
     <div class="results-container" id="resultsContainer">
         
-        <!-- Summary -->
         <div class="result-section" id="summarySection" style="display:none;">
-            <div class="section-title">
-                <span>📋</span>
-                <span>Learning Summary</span>
-            </div>
+            <div class="section-title"><span>📋</span><span>Learning Summary</span></div>
             <div class="summary-text" id="summaryText"></div>
         </div>
         
-        <!-- Checklist -->
         <div class="result-section" id="checklistSection" style="display:none;">
-            <div class="section-title">
-                <span>✅</span>
-                <span>Topic Checklist</span>
-            </div>
+            <div class="section-title"><span>✅</span><span>Topic Checklist</span></div>
             <div class="checklist-container" id="checklistContainer"></div>
             <button class="generate-overview-btn" id="overviewBtn" onclick="generateOverview()">
                 📚 Generate Overview for Unchecked Topics
             </button>
         </div>
         
-        <!-- Overview -->
         <div class="result-section" id="overviewSection" style="display:none;">
-            <div class="section-title">
-                <span>📖</span>
-                <span>Topics to Learn</span>
-            </div>
+            <div class="section-title"><span>📖</span><span>Topics to Learn</span></div>
             <div class="overview-content" id="overviewContent"></div>
         </div>
         
@@ -407,7 +386,6 @@ function showAlert(message, type) {
 function setDefaultDates() {
     const today = new Date();
     const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-    
     document.getElementById('endDate').value = today.toISOString().split('T')[0];
     document.getElementById('startDate').value = sevenDaysAgo.toISOString().split('T')[0];
 }
@@ -418,40 +396,24 @@ async function generateRecap() {
     const generateBtn = document.getElementById('generateBtn');
     const token = localStorage.getItem('token');
     
-    if (!startDate || !endDate) {
-        showAlert('Please select both start and end dates', 'error');
-        return;
-    }
-    
-    if (new Date(startDate) > new Date(endDate)) {
-        showAlert('Start date must be before end date', 'error');
-        return;
-    }
+    if (!startDate || !endDate) { showAlert('Please select both start and end dates', 'error'); return; }
+    if (new Date(startDate) > new Date(endDate)) { showAlert('Start date must be before end date', 'error'); return; }
     
     generateBtn.disabled = true;
     generateBtn.textContent = '⏳ Generating...';
     
     document.getElementById('resultsContainer').classList.add('show');
     document.getElementById('summarySection').style.display = 'block';
-    document.getElementById('summaryText').innerHTML = '<div class="loading"><div class="loading-spinner">🤖</div><div>AI is analyzing your logs...</div></div>';
+    document.getElementById('summaryText').innerHTML = '<div class="loading"><span class="loading-spinner">🤖</span><div>AI is analyzing your logs...</div></div>';
     
     try {
-        // Fetch logs (grouped by topic)
-        console.log("📡 Fetching logs...");
         const logsResponse = await fetch(`${API_URL}/logs/ai-recap/logs`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ startDate, endDate })
         });
-        
-        if (!logsResponse.ok) {
-            throw new Error("Logs API failed");
-        }
+        if (!logsResponse.ok) throw new Error("Logs API failed");
         const logsData = await logsResponse.json();
-        console.log("📊 Logs received:", logsData);
         
         if (!logsData.success || logsData.logs.length === 0) {
             showAlert('No logs found for this period', 'error');
@@ -465,41 +427,22 @@ async function generateRecap() {
         groupedLogs = logsData.groupedLogs;
         const topics = logsData.topics;
         
-        console.log("📚 Topics found:", topics);
-        
-        // Generate topic-wise summary
-        console.log("🤖 Generating summary...");
         const summaryResponse = await fetch(`${API_URL}/logs/ai-recap/summary`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-            groupedLogs: logsData.groupedLogs,
-            weakTopics: logsData.weakTopics
-        })
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ groupedLogs: logsData.groupedLogs, weakTopics: logsData.weakTopics })
         });
-        if (!summaryResponse.ok) {
-            throw new Error("Logs API failed");
-        }
+        if (!summaryResponse.ok) throw new Error("Summary API failed");
         const summaryData = await summaryResponse.json();
-        console.log("✅ Summary received:", summaryData.success);
         
         if (summaryData.success) {
             document.getElementById('summaryText').innerHTML = 
-                summaryData.summary
-                    .replace(/\n/g, '<br>')
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                summaryData.summary.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         } else {
-            document.getElementById('summaryText').textContent = 
-                summaryData.summary || "Failed to generate summary";
+            document.getElementById('summaryText').textContent = summaryData.summary || "Failed to generate summary";
         }
         
-        // Generate comprehensive checklist
-        if (topics.length > 0) {
-            await generateChecklistFromAPI(topics);
-        }
+        if (topics.length > 0) await generateChecklistFromAPI(topics);
         
     } catch (error) {
         console.error('❌ Generate recap error:', error);
@@ -512,28 +455,17 @@ async function generateRecap() {
 
 async function generateChecklistFromAPI(topics) {
     const token = localStorage.getItem('token');
-    
     document.getElementById('checklistSection').style.display = 'block';
-    document.getElementById('checklistContainer').innerHTML = 
-        '<div class="loading"><div class="loading-spinner">🤖</div><div>Generating comprehensive checklist...</div></div>';
+    document.getElementById('checklistContainer').innerHTML = '<div class="loading"><span class="loading-spinner">🤖</span><div>Generating comprehensive checklist...</div></div>';
     
     try {
-        console.log("🤖 Generating checklist for topics:", topics);
-        
         const response = await fetch(`${API_URL}/logs/ai-recap/checklist`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ topics })
         });
-        
-        if (!response.ok) {
-            throw new Error("Logs API failed");
-        }
+        if (!response.ok) throw new Error("Checklist API failed");
         const data = await response.json();
-        console.log("✅ Checklist received:", data);
         
         if (data.success && data.checklist.length > 0) {
             checklist = data.checklist;
@@ -541,7 +473,6 @@ async function generateChecklistFromAPI(topics) {
         } else {
             document.getElementById('checklistContainer').textContent = 'Could not generate checklist.';
         }
-        
     } catch (error) {
         console.error('❌ Checklist error:', error);
         document.getElementById('checklistContainer').textContent = 'Failed to generate checklist.';
@@ -550,7 +481,6 @@ async function generateChecklistFromAPI(topics) {
 
 function renderChecklist() {
     const container = document.getElementById('checklistContainer');
-    
     container.innerHTML = checklist.map((topic, topicIdx) => `
         <div class="topic-group">
             <div class="topic-name">${topic.mainTopic}</div>
@@ -560,9 +490,7 @@ function renderChecklist() {
                         <input type="checkbox" class="subtopic-checkbox" 
                                id="check_${topicIdx}_${subIdx}"
                                onchange="toggleSubtopic(${topicIdx}, ${subIdx})">
-                        <label class="subtopic-label" for="check_${topicIdx}_${subIdx}">
-                            ${subtopic}
-                        </label>
+                        <label class="subtopic-label" for="check_${topicIdx}_${subIdx}">${subtopic}</label>
                     </div>
                 `).join('')}
             </div>
@@ -573,69 +501,44 @@ function renderChecklist() {
 function toggleSubtopic(topicIdx, subIdx) {
     const item = document.getElementById(`subtopic_${topicIdx}_${subIdx}`);
     const checkbox = document.getElementById(`check_${topicIdx}_${subIdx}`);
-    
-    if (checkbox.checked) {
-        item.classList.add('checked');
-    } else {
-        item.classList.remove('checked');
-    }
+    if (checkbox.checked) { item.classList.add('checked'); } else { item.classList.remove('checked'); }
 }
 
 async function generateOverview() {
     const token = localStorage.getItem('token');
     const overviewBtn = document.getElementById('overviewBtn');
-    
-    // Get unchecked topics
     const uncheckedTopics = [];
     
     checklist.forEach((topic, topicIdx) => {
         topic.subtopics.forEach((subtopic, subIdx) => {
             const checkbox = document.getElementById(`check_${topicIdx}_${subIdx}`);
-            if (!checkbox.checked) {
-                uncheckedTopics.push(subtopic);
-            }
+            if (!checkbox.checked) uncheckedTopics.push(subtopic);
         });
     });
     
-    if (uncheckedTopics.length === 0) {
-        showAlert('✅ All topics completed! Great job!', 'success');
-        return;
-    }
+    if (uncheckedTopics.length === 0) { showAlert('✅ All topics completed! Great job!', 'success'); return; }
     
     overviewBtn.disabled = true;
     overviewBtn.textContent = '⏳ Generating overview...';
     
     document.getElementById('overviewSection').style.display = 'block';
-    document.getElementById('overviewContent').innerHTML = 
-        '<div class="loading"><div class="loading-spinner">🤖</div><div>AI is creating topic overviews...</div></div>';
+    document.getElementById('overviewContent').innerHTML = '<div class="loading"><span class="loading-spinner">🤖</span><div>AI is creating topic overviews...</div></div>';
     
     try {
-        console.log("🤖 Generating overview for unchecked topics:", uncheckedTopics.length);
-        
         const response = await fetch(`${API_URL}/logs/ai-recap/overview`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ topics: uncheckedTopics })
         });
-        if (!response.ok) {
-            throw new Error("Logs API failed");
-        }
+        if (!response.ok) throw new Error("Overview API failed");
         const data = await response.json();
-        console.log("✅ Overview received");
         
         if (data.success) {
             document.getElementById('overviewContent').innerHTML = 
-                data.overview
-                    .replace(/\n/g, '<br>')
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                data.overview.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         } else {
-            document.getElementById('overviewContent').textContent = 
-                data.overview || 'Failed to generate overview.';
+            document.getElementById('overviewContent').textContent = data.overview || 'Failed to generate overview.';
         }
-        
     } catch (error) {
         console.error('❌ Overview error:', error);
         document.getElementById('overviewContent').textContent = 'Failed to generate overview.';
@@ -650,33 +553,17 @@ function loadUserData() {
     if (u.name) {
         document.getElementById('userName').textContent = u.name;
         document.getElementById('userAvatar').textContent = u.name.charAt(0).toUpperCase();
+        const mob = document.getElementById('mobileAvatar');
+        if (mob) mob.textContent = u.name.charAt(0).toUpperCase();
     }
     if (u.email) document.getElementById('userEmail').textContent = u.email;
 }
 
-function handleLogout() {
-    if (confirm('👋 Logout?')) {
-        localStorage.clear();
-        window.location.href = 'index.html';
-    }
-}
+function handleLogout() { if (confirm('👋 Logout?')) { localStorage.clear(); window.location.href = 'index.html'; } }
+function showComingSoon() { alert('🚀 Coming soon!'); }
+function checkAuth() { if (!localStorage.getItem('token')) window.location.href = 'index.html'; }
 
-function showComingSoon() {
-    alert('🚀 Coming soon!');
-}
-
-function checkAuth() {
-    if (!localStorage.getItem('token')) {
-        window.location.href = 'index.html';
-    }
-}
-
-window.onload = () => {
-    checkAuth();
-    loadUserData();
-    setDefaultDates();
-    console.log("✅ AI Recaps page loaded");
-};
+window.onload = () => { checkAuth(); loadUserData(); setDefaultDates(); };
 </script>
 
 </body>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>TRACE - Learning Log</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -17,11 +17,11 @@
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh; }
 
-/* Sidebar */
+/* ===== SIDEBAR (Desktop) ===== */
 .sidebar {
     position: fixed; left: 0; top: 0; width: 260px; height: 100vh;
     background: var(--charcoal); border-right: 1px solid var(--border);
-    padding: 25px 15px; display: flex; flex-direction: column;
+    padding: 25px 15px; display: flex; flex-direction: column; z-index: 100;
 }
 
 .logo-section {
@@ -61,17 +61,17 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
     width: 42px; height: 42px; border-radius: 8px;
     background: var(--teal); color: var(--beige);
     display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 18px;
+    font-weight: 700; font-size: 18px; flex-shrink: 0;
 }
 
-.user-info { flex: 1; }
-.user-name { font-size: 14px; font-weight: 600; color: var(--beige); }
-.user-email { font-size: 11px; color: rgba(245, 241, 232, 0.5); }
+.user-info { flex: 1; min-width: 0; }
+.user-name { font-size: 14px; font-weight: 600; color: var(--beige); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-email { font-size: 11px; color: rgba(245, 241, 232, 0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .logout-btn {
     background: rgba(90, 159, 159, 0.15); border: none;
     color: var(--teal); cursor: pointer; width: 36px; height: 36px;
-    border-radius: 8px; font-size: 18px;
+    border-radius: 8px; font-size: 18px; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
     transition: all 0.3s; position: relative; overflow: hidden;
 }
@@ -85,7 +85,54 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
 .logout-btn:hover .logout-icon { opacity: 0; transform: translateY(-10px); }
 .logout-icon { transition: all 0.3s; }
 
-/* Main Content */
+/* ===== MOBILE TOP HEADER ===== */
+.mobile-header {
+    display: none;
+    position: fixed; top: 0; left: 0; right: 0; height: 60px;
+    background: var(--charcoal); border-bottom: 1px solid var(--border);
+    align-items: center; justify-content: space-between;
+    padding: 0 16px; z-index: 200;
+}
+
+.mobile-logo { display: flex; align-items: center; gap: 10px; }
+
+.mobile-logo-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--beige); color: var(--charcoal);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 14px;
+}
+
+.mobile-logo-text { font-size: 20px; font-weight: 800; color: var(--beige); }
+
+.mobile-user-avatar {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--teal); color: var(--beige);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 16px;
+}
+
+/* ===== MOBILE BOTTOM NAV ===== */
+.mobile-bottom-nav {
+    display: none;
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--charcoal); border-top: 1px solid var(--border);
+    padding: 8px 0 env(safe-area-inset-bottom, 8px); z-index: 200;
+}
+
+.mobile-nav-items { display: flex; justify-content: space-around; align-items: center; }
+
+.mobile-nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 6px 10px; border-radius: 8px; text-decoration: none;
+    color: rgba(245, 241, 232, 0.5); transition: all 0.2s; min-width: 50px;
+}
+
+.mobile-nav-item.active { color: var(--teal); }
+.mobile-nav-item .m-icon { font-size: 20px; }
+.mobile-nav-item .m-label { font-size: 9px; font-weight: 600; text-align: center; white-space: nowrap; }
+
+/* ===== MAIN CONTENT ===== */
 .main-content { margin-left: 260px; padding: 30px; }
 
 .page-header {
@@ -93,50 +140,36 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
     margin-bottom: 30px; border: 1px solid var(--border);
 }
 
-.page-title {
-    font-size: 28px; font-weight: 800; color: var(--beige); margin-bottom: 8px;
-}
-
+.page-title { font-size: 28px; font-weight: 800; color: var(--beige); margin-bottom: 8px; }
 .page-subtitle { font-size: 14px; color: rgba(245, 241, 232, 0.7); }
 
-/* Form Container */
+/* ===== FORM ===== */
 .form-container {
     background: var(--charcoal); padding: 35px; border-radius: 12px;
     border: 1px solid var(--border); max-width: 900px;
 }
 
-/* Top Controls: Date + Voice Button */
 .top-controls {
     display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 30px; padding-bottom: 20px;
-    border-bottom: 1px solid var(--border);
+    margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--border);
+    gap: 16px;
 }
 
-.date-group {
-    flex: 1; max-width: 300px;
-}
+.date-group { flex: 1; max-width: 300px; }
 
-.voice-control {
-    display: flex; align-items: center; gap: 10px;
-}
+.voice-control { display: flex; align-items: center; gap: 10px; }
 
-.voice-status {
-    font-size: 12px; color: rgba(245, 241, 232, 0.6);
-}
+.voice-status { font-size: 12px; color: rgba(245, 241, 232, 0.6); }
 
 .global-voice-btn {
     background: rgba(245, 241, 232, 0.1); border: 1px solid var(--border);
     color: var(--beige); cursor: pointer; width: 50px; height: 50px;
     border-radius: 10px; font-size: 22px;
     display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s;
+    transition: all 0.2s; flex-shrink: 0;
 }
 
-.global-voice-btn:hover {
-    background: rgba(245, 241, 232, 0.15);
-    border-color: var(--beige);
-    box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1);
-}
+.global-voice-btn:hover { background: rgba(245, 241, 232, 0.15); border-color: var(--beige); box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1); }
 
 .global-voice-btn.recording {
     background: #ff4444; color: #fff; border-color: #ff4444;
@@ -148,120 +181,119 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
     50% { opacity: 0.8; transform: scale(1.05); }
 }
 
-.form-group {
-    margin-bottom: 25px;
-}
+.form-group { margin-bottom: 25px; }
 
-.form-label {
-    display: block; font-size: 13px; font-weight: 600;
-    color: var(--beige); margin-bottom: 8px;
-}
+.form-label { display: block; font-size: 13px; font-weight: 600; color: var(--beige); margin-bottom: 8px; }
 
 .form-input, .form-textarea {
     width: 100%; padding: 14px 16px; border-radius: 8px;
-    border: 1px solid var(--border);
-    background: rgba(245, 241, 232, 0.05);
-    color: var(--beige); font-size: 14px;
-    font-family: 'Inter', sans-serif;
-    transition: all 0.3s;
+    border: 1px solid var(--border); background: rgba(245, 241, 232, 0.05);
+    color: var(--beige); font-size: 14px; font-family: 'Inter', sans-serif; transition: all 0.3s;
 }
 
-.form-input::placeholder, .form-textarea::placeholder {
-    color: rgba(245, 241, 232, 0.4);
-}
+.form-input::placeholder, .form-textarea::placeholder { color: rgba(245, 241, 232, 0.4); }
+.form-input:hover, .form-textarea:hover { border-color: var(--beige); box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1); }
+.form-input:focus, .form-textarea:focus { outline: none; border-color: var(--teal); background: rgba(245, 241, 232, 0.08); box-shadow: 0 0 0 3px rgba(90, 159, 159, 0.15); }
+.form-textarea { min-height: 140px; resize: vertical; }
 
-/* HOVER EFFECT - BEIGE SHADOW */
-.form-input:hover, .form-textarea:hover {
-    border-color: var(--beige);
-    box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1);
-}
-
-.form-input:focus, .form-textarea:focus {
-    outline: none;
-    border-color: var(--teal);
-    background: rgba(245, 241, 232, 0.08);
-    box-shadow: 0 0 0 3px rgba(90, 159, 159, 0.15);
-}
-
-.form-textarea {
-    min-height: 140px; resize: vertical;
-}
-
-.hint-text {
-    font-size: 11px; color: rgba(245, 241, 232, 0.5);
-    margin-top: 6px; display: flex; align-items: center; gap: 5px;
-}
+.hint-text { font-size: 11px; color: rgba(245, 241, 232, 0.5); margin-top: 6px; display: flex; align-items: center; gap: 5px; }
 
 .action-buttons {
     display: flex; gap: 15px; margin-top: 35px;
     padding-top: 25px; border-top: 1px solid var(--border);
 }
 
-.btn {
-    padding: 13px 30px; border-radius: 8px; font-size: 14px;
-    font-weight: 600; cursor: pointer; transition: all 0.2s;
-    border: none;
-}
+.btn { padding: 13px 30px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; }
 
-.btn-primary {
-    background: var(--teal); color: var(--beige);
-}
+.btn-primary { background: var(--teal); color: var(--beige); }
+.btn-primary:hover { background: #4a8f8f; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(90, 159, 159, 0.3); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-.btn-primary:hover {
-    background: #4a8f8f; transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(90, 159, 159, 0.3);
-}
+.btn-secondary { background: rgba(245, 241, 232, 0.1); color: var(--beige); border: 1px solid var(--border); }
+.btn-secondary:hover { background: rgba(245, 241, 232, 0.15); border-color: var(--beige); box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1); }
 
-.btn-primary:disabled {
-    opacity: 0.5; cursor: not-allowed; transform: none;
-}
-
-.btn-secondary {
-    background: rgba(245, 241, 232, 0.1);
-    color: var(--beige); border: 1px solid var(--border);
-}
-
-.btn-secondary:hover {
-    background: rgba(245, 241, 232, 0.15);
-    border-color: var(--beige);
-    box-shadow: 0 0 0 3px rgba(245, 241, 232, 0.1);
-}
-
-.alert {
-    padding: 13px 18px; border-radius: 8px; margin-bottom: 20px;
-    font-size: 13px; display: none; align-items: center; gap: 10px;
-}
-
+.alert { padding: 13px 18px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; display: none; align-items: center; gap: 10px; }
 .alert.show { display: flex; }
-.alert-success {
-    background: rgba(90, 159, 159, 0.2); color: var(--teal);
-    border: 1px solid var(--teal);
-}
-.alert-error {
-    background: rgba(255, 68, 68, 0.2); color: #ff4444;
-    border: 1px solid #ff4444;
-}
+.alert-success { background: rgba(90, 159, 159, 0.2); color: var(--teal); border: 1px solid var(--teal); }
+.alert-error { background: rgba(255, 68, 68, 0.2); color: #ff4444; border: 1px solid #ff4444; }
 
-/* Responsive */
+/* ===== TABLET ===== */
 @media (max-width: 1024px) {
     .sidebar { width: 70px; padding: 20px 10px; }
     .logo-text, .nav-item span, .user-info { display: none; }
     .main-content { margin-left: 70px; padding: 20px; }
-    .top-controls { flex-direction: column; align-items: flex-start; gap: 15px; }
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+    .sidebar { display: none; }
+    .mobile-header { display: flex; }
+    .mobile-bottom-nav { display: block; }
+
+    .main-content {
+        margin-left: 0;
+        padding: 80px 16px 90px;
+    }
+
+    .page-header { padding: 20px; }
+    .page-title { font-size: 22px; }
+    .page-subtitle { font-size: 13px; }
+
+    .form-container { padding: 20px; }
+
+    .top-controls {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+    }
+
+    .date-group { flex: 1; min-width: 140px; max-width: none; }
+
+    .form-input { font-size: 16px; /* prevents iOS zoom */ padding: 12px 14px; }
+    .form-textarea { font-size: 16px; min-height: 120px; }
+
+    .form-label { font-size: 12px; }
+    .hint-text { font-size: 10px; }
+
+    .action-buttons {
+        flex-direction: column;
+        margin-top: 24px;
+        padding-top: 20px;
+        gap: 10px;
+    }
+
+    .btn { width: 100%; padding: 15px; font-size: 15px; text-align: center; }
+
+    .voice-status { display: none; }
+    .global-voice-btn { width: 44px; height: 44px; font-size: 20px; }
 }
 </style>
 </head>
 <body>
 
-<!-- Sidebar -->
+<!-- ===== MOBILE TOP HEADER ===== -->
+<div class="mobile-header">
+    <div class="mobile-logo">
+        <div class="logo">
+            <img src="logo.png" alt="TRACE Logo" class="logo-small">
+        </div>
+        <div class="mobile-logo-text">TRACE</div>
+    </div>
+    <div class="mobile-user-avatar" id="mobileAvatar">U</div>
+</div>
+
+<!-- ===== DESKTOP SIDEBAR ===== -->
 <div class="sidebar">
     <div class="logo-section">
         <div class="logo">
-        <img src="logo.png" alt="TRACE Logo" class="logo-small">
+            <img src="logo.png" alt="TRACE Logo" class="logo-small">
         </div>
         <div class="logo-text">TRACE</div>
     </div>
-    
+       
     <nav class="nav-menu">
         <a href="dashboard.html" class="nav-item">
             <span class="nav-icon">📊</span>
@@ -301,23 +333,50 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
     </div>
 </div>
 
-<!-- Main -->
+<!-- ===== MOBILE BOTTOM NAV ===== -->
+<div class="mobile-bottom-nav">
+    <div class="mobile-nav-items">
+        <a href="dashboard.html" class="mobile-nav-item">
+            <span class="m-icon">📊</span>
+            <span class="m-label">Home</span>
+        </a>
+        <a href="learning-log.html" class="mobile-nav-item active">
+            <span class="m-icon">📝</span>
+            <span class="m-label">Learn</span>
+        </a>
+        <a href="coding-log.html" class="mobile-nav-item">
+            <span class="m-icon">💻</span>
+            <span class="m-label">Code</span>
+        </a>
+        <a href="ai-recaps.html" class="mobile-nav-item">
+            <span class="m-icon">🤖</span>
+            <span class="m-label">AI</span>
+        </a>
+        <a href="analytics.html" class="mobile-nav-item">
+            <span class="m-icon">📈</span>
+            <span class="m-label">Stats</span>
+        </a>
+        <a href="manage-logs.html" class="mobile-nav-item">
+            <span class="m-icon">🔍</span>
+            <span class="m-label">Manage</span>
+        </a>
+    </div>
+</div>
+
+<!-- ===== MAIN CONTENT ===== -->
 <div class="main-content">
     
-    <!-- Page Header -->
     <div class="page-header">
         <div class="page-title">📝 Learning Log</div>
         <div class="page-subtitle">Track what you learned today and challenges you faced</div>
     </div>
     
-    <!-- Form -->
     <div class="form-container">
         
         <div id="alert" class="alert"></div>
         
         <form id="learningForm" onsubmit="saveLearningLog(event)">
             
-            <!-- Top Controls: Date + Voice Button -->
             <div class="top-controls">
                 <div class="date-group">
                     <label class="form-label">📅 Date</label>
@@ -332,7 +391,6 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
                 </div>
             </div>
             
-            <!-- Topic -->
             <div class="form-group">
                 <label class="form-label">Topic Name</label>
                 <input type="text" id="topic" class="form-input" 
@@ -341,7 +399,6 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
                 <div class="hint-text">💡 What subject or technology did you study?</div>
             </div>
             
-            <!-- What You Learned -->
             <div class="form-group">
                 <label class="form-label">What You Learned</label>
                 <textarea id="content" class="form-textarea" 
@@ -350,16 +407,14 @@ body { background: var(--dark-charcoal); color: var(--beige); min-height: 100vh;
                 <div class="hint-text">💡 Key concepts, techniques, or insights you gained</div>
             </div>
             
-            <!-- Challenges & Mistakes -->
             <div class="form-group">
-                <label class="form-label">Challenges & Mistakes (Optional)</label>
+                <label class="form-label">Challenges &amp; Mistakes (Optional)</label>
                 <textarea id="challenges" class="form-textarea" 
                           placeholder="What difficulties did you face? What mistakes did you make?"
                           onfocus="setActiveField('challenges')"></textarea>
                 <div class="hint-text">💡 Recording mistakes helps identify patterns</div>
             </div>
             
-            <!-- Buttons -->
             <div class="action-buttons">
                 <button type="submit" class="btn btn-primary" id="saveBtn">
                     💾 Save Log
@@ -381,7 +436,6 @@ let activeField = null;
 let recognition = null;
 let isRecording = false;
 
-// Voice Recognition Setup
 if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognition = new SpeechRecognition();
@@ -390,109 +444,65 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     recognition.lang = 'en-US';
     
     recognition.onresult = (event) => {
-    const result = event.results[event.resultIndex];
-
-    // ❗ Only process FINAL result
-    if (!result.isFinal) return;
-
-    const transcript = result[0].transcript.trim();
-
-    const fieldId = activeField || document.activeElement?.id;
-    if (!fieldId) return;
-
-    const field = document.getElementById(fieldId);
-    if (!field) return;
-
-    field.value += (field.value ? ' ' : '') + transcript;
+        const result = event.results[event.resultIndex];
+        if (!result.isFinal) return;
+        const transcript = result[0].transcript.trim();
+        const fieldId = activeField || document.activeElement?.id;
+        if (!fieldId) return;
+        const field = document.getElementById(fieldId);
+        if (!field) return;
+        field.value += (field.value ? ' ' : '') + transcript;
     };
     
     recognition.onerror = (event) => {
-    if (event.error === 'no-speech') return;
-
-    console.error('Speech error:', event.error);
-    showAlert('Voice error: ' + event.error, 'error');
-    stopVoiceInput();
+        if (event.error === 'no-speech') return;
+        console.error('Speech error:', event.error);
+        showAlert('Voice error: ' + event.error, 'error');
+        stopVoiceInput();
     };
     
     recognition.onend = () => {
         if (isRecording) {
-            try {
-                recognition.start();
-            } catch (e) {}
+            try { recognition.start(); } catch (e) {}
         } else {
             stopVoiceInput();
         }
     };
 }
 
-function setActiveField(fieldId) {
-    activeField = fieldId;
-    updateVoiceStatus();
-}
+function setActiveField(fieldId) { activeField = fieldId; updateVoiceStatus(); }
 
 function toggleVoiceInput() {
-    if (!recognition) {
-        showAlert('Voice input not supported in your browser. Please use Chrome or Edge.', 'error');
-        return;
-    }
-    
-    if (!activeField) {
-        showAlert('Please click on a field first, then click the microphone', 'error');
-        return;
-    }
-    
-    if (isRecording) {
-        stopVoiceInput();
-    } else {
-        startVoiceInput();
-    }
+    if (!recognition) { showAlert('Voice input not supported in your browser. Please use Chrome or Edge.', 'error'); return; }
+    if (!activeField) { showAlert('Please click on a field first, then click the microphone', 'error'); return; }
+    if (isRecording) { stopVoiceInput(); } else { startVoiceInput(); }
 }
 
 function startVoiceInput() {
     activeField = document.activeElement?.id;
-
-    if (!activeField) {
-        showAlert('Click inside a field first', 'error');
-        return;
-    }
+    if (!activeField) { showAlert('Click inside a field first', 'error'); return; }
     const btn = document.getElementById('globalVoiceBtn');
     const status = document.getElementById('voiceStatus');
-    
     btn.classList.add('recording');
-    status.textContent = 'Listening...';
+    if (status) status.textContent = 'Listening...';
     isRecording = true;
-    
-    try {
-        recognition.start();
-    } catch (error) {
-        console.error('Recognition start error:', error);
-        stopVoiceInput();
-    }
+    try { recognition.start(); } catch (error) { console.error('Recognition start error:', error); stopVoiceInput(); }
 }
 
 function stopVoiceInput() {
     const btn = document.getElementById('globalVoiceBtn');
     const status = document.getElementById('voiceStatus');
-    
-    if (recognition) {
-        try {
-            recognition.stop();
-        } catch (error) {}
-    }
-    
+    if (recognition) { try { recognition.stop(); } catch (error) {} }
     btn.classList.remove('recording');
-    status.textContent = 'Click to speak';
+    if (status) status.textContent = 'Click to speak';
     isRecording = false;
 }
 
 function updateVoiceStatus() {
     const status = document.getElementById('voiceStatus');
+    if (!status) return;
     if (activeField) {
-        const fieldNames = {
-            'topic': 'Topic',
-            'content': 'What You Learned',
-            'challenges': 'Challenges'
-        };
+        const fieldNames = { 'topic': 'Topic', 'content': 'What You Learned', 'challenges': 'Challenges' };
         status.textContent = `Ready for: ${fieldNames[activeField] || activeField}`;
     }
 }
@@ -506,44 +516,26 @@ function showAlert(message, type) {
 
 async function saveLearningLog(event) {
     event.preventDefault();
-    
     const saveBtn = document.getElementById('saveBtn');
     const token = localStorage.getItem('token');
-    
-    if (!token) {
-        alert('Please login first');
-        window.location.href = 'index.html';
-        return;
-    }
-    
+    if (!token) { alert('Please login first'); window.location.href = 'index.html'; return; }
     const data = {
         topic: document.getElementById('topic').value.trim(),
         content: document.getElementById('content').value.trim(),
         challenges: document.getElementById('challenges').value.trim(),
         log_date: document.getElementById('log_date').value
     };
-    
     saveBtn.disabled = true;
     saveBtn.textContent = '💾 Saving...';
-    
     try {
         const response = await fetch('http://localhost:5000/api/logs/learning', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
-            },
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
             body: JSON.stringify(data)
         });
-        
         const result = await response.json();
-        
-        if (result.success) {
-            alert('✅ Learning log saved!');
-            window.location.href = 'dashboard.html';
-        } else {
-            alert('❌ ' + result.message);
-        }
+        if (result.success) { alert('✅ Learning log saved!'); window.location.href = 'dashboard.html'; }
+        else { alert('❌ ' + result.message); }
     } catch (error) {
         console.error('Error:', error);
         alert('❌ Cannot connect to server');
@@ -572,10 +564,10 @@ function loadUserData() {
     if (user.name) {
         document.getElementById('userName').textContent = user.name;
         document.getElementById('userAvatar').textContent = user.name.charAt(0).toUpperCase();
+        const mob = document.getElementById('mobileAvatar');
+        if (mob) mob.textContent = user.name.charAt(0).toUpperCase();
     }
-    if (user.email) {
-        document.getElementById('userEmail').textContent = user.email;
-    }
+    if (user.email) document.getElementById('userEmail').textContent = user.email;
 }
 
 function handleLogout() {
@@ -586,21 +578,10 @@ function handleLogout() {
     }
 }
 
-function showComingSoon() {
-    alert('🚀 Feature coming soon!');
-}
+function showComingSoon() { alert('🚀 Feature coming soon!'); }
+function checkAuth() { if (!localStorage.getItem('token')) window.location.href = 'index.html'; }
 
-function checkAuth() {
-    if (!localStorage.getItem('token')) {
-        window.location.href = 'index.html';
-    }
-}
-
-window.onload = () => {
-    checkAuth();
-    loadUserData();
-    setTodayDate();
-};
+window.onload = () => { checkAuth(); loadUserData(); setTodayDate(); };
 </script>
 
 </body>
