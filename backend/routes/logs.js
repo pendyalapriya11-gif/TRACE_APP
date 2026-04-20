@@ -15,7 +15,47 @@ const topicGraph = {
   "Queue": ["Breadth-First Search"],
 };
 
+const topicMap = {
+    "array": "Array",
+    "arrays": "Array",
 
+    "string": "String",
+    "strings": "String",
+
+    "tree": "Tree",
+    "trees": "Tree",
+
+    "graph": "Graph",
+    "graphs": "Graph",
+
+    "dp": "Dynamic Programming",
+    "dynamic programming": "Dynamic Programming"
+};
+
+// Topic normalization
+function normalizeTopic(topic) {
+    if (!topic) return '';
+
+    const clean = topic.trim().toLowerCase();
+
+    // 🔥 1. exact mapping (high accuracy)
+    if (topicMap[clean]) {
+        return topicMap[clean];
+    }
+
+    // 🔥 2. smart keyword detection (flexible)
+    if (clean.includes("array")) return "Array";
+    if (clean.includes("tree")) return "Tree";
+    if (clean.includes("graph")) return "Graph";
+    if (clean.includes("string")) return "String";
+    if (clean.includes("dp") || clean.includes("dynamic")) return "Dynamic Programming";
+
+    // 🔥 3. fallback (IMPORTANT)
+    return clean
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+}
 // ========================================
 // LEARNING LOG ROUTES
 // ========================================
@@ -23,18 +63,28 @@ const topicGraph = {
 // Create Learning Log
 router.post('/learning', auth, async (req, res) => {
     try {
-        const { topic, content, challenges, log_date } = req.body;
-        const userId = req.user.userId; 
+        let { topic, content, challenges, log_date } = req.body;
+        const userId = req.user.userId;
+
+        // 🔥 NORMALIZE TOPIC (THIS IS THE FIX)
+        topic = normalizeTopic(topic);
 
         await db.query(
             'INSERT INTO learning_logs (user_id, topic, content, challenges, log_date) VALUES (?, ?, ?, ?, ?)',
             [userId, topic, content, challenges || '', log_date]
         );
 
+        // clear cache
+        await db.query(
+            'DELETE FROM mistake_analysis_cache WHERE user_id = ?',
+            [userId]
+        );
+
         res.status(201).json({
             success: true,
             message: 'Learning log saved successfully'
         });
+
     } catch (error) {
         console.error('Save learning log error:', error);
         res.status(500).json({
@@ -44,16 +94,7 @@ router.post('/learning', auth, async (req, res) => {
     }
 });
 
-// ========================================
-// CODING LOG ROUTES
-// ========================================
 
-// Create Coding Log
-// Topic normalization
-function normalizeTopic(topic) {
-    if (!topic) return '';
-    return topic.trim().toLowerCase();
-}
 
 // Get or create normalized topic
 router.post('/topic/normalize', auth, async (req, res) => {
@@ -216,7 +257,11 @@ router.post('/question/solve', auth, async (req, res) => {
             mistakes_faced,
             solved_date
         ]);
-
+        // ❌ Clear cache when new coding log added
+        await db.query(
+            'DELETE FROM mistake_analysis_cache WHERE user_id = ?',
+            [userId]
+        );
         res.json({ success: true });
 
     } catch (error) {
@@ -260,8 +305,11 @@ router.get('/dashboard/stats', auth,async (req, res) => {
 
         // Topics
         const [topics] = await db.query(`
-            SELECT COUNT(DISTINCT topic_name) as total FROM user_solved_questions WHERE user_id = ?
+            SELECT COUNT(DISTINCT topic) as total 
+            FROM learning_logs 
+            WHERE user_id = ?
         `, [userId]);
+
 
         const [datesRows] = await db.query(`
             SELECT DISTINCT DATE(solved_date) as date
@@ -278,17 +326,23 @@ router.get('/dashboard/stats', auth,async (req, res) => {
         }
 
         let currentStreak = 0;
-        let today = new Date();
 
-        // STRICT streak (no skipping today)
-        if (solvedDates.has(formatDate(today))) {
+        const sortedDates = Array.from(solvedDates).sort().reverse();
+
+        if (sortedDates.length > 0) {
+            let startDate = new Date(sortedDates[0]); 
+
             for (let i = 0; i < 365; i++) {
-                const temp = new Date(today);
-                temp.setDate(today.getDate() - i);
+                const temp = new Date(startDate);
+                temp.setDate(startDate.getDate() - i);
 
-                if (solvedDates.has(formatDate(temp))) {
+                const dateStr = formatDate(temp);
+
+                if (solvedDates.has(dateStr)) {
                     currentStreak++;
-                } else break;
+                } else {
+                    break;
+                }
             }
         }
         res.json({
@@ -307,17 +361,21 @@ router.get('/dashboard/stats', auth,async (req, res) => {
 });
 
 // Get Recent Activity
-router.get('/dashboard/activity', auth,async (req, res) => {
+router.get('/dashboard/activity', auth, async (req, res) => {
     try {
         const userId = req.user.userId;
 
-        const [rows] = await db.query(`
+        const showAll = req.query.all === 'true';   // 👈 ADD THIS
+
+        const query = `
             SELECT topic_name, solved_date, mistakes_faced
             FROM user_solved_questions
             WHERE user_id = ?
             ORDER BY solved_date DESC
-            LIMIT 10
-        `, [userId]);
+            ${showAll ? '' : 'LIMIT 5'}
+        `;
+
+        const [rows] = await db.query(query, [userId]);
 
         const activity = rows.map(r => ({
             type: 'coding',
@@ -335,35 +393,30 @@ router.get('/dashboard/activity', auth,async (req, res) => {
 });
 
 // Get Weak Areas
-router.get('/dashboard/weak-areas', auth, async (req, res) => {
+router.get('/weak-areas', auth, async (req, res) => {
     try {
-        const userId = req.user.userId; // or req.user.id if auth
+        console.log("WEAK AREAS HIT");
 
-        const [rows] = await db.query(`
-            SELECT topic_name as topic,
-                COUNT(*) as count,
-                GROUP_CONCAT(mistakes_faced SEPARATOR ' | ') as mistakes
+        const userId = req.user.userId;
+
+        const query = `
+            SELECT mistakes_faced, topic_name, problem_name, solved_date
             FROM user_solved_questions
-            WHERE user_id = ? 
-            AND mistakes_faced IS NOT NULL 
-            AND mistakes_faced != ''
-            GROUP BY topic_name
-            ORDER BY count DESC
-            LIMIT 5
-        `, [userId]);
-        console.log("ROWS FROM DB:", rows);
+            WHERE user_id = ?
+            ORDER BY solved_date DESC
+        `;
+
+        const [rows] = await db.query(query, [userId]);
+
+        console.log("WEAK AREAS DATA:", rows);
+
         res.json({
             success: true,
-            weakAreas: rows.map(r => ({
-                topic: r.topic,
-                count: r.count,
-                mistakes: r.mistakes || '',
-                difficulty: Math.min(100, r.count * 10)
-            }))
+            weakAreas: rows
         });
 
-    } catch (err) {
-        console.error("Weak areas error:", err);
+    } catch (error) {
+        console.error("❌ Weak areas error:", error);
         res.status(500).json({ success: false });
     }
 });
@@ -598,66 +651,72 @@ router.get('/analytics/data', auth, async (req, res) => {
             LIMIT 5
         `, [userId]);
 
-        // =========================
-        // 4. STREAK CALCULATION 🔥
-        // =========================
        
         const [datesRows] = await db.query(`
-            SELECT DISTINCT solved_date
-            FROM user_solved_questions
-            WHERE user_id = ?
-        `, [userId]);
+    SELECT DISTINCT DATE(date) as date FROM (
+        SELECT solved_date as date FROM user_solved_questions WHERE user_id = ?
+        UNION
+        SELECT log_date as date FROM learning_logs WHERE user_id = ?
+    ) as combined
+`, [userId, userId]);
 
-       const solvedDates = new Set(
-            datesRows.map(r => r.solved_date.toISOString().slice(0, 10))
-        );
+      const solvedDates = new Set(
+    datesRows
+        .filter(r => r.date)
+        .map(r => {
+            const d = new Date(r.date);
+            return d.getFullYear() + '-' +
+                   String(d.getMonth() + 1).padStart(2, '0') + '-' +
+                   String(d.getDate()).padStart(2, '0');
+        })
+);
 
-        function formatDate(date) {
-            return date.toISOString().split('T')[0];
-        }
+function formatDate(date) {
+    return date.toISOString().slice(0, 10);
+}
+console.log("DATES FROM DB:", datesRows);
+console.log("SET:", solvedDates);
+let currentStreak = 0;
+let today = new Date();
 
-        let currentStreak = 0;
-        let today = new Date();
+for (let i = 0; i < 365; i++) {
+    const temp = new Date(today);
+    temp.setDate(today.getDate() - i);
 
-        if(solvedDates.has(formatDate(today))) {
-        // calculate current streak
-            for (let i = 0; i < 365; i++) {
-            const tempDate = new Date(today);
-            tempDate.setDate(today.getDate() - i);
+    const dateStr = formatDate(temp);
 
-            const dateStr = formatDate(tempDate);
-
-            if (solvedDates.has(dateStr)) {
-                currentStreak++;
-            } else {
-                break;
-            }
-        }
+    if (solvedDates.has(dateStr)) {
+        currentStreak++;
+    } else {
+        break;
+    }
 }
 
         // =========================
         // MAX STREAK
         // =========================
-        const sortedDates = Array.from(solvedDates).sort();
+        
 
-        let maxStreak = 0;
-        let tempStreak = 0;
+        const sortedDatesArr = Array.from(solvedDates).sort();
 
-        for (let i = 0; i < sortedDates.length; i++) {
-            if (i === 0) {
-                tempStreak = 1;
-            } else {
-                const prev = new Date(sortedDates[i - 1]);
-                const curr = new Date(sortedDates[i]);
+            let maxStreak = 0;
+            let tempStreak = 0;
 
-                const diff = (curr - prev) / (1000 * 60 * 60 * 24);
+            for (let i = 0; i < sortedDatesArr.length; i++) {
+                if (i === 0) {
+                    tempStreak = 1;
+                } else {
+                    const prev = new Date(sortedDatesArr[i - 1]);
+                    const curr = new Date(sortedDatesArr[i]);
 
-                if (diff === 1) tempStreak++;
-                else tempStreak = 1;
+                    const diff = (curr - prev) / (1000 * 60 * 60 * 24);
+
+                    if (diff === 1) tempStreak++;
+                    else tempStreak = 1;
+                }
+
+                maxStreak = Math.max(maxStreak, tempStreak);
             }
-
-            maxStreak = Math.max(maxStreak, tempStreak);
-        }
 
         const activeDays = solvedDates.size;
 

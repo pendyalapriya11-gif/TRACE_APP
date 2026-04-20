@@ -288,18 +288,6 @@ body { background: var(--dark-charcoal); color: var(--beige); }
     color: rgba(245, 241, 232, 0.5);
 }
 
-.weak-action {
-    background: rgba(90, 159, 159, 0.15);
-    border: 1px solid rgba(90, 159, 159, 0.3);
-    padding: 8px 14px; border-radius: 8px; font-size: 12px;
-    font-weight: 600; color: var(--teal); cursor: pointer;
-    flex-shrink: 0; transition: all 0.2s;
-}
-
-.weak-action:hover {
-    background: var(--teal); color: var(--beige);
-}
-
 .empty-state {
     text-align: center; padding: 40px;
     color: rgba(245, 241, 232, 0.5);
@@ -489,7 +477,7 @@ body { background: var(--dark-charcoal); color: var(--beige); }
     <div class="section">
         <div class="section-header">
             <h2 class="section-title">⚠️ Weak Areas</h2>
-            <button class="view-all-btn" onclick="showComingSoon()">View All</button>
+            <button class="view-all-btn" onclick="toggleWeakAreas()">View All</button>
         </div>
         <div class="weak-list" id="weakList">
             <div class="empty-state">
@@ -502,7 +490,7 @@ body { background: var(--dark-charcoal); color: var(--beige); }
     <div class="section">
         <div class="section-header">
             <h2 class="section-title">Recent Activity</h2>
-            <button class="view-all-btn" onclick="showComingSoon()">View All</button>
+            <button class="view-all-btn" onclick="toggleActivity()">View All</button>
         </div>
         <div id="activityList" class="activity-list">
             <div class="empty-state">No recent activity</div>
@@ -513,7 +501,10 @@ body { background: var(--dark-charcoal); color: var(--beige); }
 
 <script>
 const API_URL = 'http://localhost:5000/api';
-
+let showAllWeak = false;
+let allWeakData = [];
+let showAllActivity = false;
+let allActivityData = [];
 // ========================================
 // FETCH STATS FROM DATABASE
 // ========================================
@@ -588,35 +579,40 @@ async function loadWeakAreas() {
     if (!token) return;
 
     try {
-        const response = await fetch(`${API_URL}/logs/dashboard/weak-areas`, {
+        const response = await fetch(`${API_URL}/logs/weak-areas`, {
             headers: { 'Authorization': 'Bearer ' + token }
         });
         
         const data = await response.json();
         
         if (data.success && data.weakAreas.length > 0) {
-            document.getElementById('weakList').innerHTML = data.weakAreas.map(area => {
-    const shortMistakes = area.mistakes 
-        ? area.mistakes.split(' | ').slice(0,2).join(', ')
-        : '';
-                console.log("weak areas: ",data);
+           allWeakData = data.weakAreas;
+
+const displayData = showAllWeak ? allWeakData : allWeakData.slice(0, 1);
+
+document.getElementById('weakList').innerHTML = displayData.map(area => {
     return `
-        <div class="weak-item">
-            <div class="weak-icon">⚠️</div>
-            <div class="weak-content">
-                <div class="weak-topic">${area.topic}</div>
-                <div class="weak-desc">
-                    ${shortMistakes || `Repeated ${area.count} times`}
-                </div>
-                <div class="weak-stats">
-                    <span>❌ ${area.count} attempts</span>
-                    <span>📊 ${area.difficulty}% difficulty</span>
-                </div>
+    <div class="weak-item">
+        <div class="weak-icon">⚠️</div>
+
+        <div class="weak-content">
+            <div class="weak-topic">
+                ${area.topic_name || "General"}
             </div>
-            <button class="weak-action" onclick="practiceWeak('${area.topic}')">Practice</button>
+
+            <div class="weak-desc">
+                ${area.mistakes_faced || "No mistake recorded"}
+            </div>
+
+            <div class="weak-stats">
+                <span>📅 ${area.solved_date || ""}</span>
+            </div>
         </div>
-    `;
+    </div>
+`;
 }).join('');
+    document.querySelector('.section .view-all-btn').textContent = 
+    showAllWeak ? 'Show Less' : 'View All';
         } else {
             document.getElementById('weakList').innerHTML = '<div class="empty-state">Great! No struggling topics detected yet.</div>';
         }
@@ -642,7 +638,14 @@ async function loadActivity() {
         const data = await response.json();
         
         if (data.success && data.activity.length > 0) {
-            document.getElementById('activityList').innerHTML = data.activity.map(log => {
+
+            allActivityData = data.activity;
+
+            const displayData = showAllActivity 
+                ? allActivityData 
+                : allActivityData.slice(0, 1);
+
+            document.getElementById('activityList').innerHTML = displayData.map(log => {
                 const iconClass = log.type === 'coding' ? 'coding' : 'learning';
                 const icon = log.type === 'coding' ? '💻' : '📝';
                 
@@ -651,18 +654,25 @@ async function loadActivity() {
                         <div class="activity-icon ${iconClass}">${icon}</div>
                         <div class="activity-content">
                             <div class="activity-title">${log.topic || 'Learning Activity'}</div>
-                            <div class="activity-desc">${(log.notes || 'No description').substring(0, 100)}...</div>
+                            <div class="activity-desc">${(log.notes || 'No description').substring(0, 100)}</div>
                             <div class="activity-time">
                                 🕐 ${log.date || 'Recently'}
-                                <span class="activity-badge">${log.type === 'coding' ? 'Coding' : 'Learning'}</span>
+                                <span class="activity-badge">${log.type}</span>
                             </div>
                         </div>
                     </div>
                 `;
             }).join('');
+
+            // 👇 update button text
+            document.querySelectorAll('.view-all-btn')[1].textContent =
+                showAllActivity ? 'Show Less' : 'View All';
+
         } else {
-            document.getElementById('activityList').innerHTML = '<div class="empty-state">No recent activity. Start logging your learning!</div>';
+            document.getElementById('activityList').innerHTML =
+                '<div class="empty-state">No recent activity</div>';
         }
+
     } catch (error) {
         console.error('Load activity error:', error);
     }
@@ -698,10 +708,6 @@ function loadUserData() {
     if (u.email) document.getElementById('userEmail').textContent = u.email;
 }
 
-function practiceWeak(topic) {
-    alert(`Practice session for "${topic}" coming soon!`);
-}
-
 function handleLogout() {
     const confirmMsg = '👋 Are you sure you want to logout?\n\nYour progress will be saved.';
     if (confirm(confirmMsg)) {
@@ -711,6 +717,14 @@ function handleLogout() {
     }
 }
 
+function toggleWeakAreas() {
+    showAllWeak = !showAllWeak;
+    loadWeakAreas();
+}
+function toggleActivity() {
+    showAllActivity = !showAllActivity;
+    loadActivity();
+}
 function showComingSoon() {
     alert('🚀 Feature coming soon!');
 }

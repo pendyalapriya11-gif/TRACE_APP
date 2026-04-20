@@ -1,37 +1,33 @@
-async function callGeminiAPI(prompt) {
-    const API_KEY = process.env.GEMINI_API_KEY;
 
-    const models = [
-        // "gemini-2.5-flash",   // try best first
-        // "gemini-2.0-flash",   // fallback
-        "gemini-flash-latest" // backup
-    ];
+async function callGroqAPI(prompt) {
+    const API_KEY = process.env.GROQ_API_KEY;  // ← changed
 
-    for (let model of models) {
-        try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${API_KEY}`;
-
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }]
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(await response.text());
-            }
-
-            const data = await response.json();
-            return data.candidates[0].content.parts[0].text;
-
-        } catch (error) {
-            console.log(`⚠️ Model ${model} failed, trying next...`);
+    const response = await fetch(
+        'https://api.groq.com/openai/v1/chat/completions',  // ← changed
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${API_KEY}`  // ← changed
+            },
+            body: JSON.stringify({
+                model:  'llama-3.3-70b-versatile',  // ← changed
+                messages: [{ role: 'user', content: prompt }],  // ← changed
+                max_tokens: 1000
+            })
         }
+    );
+
+    const raw = await response.text();
+    console.log("🔥 RAW RESPONSE:", raw);
+
+    if (!response.ok) {
+        throw new Error(raw);
     }
 
-    throw new Error("All Gemini models failed");
+    const data = JSON.parse(raw);
+
+    return data.choices?.[0]?.message?.content || "";  // ← changed
 }
 
 // Generate Topic-Wise Summary
@@ -79,7 +75,7 @@ async function generateTopicWiseSummary(groupedLogs, weakTopics = []) {
 
         console.log("🤖 Calling Gemini API...");
         
-        const text = await callGeminiAPI(prompt);
+        const text = await callGroqAPI(prompt);
 
         console.log("✅ Summary generated");
 
@@ -116,7 +112,7 @@ Return ONLY valid JSON:
   ]
 }`;
 
-        const text = await callGeminiAPI(prompt);
+        const text = await callGroqAPI(prompt);
         
         // Clean and parse
         let cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
@@ -161,7 +157,7 @@ For EACH topic provide:
 
 Keep concise.`;
 
-        const text = await callGeminiAPI(prompt);
+        const text = await callGroqAPI(prompt);
 
         return {
             success: true,
@@ -180,5 +176,5 @@ Keep concise.`;
 module.exports = {
     generateTopicWiseSummary,
     generateComprehensiveChecklist,
-    generateTopicOverview
+    generateTopicOverview,
 };
