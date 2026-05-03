@@ -782,12 +782,6 @@ router.post('/analytics/compare', auth, async (req, res) => {
             WHERE user_id = ? AND solved_date BETWEEN ? AND ?
         `, [userId, periodA.start, periodA.end]);
 
-        const [problemsA] = await db.query(`
-            SELECT * 
-            FROM user_solved_questions
-            WHERE user_id = ? 
-            AND solved_date BETWEEN ? AND ?
-        `, [userId, periodA.start, periodA.end]);
 
 
         // ======================
@@ -803,27 +797,85 @@ router.post('/analytics/compare', auth, async (req, res) => {
             WHERE user_id = ? AND solved_date BETWEEN ? AND ?
         `, [userId, periodB.start, periodB.end]);
 
-        const [problemsB] = await db.query(`
-            SELECT * 
-            FROM user_solved_questions
-            WHERE user_id = ? 
-            AND solved_date BETWEEN ? AND ?
-        `, [userId, periodB.start, periodB.end]);
-
         console.log('✅ Comparison data ready');
+
+        function calculateStats(learningLogs, codingLogs) {
+
+                const totalSolved = codingLogs.length;
+
+                const difficulty = { Easy: 0, Medium: 0, Hard: 0 };
+
+                codingLogs.forEach(log => {
+                    if (log.difficulty) {
+                        difficulty[log.difficulty] =
+                            (difficulty[log.difficulty] || 0) + 1;
+                    }
+                });
+
+                // 🔥 combine dates
+                const datesSet = new Set();
+
+                codingLogs.forEach(log => {
+                    if (log.solved_date) {
+                        const d = new Date(log.solved_date);
+                        datesSet.add(d.toISOString().slice(0, 10));
+                    }
+                });
+
+                learningLogs.forEach(log => {
+                    if (log.log_date) {
+                        const d = new Date(log.log_date);
+                        datesSet.add(d.toISOString().slice(0, 10));
+                    }
+                });
+
+                // 🔥 active days
+                const activeDays = datesSet.size;
+
+                // 🔥 current streak
+                let currentStreak = 0;
+                let today = new Date();
+
+                while (true) {
+                    const d = today.toISOString().slice(0, 10);
+                    if (datesSet.has(d)) {
+                        currentStreak++;
+                        today.setDate(today.getDate() - 1);
+                    } else break;
+                }
+
+                // 🔥 max streak
+                const sorted = Array.from(datesSet).sort();
+                let maxStreak = 0, temp = 0;
+
+                for (let i = 0; i < sorted.length; i++) {
+                    if (i === 0) temp = 1;
+                    else {
+                        const prev = new Date(sorted[i - 1]);
+                        const curr = new Date(sorted[i]);
+
+                        const diff = (curr - prev) / (1000 * 60 * 60 * 24);
+                        temp = diff === 1 ? temp + 1 : 1;
+                    }
+                    maxStreak = Math.max(maxStreak, temp);
+                }
+
+                return {
+                    totalSolved,
+                    difficulty,
+                    totalLogs: learningLogs.length,
+                    activeDays,
+                    currentStreak,
+                    maxStreak
+                };
+            }
+            const statsA = calculateStats(learningA, codingA);
+        const statsB = calculateStats(learningB, codingB);
 
         res.json({
             success: true,
-            periodA: {
-                learningLogs: learningA,
-                codingLogs: codingA,
-                problems: problemsA
-            },
-            periodB: {
-                learningLogs: learningB,
-                codingLogs: codingB,
-                problems: problemsB
-            }
+            periodA: statsA,
+            periodB: statsB
         });
 
     } catch (error) {
