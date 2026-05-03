@@ -1,4 +1,3 @@
-
 async function callGroqAPI(prompt) {
     const API_KEY = process.env.GROQ_API_KEY;  // ← changed
 

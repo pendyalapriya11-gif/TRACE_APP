@@ -808,12 +808,22 @@ function displayComparison(periodA, periodB, a1, a2, b1, b2) {
 }
 
 function calculatePeriodStats(period) {
-    const problems = period.problems || [];
-    const learningLogs = period.learningLogs || [];
-    const codingLogs = period.codingLogs || [];
-    const topics = new Set(learningLogs.map(l => l.topic)).size;
-    const activeDates = new Set([...learningLogs.map(l => l.log_date), ...codingLogs.map(l => l.log_date)]).size;
-    return { problems: problems.length, easy: problems.filter(p => p.difficulty === 'Easy').length, medium: problems.filter(p => p.difficulty === 'Medium').length, hard: problems.filter(p => p.difficulty === 'Hard').length, topics, sessions: learningLogs.length + codingLogs.length, activeDays: activeDates };
+
+    // 🔥 NEW STRUCTURE (from backend)
+    const totalSolved = period.totalSolved || 0;
+    const difficulty = period.difficulty || {};
+    const totalLogs = period.totalLogs || 0;
+    const activeDays = period.activeDays || 0;
+
+    return {
+        problems: totalSolved,
+        easy: difficulty.Easy || 0,
+        medium: difficulty.Medium || 0,
+        hard: difficulty.Hard || 0,
+        topics: totalLogs,   // or uniqueTopics if you send it
+        sessions: totalLogs,
+        activeDays: activeDays
+    };
 }
 
 function calculatePlatformCount() { return analyticsData.platforms ? analyticsData.platforms.length : 0; }

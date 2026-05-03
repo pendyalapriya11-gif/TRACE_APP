@@ -74,12 +74,6 @@ router.post('/learning', auth, async (req, res) => {
             [userId, topic, content, challenges || '', log_date]
         );
 
-        // clear cache
-        await db.query(
-            'DELETE FROM mistake_analysis_cache WHERE user_id = ?',
-            [userId]
-        );
-
         res.status(201).json({
             success: true,
             message: 'Learning log saved successfully'
@@ -257,11 +251,6 @@ router.post('/question/solve', auth, async (req, res) => {
             mistakes_faced,
             solved_date
         ]);
-        // ❌ Clear cache when new coding log added
-        await db.query(
-            'DELETE FROM mistake_analysis_cache WHERE user_id = ?',
-            [userId]
-        );
         res.json({ success: true });
 
     } catch (error) {
