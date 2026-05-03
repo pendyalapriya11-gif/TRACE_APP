@@ -774,13 +774,32 @@ async function runComparison() {
     const b1 = document.getElementById('cmpB1').value, b2 = document.getElementById('cmpB2').value;
     if (!a1 || !a2 || !b1 || !b2) { alert('Please select all dates'); return; }
     try {
-        const response = await fetch(`${API_URL}/logs/analytics/compare`, {
+                const response = await fetch(`${API_URL}/logs/analytics/compare`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ periodA: { start: a1, end: a2 }, periodB: { start: b1, end: b2 } })
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                periodA: { start: a1, end: a2 },
+                periodB: { start: b1, end: b2 }
+            })
         });
+
+        if (!response.ok) {
+            throw new Error("API failed");
+        }
         const data = await response.json();
-        if (data.success) displayComparison(data.periodA, data.periodB, a1, a2, b1, b2);
+        console.log("COMPARE RESPONSE:", data);
+
+        console.log("COMPARE RESPONSE:", data);   
+
+        if (!data.success) {
+            alert("No data received");
+            return;
+        }
+
+        displayComparison(data.periodA, data.periodB, a1, a2, b1, b2);
     } catch (error) { console.error('Comparison error:', error); alert('Failed to compare periods'); }
 }
 
