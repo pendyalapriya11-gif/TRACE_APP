@@ -37,42 +37,74 @@ async function generateTopicWiseSummary(groupedLogs, weakTopics = []) {
         const topicSummaries = Object.entries(groupedLogs).map(([topic, logs]) => {
             const logDetails = logs.map(log => {
                 if (log.type === 'learning') {
-                    return `  • ${log.log_date}: ${log.content}`;
+                    return `  • ${log.log_date}: Learned → ${log.content}`;
                 } else {
-                    return `  • ${log.log_date}: Solved problem (${log.question_name || ''}) [${log.platform || ''}, ${log.difficulty || ''}]. ${
-                        log.challenges ? `Mistakes: ${log.challenges}` : ''
-                    }`;
+                    return `  • ${log.log_date}: Solved ${log.problem_name || ''} (${log.difficulty || ''}) on ${log.platform || ''}. ${
+                    log.challenges ? `Mistakes: ${log.challenges}` : ''
+                }`;
                 }
             }).join('\n');
             
             return `Topic: ${topic}\n${logDetails}`;
         }).join('\n\n');
 
-        const prompt = `
+       const prompt = `
             You are an expert coding mentor.
 
-            Analyze the student's learning activity:
+            Analyze the student's activity logs:
 
             ${topicSummaries}
 
-            Weak areas:
-            ${JSON.stringify(weakTopics)}
+            -----------------------------
+            PART 1: LEARNING SUMMARY
+            -----------------------------
+            For EACH topic, summarize:
 
-            Focus strongly on mistakes. Give specific problem patterns to practice.
-            Avoid generic advice.
+            - What the student learned
+            - What concepts they practiced
+            - Overall progress (Beginner / Improving / Strong)
+
+            -----------------------------
+            PART 2: WEAK AREAS ANALYSIS
+            -----------------------------
+            Now analyze weak areas:
+
+            ${JSON.stringify(weakTopics)}
 
             For EACH topic provide:
 
+            ⚠️ Key Weakness (based on mistakes)
+            💡 What to Improve (specific actionable advice)
+            🚀 Next Step (what to practice next)
+
+            -----------------------------
+            OUTPUT FORMAT:
+
             **[TOPIC NAME]**
-            📊 Progress Level: (Beginner / Intermediate / Strong)
-            ⚠️ Key Weakness: (based on mistakes)
-            💡 What to Improve: (specific actionable advice)
-            🚀 Next Step: (what to practice next)
 
-            Be precise. Avoid generic advice.
+            📊 Summary:
+            (short summary of learning)
+
+            📈 Progress Level:
+            (Beginner / Improving / Strong)
+
+            ⚠️ Weakness:
+            (only if exists)
+
+            💡 Improvement:
+            (actionable advice)
+
+            🚀 Next Step:
+            (what to do next)
+
+            -----------------------------
+            RULES:
+            - First focus on learning summary
+            - Then mention weaknesses
+            - Do NOT ignore topics without mistakes
+            - Avoid generic advice
+            - Be specific and structured
             `;
-
-        console.log("🤖 Calling Gemini API...");
         
         const text = await callGroqAPI(prompt);
 
