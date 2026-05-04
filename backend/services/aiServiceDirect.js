@@ -12,7 +12,7 @@ async function callGroqAPI(prompt) {
             body: JSON.stringify({
                 model:  'llama-3.3-70b-versatile',  // ← changed
                 messages: [{ role: 'user', content: prompt }],  // ← changed
-                max_tokens: 1000
+                max_tokens: 1500
             })
         }
     );
@@ -51,59 +51,87 @@ async function generateTopicWiseSummary(groupedLogs, weakTopics = []) {
        const prompt = `
             You are an expert coding mentor.
 
-            Analyze the student's activity logs:
+            Analyze the student's learning activity logs:
 
             ${topicSummaries}
 
-            -----------------------------
-            PART 1: LEARNING SUMMARY
-            -----------------------------
-            For EACH topic, summarize:
+            -----------------------------------
+            PART 1: CONCEPT SUMMARY (DETAILED)
+            -----------------------------------
+            For EACH topic:
 
-            - What the student learned
-            - What concepts they practiced
-            - Overall progress (Beginner / Improving / Strong)
+            Explain clearly in 5–6 lines:
 
-            -----------------------------
-            PART 2: WEAK AREAS ANALYSIS
-            -----------------------------
-            Now analyze weak areas:
+            - What the topic is (definition)
+            - Key concepts involved
+            - What the student practiced (based on logs)
+            - How the concept is used in problem solving
 
-            ${JSON.stringify(weakTopics)}
+            Do NOT give short answers.
+            Do NOT say "learned syntax".
+            Explain like teaching a beginner properly.
 
-            For EACH topic provide:
-
-            ⚠️ Key Weakness (based on mistakes)
-            💡 What to Improve (specific actionable advice)
-            🚀 Next Step (what to practice next)
-
-            -----------------------------
-            OUTPUT FORMAT:
-
-            **[TOPIC NAME]**
-
-            📊 Summary:
-            (short summary of learning)
+            -----------------------------------
+            PART 2: PROGRESS ANALYSIS
+            -----------------------------------
+            For EACH topic:
 
             📈 Progress Level:
             (Beginner / Improving / Strong)
 
-            ⚠️ Weakness:
-            (only if exists)
+            Explain WHY based on logs (2–3 lines).
 
-            💡 Improvement:
-            (actionable advice)
+            -----------------------------------
+            PART 3: WEAK AREAS (DEEP ANALYSIS)
+            -----------------------------------
+            Weak topics data:
+            ${JSON.stringify(weakTopics)}
+
+            For EACH topic:
+
+            ⚠️ Mistake:
+            - What mistake the student is making
+
+            🧠 Why it happens:
+            - Explain root cause (concept gap / misunderstanding / lack of practice)
+            - Give real reasoning, not generic
+
+            💡 How to fix:
+            - Exact concept or pattern to learn
 
             🚀 Next Step:
-            (what to do next)
+            - Specific practice (type of problems)
 
-            -----------------------------
+            -----------------------------------
+            OUTPUT FORMAT:
+
+            **[TOPIC NAME]**
+
+            📘 Concept Summary:
+            (5–6 lines detailed explanation)
+
+            📈 Progress:
+            (level + reason)
+
+            ⚠️ Mistake:
+            (if exists)
+
+            🧠 Why it happens:
+            (clear reasoning)
+
+            💡 Fix:
+            (actionable solution)
+
+            🚀 Next Step:
+            (practice guidance)
+
+            -----------------------------------
             RULES:
-            - First focus on learning summary
-            - Then mention weaknesses
-            - Do NOT ignore topics without mistakes
-            - Avoid generic advice
-            - Be specific and structured
+            - Minimum 5 lines for concept summary
+            - No generic statements
+            - Explain concepts, not just mention them
+            - Weak areas must include WHY + FIX
+            - Be specific and practical
             `;
         
         const text = await callGroqAPI(prompt);
