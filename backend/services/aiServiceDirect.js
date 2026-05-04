@@ -35,13 +35,12 @@ async function generateTopicWiseSummary(groupedLogs, weakTopics = []) {
         console.log("📊 AI Summary - Starting...");
         
         const topicSummaries = Object.entries(groupedLogs).map(([topic, logs]) => {
-            const logDetails = logs.map(log => {
+            const logDetails = logs.map((log, index) => {
                 if (log.type === 'learning') {
-                    return `  • ${log.log_date}: Learned → ${log.content}`;
+                    return `  ${index + 1}. ${log.log_date}: Learned → ${log.content}`;
                 } else {
-                    return `  • ${log.log_date}: Solved ${log.problem_name || ''} (${log.difficulty || ''}) on ${log.platform || ''}. ${
-                    log.challenges ? `Mistakes: ${log.challenges}` : ''
-                }`;
+                    return `  ${index + 1}. ${log.log_date}: Solved ${log.problem_name || ''} (${log.difficulty || ''}) on ${log.platform || ''}.
+                ${log.challenges ? `⚠️ Mistake: ${log.challenges}` : 'No mistakes recorded'}`;
                 }
             }).join('\n');
             
@@ -49,91 +48,138 @@ async function generateTopicWiseSummary(groupedLogs, weakTopics = []) {
         }).join('\n\n');
 
        const prompt = `
-            You are an expert coding mentor.
+You are an expert coding mentor analyzing a student's learning logs.
 
-            Analyze the student's learning activity logs:
+========================
+STUDENT LOGS
+========================
+${topicSummaries}
 
-            ${topicSummaries}
+========================
+WEAK TOPICS DATA
+========================
+${JSON.stringify(weakTopics)}
 
-            -----------------------------------
-            PART 1: CONCEPT SUMMARY (DETAILED)
-            -----------------------------------
-            For EACH topic:
+====================================================
+TASK: ANALYZE IN DEPTH (DO NOT SKIP ANY SECTION)
+====================================================
 
-            Explain clearly in 5–6 lines:
+For EACH topic, you MUST generate ALL sections below.
 
-            - What the topic is (definition)
-            - Key concepts involved
-            - What the student practiced (based on logs)
-            - How the concept is used in problem solving
+-----------------------------------
+PART 1: CONCEPT SUMMARY (DETAILED)
+-----------------------------------
+Write a clear explanation in 5–6 lines:
 
-            Do NOT give short answers.
-            Do NOT say "learned syntax".
-            Explain like teaching a beginner properly.
+- What the topic is (definition)
+- Key concepts involved
+- What the student practiced (based on logs)
+- How it is used in problem solving
+- Keep it simple but informative
 
-            -----------------------------------
-            PART 2: PROGRESS ANALYSIS
-            -----------------------------------
-            For EACH topic:
+STRICT RULES:
+- Do NOT say "learned syntax"
+- Do NOT be generic
+- Minimum 5 lines
 
-            📈 Progress Level:
-            (Beginner / Improving / Strong)
+-----------------------------------
+PART 2: PROGRESS ANALYSIS
+-----------------------------------
+📈 Progress Level: Beginner / Improving / Strong
 
-            Explain WHY based on logs (2–3 lines).
+Explain in 2–3 lines WHY:
+- Based on repetition
+- Based on complexity of problems
+- Based on consistency
 
-            -----------------------------------
-            PART 3: WEAK AREAS (DEEP ANALYSIS)
-            -----------------------------------
-            Weak topics data:
-            ${JSON.stringify(weakTopics)}
+-----------------------------------
+PART 3: MISTAKE PATTERN DETECTION (VERY IMPORTANT)
+-----------------------------------
 
-            For EACH topic:
+From the logs, identify REAL patterns in mistakes.
 
-            ⚠️ Mistake:
-            - What mistake the student is making
+You MUST:
+- Combine similar mistakes
+- Identify recurring issues (not one-time mistakes)
+-If very few mistakes exist, infer likely weaknesses from learning behavior
 
-            🧠 Why it happens:
-            - Explain root cause (concept gap / misunderstanding / lack of practice)
-            - Give real reasoning, not generic
+Examples of patterns:
+- Edge case handling issues
+- Incorrect logic application
+- Confusion between concepts
+- Syntax vs logic gap
 
-            💡 How to fix:
-            - Exact concept or pattern to learn
+-----------------------------------
+PART 4: ROOT CAUSE ANALYSIS
+-----------------------------------
 
-            🚀 Next Step:
-            - Specific practice (type of problems)
+🧠 Why it happens:
 
-            -----------------------------------
-            OUTPUT FORMAT:
+For each mistake pattern:
+- Explain the actual reason
+- Choose one:
+  - Concept gap
+  - Lack of practice
+  - Misunderstanding problem
+  - Pattern recognition failure
 
-            **[TOPIC NAME]**
+NO generic answers like "needs practice"
 
-            📘 Concept Summary:
-            (5–6 lines detailed explanation)
+-----------------------------------
+PART 5: FIX STRATEGY
+-----------------------------------
 
-            📈 Progress:
-            (level + reason)
+💡 How to fix:
 
-            ⚠️ Mistake:
-            (if exists)
+- Give specific actions
+- Mention exact concepts/patterns
+- Mention what to study or revise
 
-            🧠 Why it happens:
-            (clear reasoning)
+-----------------------------------
+PART 6: NEXT STEP
+-----------------------------------
 
-            💡 Fix:
-            (actionable solution)
+🚀 Next Step:
 
-            🚀 Next Step:
-            (practice guidance)
+- Suggest concrete practice:
+  - type of problems
+  - difficulty level
+  - pattern (e.g., sliding window, DFS)
 
-            -----------------------------------
-            RULES:
-            - Minimum 5 lines for concept summary
-            - No generic statements
-            - Explain concepts, not just mention them
-            - Weak areas must include WHY + FIX
-            - Be specific and practical
-            `;
-        
+-----------------------------------
+FINAL OUTPUT FORMAT (STRICT)
+-----------------------------------
+
+**[TOPIC NAME]**
+
+📘 Concept Summary:
+(5–6 lines explanation)
+
+📈 Progress:
+(level + reason)
+
+⚠️ Mistake Pattern:
+(identified pattern OR "No clear pattern detected")
+
+🧠 Why it happens:
+(deep explanation)
+
+💡 Fix:
+(actionable solution)
+
+🚀 Next Step:
+(practical guidance)
+
+-----------------------------------
+GLOBAL RULES:
+-----------------------------------
+- DO NOT skip any section
+- DO NOT give generic advice
+- MUST extract patterns (not individual mistakes)
+- MUST explain WHY mistakes happen
+- MUST be specific and structured
+- Minimum depth required in each section
+`;
         const text = await callGroqAPI(prompt);
 
         console.log("✅ Summary generated");
